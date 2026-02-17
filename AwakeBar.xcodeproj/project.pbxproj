@@ -1,0 +1,503 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */; };
+		126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */; };
+		35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */; };
+		4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */; };
+		5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */; };
+		67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E534796D72E7DC597B4ADE4B /* LoginItemController.swift */; };
+		6EEBCC3AB907BD2B4E1961A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F116C3DF15E45AAAAEB1DB3 /* Assets.xcassets */; };
+		758F845CF8EF31F7E9AA73C7 /* KeepAwakeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE984A229007F093175C83 /* KeepAwakeMode.swift */; };
+		7DA31356ADFEEA6DFC253BE7 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CE46AD516F2BA51CA081BB3 /* AppState.swift */; };
+		9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */; };
+		A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */; };
+		A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E74433634A0685516D19AF8 /* Protocols.swift */; };
+		BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */; };
+		BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */; };
+		C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */; };
+		CEB85C9EDE283ED298C2F619 /* MenuContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14474E440CBEBFF91DDB212A /* MenuContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DE00E68FF6506EB53A5568C7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDCD9677D0C6E60E8ACAA4E8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C39467371F6DED0079AFDE56;
+			remoteInfo = AwakeBar;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeBarApp.swift; sourceTree = "<group>"; };
+		14474E440CBEBFF91DDB212A /* MenuContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuContentView.swift; sourceTree = "<group>"; };
+		1CE46AD516F2BA51CA081BB3 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		1E74433634A0685516D19AF8 /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
+		1F116C3DF15E45AAAAEB1DB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidPmsetControllerTests.swift; sourceTree = "<group>"; };
+		368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarControllerTests.swift; sourceTree = "<group>"; };
+		443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLidAssertionController.swift; sourceTree = "<group>"; };
+		7BE7136CC16EA1FC30BE6850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStoreTests.swift; sourceTree = "<group>"; };
+		9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeModeTests.swift; sourceTree = "<group>"; };
+		9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AwakeBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedCommandRunner.swift; sourceTree = "<group>"; };
+		CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
+		DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		E534796D72E7DC597B4ADE4B /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
+		ED4A0D68A3278179B3733FEA /* AwakeBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwakeBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidPmsetController.swift; sourceTree = "<group>"; };
+		FBDE984A229007F093175C83 /* KeepAwakeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeMode.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1F446CDAD0578D70C026E364 /* AwakeBarTests */ = {
+			isa = PBXGroup;
+			children = (
+				98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */,
+				2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */,
+				9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */,
+				368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */,
+			);
+			path = AwakeBarTests;
+			sourceTree = "<group>";
+		};
+		3E77BA83BF75C1D0B599FAB5 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				1CE46AD516F2BA51CA081BB3 /* AppState.swift */,
+				FBDE984A229007F093175C83 /* KeepAwakeMode.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		3FBD0B51096BB79076712337 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				14474E440CBEBFF91DDB212A /* MenuContentView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		60B8F47AE0A721BA1DB90FA0 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */,
+				E534796D72E7DC597B4ADE4B /* LoginItemController.swift */,
+				443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */,
+				BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */,
+				1E74433634A0685516D19AF8 /* Protocols.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		96E92EBEE9BB39EA537173A0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ED4A0D68A3278179B3733FEA /* AwakeBar.app */,
+				9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D4125B3E0242A1894386CC98 /* AwakeBar */ = {
+			isa = PBXGroup;
+			children = (
+				1F116C3DF15E45AAAAEB1DB3 /* Assets.xcassets */,
+				7BE7136CC16EA1FC30BE6850 /* Info.plist */,
+				F57AB5705DE54AAC40F4E777 /* App */,
+				3E77BA83BF75C1D0B599FAB5 /* Domain */,
+				60B8F47AE0A721BA1DB90FA0 /* Services */,
+				F36459755EFA9681D833EDA5 /* State */,
+				3FBD0B51096BB79076712337 /* UI */,
+			);
+			path = AwakeBar;
+			sourceTree = "<group>";
+		};
+		F36459755EFA9681D833EDA5 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		F57AB5705DE54AAC40F4E777 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */,
+				DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F6EAEAD372A477BE723CBEF9 = {
+			isa = PBXGroup;
+			children = (
+				D4125B3E0242A1894386CC98 /* AwakeBar */,
+				1F446CDAD0578D70C026E364 /* AwakeBarTests */,
+				96E92EBEE9BB39EA537173A0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C39467371F6DED0079AFDE56 /* AwakeBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5D77AF6841D9F03DB2695D86 /* Build configuration list for PBXNativeTarget "AwakeBar" */;
+			buildPhases = (
+				8A56613B68BD66AC9A6670D8 /* Sources */,
+				D305AB5C266BBB46BBF5F816 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AwakeBar;
+			packageProductDependencies = (
+			);
+			productName = AwakeBar;
+			productReference = ED4A0D68A3278179B3733FEA /* AwakeBar.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F70509016C681D6029FAC0D4 /* AwakeBarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CE5059BD91F040DEE12C977B /* Build configuration list for PBXNativeTarget "AwakeBarTests" */;
+			buildPhases = (
+				0A0382BBD5C45F59E16F0660 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0933952CE8A2C4238EB6DC90 /* PBXTargetDependency */,
+			);
+			name = AwakeBarTests;
+			packageProductDependencies = (
+			);
+			productName = AwakeBarTests;
+			productReference = 9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EDCD9677D0C6E60E8ACAA4E8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					C39467371F6DED0079AFDE56 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = CBAB2B9C3F8546C38292D832 /* Build configuration list for PBXProject "AwakeBar" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = F6EAEAD372A477BE723CBEF9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C39467371F6DED0079AFDE56 /* AwakeBar */,
+				F70509016C681D6029FAC0D4 /* AwakeBarTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D305AB5C266BBB46BBF5F816 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EEBCC3AB907BD2B4E1961A2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0A0382BBD5C45F59E16F0660 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */,
+				126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */,
+				07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */,
+				35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A56613B68BD66AC9A6670D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DA31356ADFEEA6DFC253BE7 /* AppState.swift in Sources */,
+				4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */,
+				BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */,
+				9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */,
+				758F845CF8EF31F7E9AA73C7 /* KeepAwakeMode.swift in Sources */,
+				67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */,
+				BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */,
+				CEB85C9EDE283ED298C2F619 /* MenuContentView.swift in Sources */,
+				C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */,
+				A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */,
+				A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0933952CE8A2C4238EB6DC90 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C39467371F6DED0079AFDE56 /* AwakeBar */;
+			targetProxy = DE00E68FF6506EB53A5568C7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0B5A005F4FA158C5FBD3D611 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		22E51A1615E55618BCF43844 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBarTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AwakeBar.app/Contents/MacOS/AwakeBar";
+			};
+			name = Release;
+		};
+		618B5BACA7F392C67B3766C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		85445C33ABBB7A2D196008CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AwakeBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar;
+				PRODUCT_NAME = AwakeBar;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9DBE37A19A002DCB7DE802D4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBarTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AwakeBar.app/Contents/MacOS/AwakeBar";
+			};
+			name = Debug;
+		};
+		AFEC0F8B953BA579632D1068 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AwakeBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar;
+				PRODUCT_NAME = AwakeBar;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5D77AF6841D9F03DB2695D86 /* Build configuration list for PBXNativeTarget "AwakeBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AFEC0F8B953BA579632D1068 /* Debug */,
+				85445C33ABBB7A2D196008CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CBAB2B9C3F8546C38292D832 /* Build configuration list for PBXProject "AwakeBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0B5A005F4FA158C5FBD3D611 /* Debug */,
+				618B5BACA7F392C67B3766C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CE5059BD91F040DEE12C977B /* Build configuration list for PBXNativeTarget "AwakeBarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9DBE37A19A002DCB7DE802D4 /* Debug */,
+				22E51A1615E55618BCF43844 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EDCD9677D0C6E60E8ACAA4E8 /* Project object */;
+}
