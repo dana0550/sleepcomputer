@@ -46,6 +46,10 @@ final class MenuBarController: ObservableObject {
         mode.statusText
     }
 
+    var statusDetailText: String {
+        mode.statusDetailText
+    }
+
     var menuIconName: String {
         mode.iconAssetName
     }

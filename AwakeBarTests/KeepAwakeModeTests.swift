@@ -25,4 +25,14 @@ final class KeepAwakeModeTests: XCTestCase {
 
         XCTAssertEqual(KeepAwakeMode.from(state: state), .openLid)
     }
+
+    func testStatusDetailTextIsHumanReadable() {
+        XCTAssertEqual(KeepAwakeMode.off.statusDetailText, "Normal macOS sleep behavior is active.")
+        XCTAssertEqual(KeepAwakeMode.openLid.statusDetailText, "Keeps your Mac awake while the lid is open.")
+        XCTAssertEqual(KeepAwakeMode.closedLid.statusDetailText, "Sleep is disabled system-wide until you turn this off.")
+        XCTAssertEqual(
+            KeepAwakeMode.externalClosedLid.statusDetailText,
+            "Sleep is disabled outside this app. Toggle off to restore default behavior."
+        )
+    }
 }
