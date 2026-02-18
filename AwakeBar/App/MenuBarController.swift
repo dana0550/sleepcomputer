@@ -221,8 +221,12 @@ final class MenuBarController: ObservableObject {
             try openLidController.setEnabled(false)
             state.openLidEnabled = false
         } catch {
-            state.openLidEnabled = previousOpen
+            state.openLidEnabled = openLidController.isEnabled
             setTransientError("Could not disable open-lid awake: \(error.localizedDescription)")
+            if state.openLidEnabled {
+                persistSafeState()
+                return
+            }
         }
 
         do {
@@ -260,8 +264,27 @@ final class MenuBarController: ObservableObject {
         state.closedLidSetupState = setupState
 
         guard setupState.isReady else {
+            let wasOpenEnabled = state.openLidEnabled
+
+            if state.openLidEnabled {
+                do {
+                    try openLidController.setEnabled(false)
+                    state.openLidEnabled = false
+                } catch {
+                    state.openLidEnabled = openLidController.isEnabled
+                    setTransientError("Could not restore default sleep while helper is unavailable: \(error.localizedDescription)")
+                    if state.openLidEnabled {
+                        return
+                    }
+                }
+            }
+
             state.externalClosedLidDetected = false
             state.closedLidEnabledByApp = false
+
+            if wasOpenEnabled && !state.openLidEnabled {
+                persistSafeState()
+            }
             return
         }
 
