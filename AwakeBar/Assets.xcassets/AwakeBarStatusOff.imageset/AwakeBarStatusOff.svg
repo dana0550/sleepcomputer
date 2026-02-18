@@ -1,4 +1,33 @@
-<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Eye closed - simple horizontal line representing sleep/off state -->
-  <path d="M4 9 Q 9 10.5 14 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- CLOSED EYE - Sleep/Off State -->
+  <!-- 20x20 canvas as per CSV specification -->
+  
+  <!-- Upper eyelid (curved line representing closed eye) -->
+  <path d="M 4.5 10.5 Q 10 8.5 15.5 10.5" 
+        stroke="currentColor" 
+        stroke-width="2" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Lower eyelid suggestion (subtle line below) -->
+  <path d="M 5 11 Q 10 12 15 11" 
+        stroke="currentColor" 
+        stroke-width="0.8" 
+        stroke-linecap="round" 
+        fill="none"
+        opacity="0.4"/>
+  
+  <!-- Eyelashes on closed eye (3 delicate lashes) -->
+  <path d="M 7.5 9 L 7 7.5" 
+        stroke="currentColor" 
+        stroke-width="0.7" 
+        stroke-linecap="round"/>
+  <path d="M 10 8.3 L 10 6.5" 
+        stroke="currentColor" 
+        stroke-width="0.7" 
+        stroke-linecap="round"/>
+  <path d="M 12.5 9 L 13 7.5" 
+        stroke="currentColor" 
+        stroke-width="0.7" 
+        stroke-linecap="round"/>
 </svg>
