@@ -5,14 +5,15 @@ name: Menu Bar Experience
 status: active
 owner: dshakiba
 parent: null
-children: []
+children:
+  - F-002.01
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.1.0
+last_reviewed: 2026-02-18
 tags:
   - ui
   - macos
-risk_level: low
+risk_level: medium
 dependencies:
   - F-001
   - F-003
@@ -24,88 +25,101 @@ dependencies:
 
 ## Summary
 
-Deliver a minimal, intuitive menu with clear mode status and direct controls.
+Deliver a minimal, menu bar-first control surface with clear status, guided closed-lid setup, and one-click shutdown.
 
 ## Goals
 
-- One-screen interaction model from menu bar.
-- Quick status visibility and one-click off path.
+- Keep all primary actions in one menu.
+- Keep mode/status visibility explicit.
+- Surface setup and error states inline.
 
 ## Non-Goals
 
-- Multi-window UI.
-- Preferences pane complexity in v1.
+- Multi-window preferences UI.
+- Background agent UI outside Menu Bar Extra.
 
 ## Requirements
 
-- R1: Menu includes status line, two mode toggles, login toggle, turn-off action, and quit.
-- R2: Menu icon reflects off, open-lid, or closed-lid status.
-- R3: Menu remains responsive during privileged toggles.
+- R1: Menu must expose status header, open-lid toggle, closed-lid toggle, launch-at-login toggle, turn-off action, and quit action.
+- R2: Closed-lid row must be disabled while setup is not ready and while privileged toggles are in-flight.
+- R3: Setup and approval-required states must render actionable guidance cards.
+- R4: Transient errors and legacy-cleanup notices must be visible in menu context.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
 
 ## Acceptance Criteria
 
-- AC1: All controls are visible and actionable from menu bar.
-- AC2: Status text and icon update immediately after successful actions.
+- AC1: `Turn Everything Off` disables both open-lid and closed-lid states.
+- AC2: Setup-required closed-lid attempts surface `approvalRequired`/non-ready state and do not flip toggle state.
+- AC3: All rows are accessible and stateful from the menu without opening additional windows.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
-- [ ] AC1
-- [ ] AC2
+- [x] AC1
+- [x] AC2
+- [ ] AC3
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R2 | test | AwakeBarTests/KeepAwakeModeTests.swift |
-| R3 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| AC1 | manual | Menu walkthrough |
-| AC2 | manual | Toggle verification |
+| R1 | code | AwakeBar/UI/MenuContentView.swift |
+| R2 | code | AwakeBar/UI/MenuContentView.swift |
+| R3 | code | AwakeBar/UI/MenuContentView.swift |
+| R4 | code | AwakeBar/UI/MenuContentView.swift |
+| AC1 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC2 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC3 | manual | Menu walkthrough on macOS host |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-002.01](./F-002.01-mode-and-status-modeling.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-001]
-- [F-003]
-- [F-004]
-- [F-005]
+- [F-001](./F-001-core-awake-control.md)
+- [F-002.01](./F-002.01-mode-and-status-modeling.md)
+- [F-003](./F-003-closed-lid-admin-control.md)
+- [F-004](./F-004-state-persistence-login.md)
+- [F-005](./F-005-iconography-asset-pipeline.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `MenuBarController`
 - `MenuContentView`
+- `MenuIconCatalog`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
 - Primary user interaction path for all sleep controls.
+- Governs UX safety affordances for privileged actions.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] Uses native macOS UI primitives
+- [x] Uses native SwiftUI/AppKit primitives
+- [x] Privileged actions stay setup-gated in UI
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] No background timers required for idle state
+- [x] No polling loops in UI layer
+- [x] Renders small bounded menu layout only
 
 ## Table of Contents
 
 <!-- AUTOGEN:TOC -->
 - Summary
 - Goals
+- Non-Goals
 - Requirements
 - Acceptance Criteria
 
@@ -114,3 +128,4 @@ Deliver a minimal, intuitive menu with clear mode status and direct controls.
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-18: Added setup/error UX requirements and child mode-modeling spec.

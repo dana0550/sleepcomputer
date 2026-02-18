@@ -5,9 +5,11 @@ name: State Persistence and Login
 status: active
 owner: dshakiba
 parent: null
-children: []
+children:
+  - F-004.01
+  - F-004.02
 aliases: []
-version: 1.1.0
+version: 1.2.0
 last_reviewed: 2026-02-18
 tags:
   - persistence
@@ -27,84 +29,95 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 
 - Restore Full Caffeine and login preference across relaunches.
 - Avoid auto-restoring closed-lid mode.
+- Persist migration completion state for one-time cleanup behavior.
 
 ## Non-Goals
 
-- Sync settings between devices.
+- Cross-device settings sync.
+- Persisting privileged runtime state that may be stale or unsafe.
 
 ## Requirements
 
-- R1: Persist open-lid and launch-at-login settings to local defaults.
-- R2: Do not persist closed-lid enabled state.
-- R3: Login setting toggles SMAppService registration state.
-- R4: Persist legacy cleanup completion marker so privileged migration runs once.
+- R1: Persist open-lid enabled state, launch-at-login preference, and legacy cleanup completion marker.
+- R2: Never persist `closedLidEnabledByApp` or `externalClosedLidDetected`.
+- R3: Bootstrap must reset closed-lid runtime state and refresh live setup/runtime status.
+- R4: Login toggle must drive `SMAppService.mainApp` registration state.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
-- [ ] R4
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
 
 ## Acceptance Criteria
 
-- AC1: Relaunch restores Full Caffeine state.
-- AC2: Relaunch requires explicit action for closed-lid mode.
-- AC3: Login toggle survives logout/login.
+- AC1: Relaunch restores prior open-lid and launch-at-login preferences.
+- AC2: Relaunch does not auto-enable closed-lid by-app state.
+- AC3: Login toggle changes are persisted and reloaded.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
-- [ ] AC1
-- [ ] AC2
-- [ ] AC3
+- [x] AC1
+- [x] AC2
+- [x] AC3
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | AwakeBarTests/AppStateStoreTests.swift |
-| R2 | test | AwakeBarTests/AppStateStoreTests.swift |
-| R3 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R4 | test | AwakeBarTests/AppStateStoreTests.swift |
-| AC1 | manual | Relaunch validation |
-| AC2 | manual | Relaunch validation |
-| AC3 | manual | Login item validation |
+| R1 | code | AwakeBar/State/AppStateStore.swift |
+| R2 | code | AwakeBar/State/AppStateStore.swift |
+| R3 | code | AwakeBar/App/MenuBarController.swift |
+| R4 | code | AwakeBar/Services/LoginItemController.swift |
+| AC1 | test | AwakeBarTests/AppStateStoreTests.swift |
+| AC2 | test | AwakeBarTests/AppStateStoreTests.swift |
+| AC3 | test | AwakeBarTests/MenuBarControllerTests.swift |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
+- [F-004.02](./F-004.02-launch-at-login-control.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-002]
+- [F-002](./F-002-menu-bar-experience.md)
+- [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
+- [F-004.02](./F-004.02-launch-at-login-control.md)
+- [F-003](./F-003-closed-lid-admin-control.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
-- `AppStateStore`
+- `AppStateStore.load()`
+- `AppStateStore.save(_:)`
 - `LoginItemControlling`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- Startup behavior and persisted user experience.
+- Controls startup behavior and persistence safety boundaries.
+- Enables one-time migration cleanup idempotency across relaunches.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] Local-only persistence via UserDefaults
+- [x] Local-only persistence via `UserDefaults`
+- [x] Does not cache credentials or privileged tokens
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] O(1) load/save persistence operations
+- [x] O(1) load/save operations
+- [x] No background sync loops
 
 ## Table of Contents
 
 <!-- AUTOGEN:TOC -->
 - Summary
 - Goals
+- Non-Goals
 - Requirements
 - Acceptance Criteria
 
@@ -114,3 +127,4 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added migration marker persistence for daemon cutover cleanup idempotency.
+- 2026-02-18: Split persistence and login-item responsibilities into child specs.
