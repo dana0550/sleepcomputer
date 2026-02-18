@@ -1,52 +1,25 @@
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- CLOSED EYE - Sleep/Off State -->
-  <!-- Canvas: 20x20, Live area: 17x17 centered (1.5px margin on all sides) -->
-  <!-- ~1.5x larger perceived size with enhanced details -->
+  <!-- Canvas: 20x20, Live area: 19x19 centered (0.5px inset) -->
+  <!-- OFF State: Gray two-tone eye (inactive/dimmed) -->
   
-  <!-- Upper eyelid (main curved line representing closed eye) -->
-  <!-- Larger, more pronounced curve -->
-  <path d="M 3 11 Q 10 7.5 17 11" 
-        stroke="currentColor" 
-        stroke-width="2" 
-        stroke-linecap="round" 
-        fill="none"/>
-  
-  <!-- Lower eyelid suggestion (subtle parallel curve below) -->
-  <path d="M 3.8 11.8 Q 10 13.5 16.2 11.8" 
-        stroke="currentColor" 
-        stroke-width="1.25" 
-        stroke-linecap="round" 
+  <!-- Eye outline (almond shape) - Medium gray -->
+  <path d="M 10 4.5 C 6.5 4.5 3.5 7.5 1.5 10 C 3.5 12.5 6.5 15.5 10 15.5 C 13.5 15.5 16.5 12.5 18.5 10 C 16.5 7.5 13.5 4.5 10 4.5 Z" 
+        stroke="#6B6B6B" 
+        stroke-width="2.4" 
         fill="none"
-        opacity="0.5"/>
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
   
-  <!-- Enhanced eyelashes on closed eye (5 lashes for more detail) -->
-  <!-- Left outer lash -->
-  <path d="M 4.5 10 L 3.5 7.5" 
-        stroke="currentColor" 
-        stroke-width="1.3" 
-        stroke-linecap="round"/>
+  <!-- Iris circle - Light gray -->
+  <circle cx="10" cy="10" r="3.5" 
+          fill="#9B9B9B"/>
   
-  <!-- Left center lash -->
-  <path d="M 6.5 8.8 L 5.8 6.5" 
-        stroke="currentColor" 
-        stroke-width="1.3" 
-        stroke-linecap="round"/>
+  <!-- Pupil - Medium gray -->
+  <circle cx="10" cy="10" r="1.8" 
+          fill="#6B6B6B"/>
   
-  <!-- Center lash (longest) -->
-  <path d="M 10 7.3 L 10 4.5" 
-        stroke="currentColor" 
-        stroke-width="1.4" 
-        stroke-linecap="round"/>
-  
-  <!-- Right center lash -->
-  <path d="M 13.5 8.8 L 14.2 6.5" 
-        stroke="currentColor" 
-        stroke-width="1.3" 
-        stroke-linecap="round"/>
-  
-  <!-- Right outer lash -->
-  <path d="M 15.5 10 L 16.5 7.5" 
-        stroke="currentColor" 
-        stroke-width="1.3" 
-        stroke-linecap="round"/>
+  <!-- Highlight (subtle) -->
+  <circle cx="11" cy="9" r="0.6" 
+          fill="#B0B0B0" 
+          opacity="0.8"/>
 </svg>
