@@ -1,25 +1,16 @@
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Canvas: 20x20, Live area: 19x19 centered (0.5px inset) -->
-  <!-- OFF State: Gray two-tone eye (inactive/dimmed) -->
-  
-  <!-- Eye outline (almond shape) - Medium gray -->
-  <path d="M 10 4.5 C 6.5 4.5 3.5 7.5 1.5 10 C 3.5 12.5 6.5 15.5 10 15.5 C 13.5 15.5 16.5 12.5 18.5 10 C 16.5 7.5 13.5 4.5 10 4.5 Z" 
-        stroke="#6B6B6B" 
-        stroke-width="2.4" 
+  <!-- OFF state: high-contrast monochrome template icon -->
+
+  <path d="M10 4.5C6.5 4.5 3.5 7.5 1.5 10C3.5 12.5 6.5 15.5 10 15.5C13.5 15.5 16.5 12.5 18.5 10C16.5 7.5 13.5 4.5 10 4.5Z"
+        stroke="currentColor"
+        stroke-width="2.6"
         fill="none"
-        stroke-linecap="round" 
+        stroke-linecap="round"
         stroke-linejoin="round"/>
-  
-  <!-- Iris circle - Light gray -->
-  <circle cx="10" cy="10" r="3.5" 
-          fill="#9B9B9B"/>
-  
-  <!-- Pupil - Medium gray -->
-  <circle cx="10" cy="10" r="1.8" 
-          fill="#6B6B6B"/>
-  
-  <!-- Highlight (subtle) -->
-  <circle cx="11" cy="9" r="0.6" 
-          fill="#B0B0B0" 
-          opacity="0.8"/>
+
+  <path d="M3.2 15.8L16.8 4.2"
+        stroke="currentColor"
+        stroke-width="2.8"
+        stroke-linecap="round"/>
 </svg>

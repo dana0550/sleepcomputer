@@ -8,19 +8,12 @@ struct AwakeBarApp: App {
         MenuBarExtra {
             MenuContentView(controller: controller)
         } label: {
-            ZStack {
-                Circle()
-                    .stroke(controller.fullAwakeSwitchIsOn ? Color.blue : Color.primary.opacity(0.45), lineWidth: 1.8)
-                    .frame(width: 14, height: 14)
-
-                if controller.fullAwakeSwitchIsOn {
-                    Circle()
-                        .fill(Color.blue)
-                        .frame(width: 8, height: 8)
-                }
-            }
-            .frame(width: 16, height: 16)
-            .accessibilityLabel(controller.fullAwakeSwitchIsOn ? "Awake On" : "Awake Off")
+            Image(controller.menuIconName)
+                .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 19, height: 19)
+                .accessibilityLabel(controller.fullAwakeSwitchIsOn ? "Awake On" : "Awake Off")
         }
         .menuBarExtraStyle(.window)
 
