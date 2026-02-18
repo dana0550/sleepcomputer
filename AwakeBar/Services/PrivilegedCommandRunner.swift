@@ -139,10 +139,14 @@ final class AdaptivePrivilegedCommandRunner: PrivilegedCommandRunning {
     }
 
     private func runPasswordlessSudo(command: String) throws -> Bool {
+        guard let pmsetArgs = parseAllowedPmsetCommand(command) else {
+            return false
+        }
+
         do {
             _ = try shell.run(
                 "/usr/bin/sudo",
-                arguments: ["-n", "/bin/sh", "-c", command]
+                arguments: ["-n", "/usr/bin/pmset"] + pmsetArgs
             )
             return true
         } catch {
@@ -190,5 +194,16 @@ final class AdaptivePrivilegedCommandRunner: PrivilegedCommandRunning {
         }
         return output.localizedCaseInsensitiveContains("user canceled")
             || output.localizedCaseInsensitiveContains("cancelled")
+    }
+
+    private func parseAllowedPmsetCommand(_ command: String) -> [String]? {
+        let normalized = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        if normalized == "/usr/bin/pmset -a disablesleep 0" {
+            return ["-a", "disablesleep", "0"]
+        }
+        if normalized == "/usr/bin/pmset -a disablesleep 1" {
+            return ["-a", "disablesleep", "1"]
+        }
+        return nil
     }
 }
