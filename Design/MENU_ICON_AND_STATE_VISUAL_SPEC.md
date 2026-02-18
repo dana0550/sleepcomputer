@@ -1,30 +1,28 @@
-# AwakeBar Menu Icon and ON-State Visual Spec (v2)
+# AwakeBar Menu Icon and State Visual Spec (v3)
 
 Date: 2026-02-18
 Owner: AwakeBar product/engineering
-Applies to: menu bar status icon and menu row ON/OFF icon states
+Applies to: menu bar status icon and simplified OFF/Full Awake state model
 
 ## 1) Objective
 
-The current menu bar icon still reads too small. We need a larger optical footprint and stronger state legibility.
+AwakeBar now uses a simplified two-state model:
+- OFF
+- Full Awake (ON)
 
-Design goals:
-- Menu bar icon should feel comparable in visual size to adjacent menu bar apps.
-- OFF and ON states must be distinguishable instantly by shape and color.
-- ON states in menu rows must use an explicit blue circle indicator, similar to Apple list rows.
+Design goal is instant recognition at menu bar size with no ambiguous intermediate icon set.
 
 ## 2) Required Deliverables
 
 Designer delivers updated source SVGs in this folder:
 - `/Users/dshakiba/sleepcomputer/Design/icons/awakebar-off.svg`
-- `/Users/dshakiba/sleepcomputer/Design/icons/awakebar-open.svg`
 - `/Users/dshakiba/sleepcomputer/Design/icons/awakebar-closed.svg`
 
-Do not rename files. The build pipeline depends on these exact names.
+Do not rename files. The generation pipeline depends on these exact names.
 
 ## 3) Menu Bar Icon Geometry Spec
 
-All three SVGs must follow this exactly:
+Both SVGs must follow this exactly:
 - Canvas: `20x20`.
 - Live drawing area: centered `19x19` (max `0.5px` inset on any side).
 - Optical occupancy target: `>= 88%` of the 20x20 area.
@@ -36,46 +34,37 @@ All three SVGs must follow this exactly:
 ## 4) State Semantics by Icon
 
 - `awakebar-off.svg`:
-  - Closed-eye OFF state.
+  - OFF state.
+  - Closed-eye glyph.
   - Must read as inactive even at very small size.
-  - Avoid eyelashes or thin decorative details.
-
-- `awakebar-open.svg`:
-  - Open-eye ON state for lid-open mode.
-  - Center feature should be bold and filled (not thin-line only).
 
 - `awakebar-closed.svg`:
-  - Open-eye + lock ON state for lid-closed/external mode.
-  - Lock must stay legible at 1x; keep lock form simple and chunky.
+  - Full Awake ON state.
+  - Open-eye + lock glyph.
+  - Lock must remain legible at 1x; keep lock form simple and chunky.
 
-## 5) Menu Row ON/OFF Visual Rules
+## 5) UI State Indicators (Implemented in Code)
 
-These are product behavior requirements the icons must support:
-- OFF rows use `awakebar-off.svg`.
-- ON rows use mode icon (`awakebar-open.svg` or `awakebar-closed.svg`).
-- ON icon container is an explicit blue circle: `#0A84FF`.
-- ON icon color is white inside the blue circle.
-- OFF icon container is neutral gray.
-- OFF icon color is secondary tint.
+- Menu bar glyph:
+  - OFF uses `AwakeBarStatusOff`.
+  - ON uses `AwakeBarStatusClosed`.
+- Menu status dot:
+  - OFF is neutral gray.
+  - ON is explicit blue `#0A84FF`.
+- Toggle:
+  - Label is `Full Awake`.
+  - Switch tint is blue when ON.
 
-## 6) ON-State Circle Dimensions (Implemented in UI)
-
-These UI values are now in code and should be respected in previews:
-- Circle size: `26x26`.
-- ON circle fill: `#0A84FF`.
-- Asset icon size inside circle: `14x14`.
-- System symbol size inside circle: `11pt semibold`.
-
-## 7) Handoff Validation Checklist
+## 6) Handoff Validation Checklist
 
 Designer must verify before handoff:
 - In a 20x20 artboard, each icon uses near-full live area (19x19 target).
 - At 100% and 200% zoom, strokes remain crisp and not muddy.
-- At simulated 18x18 and 16x16 raster preview, OFF/OPEN/CLOSED remain distinct.
-- No tiny eyelashes, highlights, or decorative marks that disappear at small size.
+- At simulated 18x18 and 16x16 raster preview, OFF and ON remain clearly distinct.
+- No decorative marks that disappear at small size.
 - Lock in `awakebar-closed.svg` remains clear at 1x.
 
-## 8) Engineering Regeneration Step
+## 7) Engineering Regeneration Step
 
 After SVG drop-in, run:
 
@@ -86,11 +75,16 @@ cd /Users/dshakiba/sleepcomputer
 
 This regenerates:
 - `/Users/dshakiba/sleepcomputer/AwakeBar/Assets.xcassets/AwakeBarStatusOff.imageset/AwakeBarStatusOff.svg`
-- `/Users/dshakiba/sleepcomputer/AwakeBar/Assets.xcassets/AwakeBarStatusOpen.imageset/AwakeBarStatusOpen.svg`
 - `/Users/dshakiba/sleepcomputer/AwakeBar/Assets.xcassets/AwakeBarStatusClosed.imageset/AwakeBarStatusClosed.svg`
+
+## 8) Removed Legacy Asset
+
+The legacy open-eye icon is intentionally removed from runtime and pipeline:
+- `Design/icons/awakebar-open.svg`
+- `AwakeBar/Assets.xcassets/AwakeBarStatusOpen.imageset/*`
 
 ## 9) Non-Goals
 
 - No changes to app icon (`AppIcon.appiconset`) in this pass.
 - No multi-color menu bar status icons.
-- No filename or asset ID changes.
+- No filename changes for retained assets.

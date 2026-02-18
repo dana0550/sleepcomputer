@@ -1,11 +1,10 @@
 item_id,menu_label,hover_help,max_label_chars,max_help_chars
-status_title,Status,"Current awake mode.",6,30
-status_off,Normal Sleep,"Uses your normal macOS sleep settings.",12,38
-status_open_lid,Stay Awake (Lid Open),"Keeps your Mac and display awake while the lid is open.",21,58
-status_closed_lid,Stay Awake (Lid Closed),"Disables system sleep, including with lid closed, until you turn it off.",23,72
-status_external_closed_lid,Stay Awake (External),"System sleep was disabled outside AwakeBar. Turn it off here to restore defaults.",21,82
-toggle_full_caffeine,Keep Awake (Lid Open),"Keeps your Mac and display awake while the lid is open.",21,58
-toggle_closed_lid,Keep Awake (Lid Closed),"Keeps your Mac running with the lid closed. Requires one-time helper setup and approval in System Settings.",23,104
-toggle_login,Start at Login,"Launch AwakeBar automatically after you sign in.",14,50
-action_turn_off,Turn Everything Off,"Turns off both Keep Awake modes.",18,34
-action_quit,Quit AwakeBar,"Closes AwakeBar.",12,20
+status_header_off,Awake is OFF,Full Awake is currently disabled.,12,40
+status_header_on,Awake is ON,Full Awake is currently enabled.,11,38
+status_header_turning_on,Turning ON...,Applying Full Awake now.,12,28
+status_header_turning_off,Turning OFF...,Restoring normal sleep settings.,13,38
+toggle_full_awake,Full Awake,ON keeps your Mac awake with the lid open and closed. OFF restores normal sleep settings.,10,94
+action_finish_setup,Finish Setup...,Open Login Items and approve the privileged helper.,14,60
+message_move_to_applications,Move app to /Applications,Install AwakeBar in /Applications to enable privileged helper setup.,27,76
+message_approval_required,Approve helper in Login Items.,Full Awake cannot turn ON until helper approval is complete.,30,66
+action_quit,Quit AwakeBar,Closes AwakeBar.,12,20

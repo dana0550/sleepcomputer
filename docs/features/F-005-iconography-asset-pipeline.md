@@ -23,7 +23,7 @@ dependencies:
 
 ## Summary
 
-Define source SVG icon assets and deterministic conversion into Xcode asset entries for OFF/OPEN/CLOSED state visuals.
+Define source SVG icon assets and deterministic conversion into Xcode asset entries for OFF/Full Awake state visuals.
 
 ## Goals
 
@@ -38,8 +38,8 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 
 ## Requirements
 
-- R1: Source SVG files for off/open/closed states must exist in `Design/icons/` with stable names.
-- R2: Build script must regenerate `.imageset` SVG + `Contents.json` entries for all three states.
+- R1: Source SVG files for off/full-awake states must exist in `Design/icons/` with stable names.
+- R2: Build script must regenerate `.imageset` SVG + `Contents.json` entries for `AwakeBarStatusOff` and `AwakeBarStatusClosed`.
 - R3: Generated `Contents.json` must set `template-rendering-intent` to `template`.
 - R4: `MenuIconCatalog` must provide deterministic OFF/ON asset mappings for current two-state mode and toggle semantics.
 
@@ -52,7 +52,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 ## Acceptance Criteria
 
 - AC1: Running `./Scripts/build-icons.sh` updates icon assets deterministically.
-- AC2: OFF/OPEN/CLOSED states map to distinct menu icon assets.
+- AC2: OFF/Full Awake states map to distinct menu icon assets.
 - AC3: Generated image sets preserve template tint behavior via asset metadata.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
@@ -66,7 +66,6 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 | Item | Type | Evidence |
 |---|---|---|
 | R1 | code | Design/icons/awakebar-off.svg |
-| R1 | code | Design/icons/awakebar-open.svg |
 | R1 | code | Design/icons/awakebar-closed.svg |
 | R2 | code | Scripts/build-icons.sh |
 | R3 | code | Scripts/build-icons.sh |
@@ -109,7 +108,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] Script runtime bounded to three icon conversions
+- [x] Script runtime bounded to two icon conversions
 - [x] Asset lookup is constant-time by name
 
 ## Table of Contents
@@ -128,3 +127,4 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added deterministic generation and visual handoff child specs.
 - 2026-02-18: Aligned icon mapping requirements with current two-state catalog API.
+- 2026-02-18: Removed legacy open icon from pipeline requirements and traceability.

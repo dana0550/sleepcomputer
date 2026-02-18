@@ -1,23 +1,19 @@
 {
   "metadata": {
     "name": "AwakeBar Icon Manifest",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "generatedAt": "2026-02-18",
     "owner": "dshakiba",
     "strategy": {
-      "menuBarStateModel": ["off", "open", "closed"],
-      "externalStateMapping": "external->closed",
-      "dropdownStateModel": ["off", "on"],
-      "dropdownIconScope": "mode-rows-only",
-      "dropdownOnStateRendering": "template-white-on-blue",
-      "sharedGlyphs": false,
+      "menuBarStateModel": ["off", "fullAwake"],
+      "menuVisualScaleTarget": "2.0x vs original baseline",
       "menuSourceCanvas": "20x20",
       "menuGlyphLiveArea": "19x19 centered within 20x20 canvas (max 0.5px inset)",
-      "menuVisualScaleTarget": "2.0x vs original baseline",
       "menuStrokeRange": "2.0-2.6",
       "menuDetailPolicy": "no micro-details under 2px at 1x",
-      "dropdownOffGlyph": "AwakeBarStatusOff",
-      "dropdownOnCircleColor": "#0A84FF"
+      "statusHeaderOnIndicator": "blue dot (#0A84FF)",
+      "statusHeaderOffIndicator": "neutral gray dot",
+      "toggleStyle": "system switch tint blue"
     }
   },
   "paths": {
@@ -47,122 +43,41 @@
       "imageset": "AwakeBarStatusOff.imageset",
       "uiState": "off"
     },
-    "open": {
-      "source": "awakebar-open.svg",
-      "compiledAssetName": "AwakeBarStatusOpen",
-      "compiledFile": "AwakeBarStatusOpen.svg",
-      "imageset": "AwakeBarStatusOpen.imageset",
-      "uiState": "on"
-    },
-    "closed": {
+    "fullAwake": {
       "source": "awakebar-closed.svg",
       "compiledAssetName": "AwakeBarStatusClosed",
       "compiledFile": "AwakeBarStatusClosed.svg",
       "imageset": "AwakeBarStatusClosed.imageset",
       "uiState": "on"
-    },
-    "external": {
-      "mappedTo": "closed",
-      "compiledAssetName": "AwakeBarStatusClosed",
-      "uiState": "on"
     }
   },
-  "menuDropdownIcons": {
-    "modeRows": {
-      "open": {
-        "off": {
-          "assetName": "AwakeBarStatusOff",
-          "source": "awakebar-off.svg",
-          "rendering": "template-unselected-tint"
-        },
-        "on": {
-          "assetName": "AwakeBarStatusOpen",
-          "source": "awakebar-open.svg",
-          "rendering": "template-white-on-blue"
-        }
-      },
-      "closed": {
-        "off": {
-          "assetName": "AwakeBarStatusOff",
-          "source": "awakebar-off.svg",
-          "rendering": "template-unselected-tint"
-        },
-        "on": {
-          "assetName": "AwakeBarStatusClosed",
-          "source": "awakebar-closed.svg",
-          "rendering": "template-white-on-blue"
-        }
-      }
+  "menuControls": {
+    "statusHeader": {
+      "off": "Awake is OFF",
+      "on": "Awake is ON",
+      "turningOn": "Turning ON...",
+      "turningOff": "Turning OFF..."
     },
-    "nonModeRows": {
-      "startAtLogin": "system-symbol",
-      "turnEverythingOff": "system-symbol",
-      "quit": "system-symbol"
-    }
+    "primaryToggle": {
+      "label": "Full Awake",
+      "help": "ON keeps your Mac awake with the lid open and closed. OFF restores normal sleep settings."
+    },
+    "setupAction": "Finish Setup...",
+    "quitAction": "Quit AwakeBar"
   },
   "appIconSet": {
     "assetCatalogName": "AppIcon",
     "slots": [
-      {
-        "assetId": "app_icon_16_1x",
-        "file": "AppIcon-16.png",
-        "size": "16x16",
-        "scale": "1x"
-      },
-      {
-        "assetId": "app_icon_16_2x",
-        "file": "AppIcon-16@2x.png",
-        "size": "16x16",
-        "scale": "2x"
-      },
-      {
-        "assetId": "app_icon_32_1x",
-        "file": "AppIcon-32.png",
-        "size": "32x32",
-        "scale": "1x"
-      },
-      {
-        "assetId": "app_icon_32_2x",
-        "file": "AppIcon-32@2x.png",
-        "size": "32x32",
-        "scale": "2x"
-      },
-      {
-        "assetId": "app_icon_128_1x",
-        "file": "AppIcon-128.png",
-        "size": "128x128",
-        "scale": "1x"
-      },
-      {
-        "assetId": "app_icon_128_2x",
-        "file": "AppIcon-128@2x.png",
-        "size": "128x128",
-        "scale": "2x"
-      },
-      {
-        "assetId": "app_icon_256_1x",
-        "file": "AppIcon-256.png",
-        "size": "256x256",
-        "scale": "1x"
-      },
-      {
-        "assetId": "app_icon_256_2x",
-        "file": "AppIcon-256@2x.png",
-        "size": "256x256",
-        "scale": "2x"
-      },
-      {
-        "assetId": "app_icon_512_1x",
-        "file": "AppIcon-512.png",
-        "size": "512x512",
-        "scale": "1x"
-      },
-      {
-        "assetId": "app_icon_512_2x",
-        "file": "AppIcon-512@2x.png",
-        "size": "512x512",
-        "scale": "2x"
-      }
+      { "assetId": "app_icon_16_1x", "file": "AppIcon-16.png", "size": "16x16", "scale": "1x" },
+      { "assetId": "app_icon_16_2x", "file": "AppIcon-16@2x.png", "size": "16x16", "scale": "2x" },
+      { "assetId": "app_icon_32_1x", "file": "AppIcon-32.png", "size": "32x32", "scale": "1x" },
+      { "assetId": "app_icon_32_2x", "file": "AppIcon-32@2x.png", "size": "32x32", "scale": "2x" },
+      { "assetId": "app_icon_128_1x", "file": "AppIcon-128.png", "size": "128x128", "scale": "1x" },
+      { "assetId": "app_icon_128_2x", "file": "AppIcon-128@2x.png", "size": "128x128", "scale": "2x" },
+      { "assetId": "app_icon_256_1x", "file": "AppIcon-256.png", "size": "256x256", "scale": "1x" },
+      { "assetId": "app_icon_256_2x", "file": "AppIcon-256@2x.png", "size": "256x256", "scale": "2x" },
+      { "assetId": "app_icon_512_1x", "file": "AppIcon-512.png", "size": "512x512", "scale": "1x" },
+      { "assetId": "app_icon_512_2x", "file": "AppIcon-512@2x.png", "size": "512x512", "scale": "2x" }
     ]
   },
   "generationPipeline": {
@@ -172,12 +87,10 @@
     },
     "statusImageSets": [
       "AwakeBarStatusOff.imageset",
-      "AwakeBarStatusOpen.imageset",
       "AwakeBarStatusClosed.imageset"
     ],
     "generatedArtifacts": [
       "AwakeBarStatusOff.svg",
-      "AwakeBarStatusOpen.svg",
       "AwakeBarStatusClosed.svg",
       "Contents.json"
     ],

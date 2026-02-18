@@ -28,6 +28,7 @@ It provides a single primary control:
 ## Visual Identity
 
 Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app icon set).
+Runtime status icon set is intentionally two assets only: `awakebar-off.svg` and `awakebar-closed.svg` (lock = Full Awake ON).
 
 | App Icon | Menu Bar OFF | Menu Bar ON |
 |---|---|---|
@@ -146,6 +147,12 @@ Use these files for icon delivery requirements:
 - `Design/ICON_ASSET_SPECS.csv`
 - `Design/ICON_MANIFEST.json`
 - `Design/MENU_COPY.csv`
+- `Design/MENU_ICON_AND_STATE_VISUAL_SPEC.md`
+
+Required menu source SVGs (two-state model):
+
+- `Design/icons/awakebar-off.svg`
+- `Design/icons/awakebar-closed.svg`
 
 After new SVG icon drop-ins:
 

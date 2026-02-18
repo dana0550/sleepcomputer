@@ -35,7 +35,6 @@ JSON
 }
 
 build_icon "awakebar-off.svg" "AwakeBarStatusOff"
-build_icon "awakebar-open.svg" "AwakeBarStatusOpen"
 build_icon "awakebar-closed.svg" "AwakeBarStatusClosed"
 
 echo "Icons generated into $ASSETS_DIR"
