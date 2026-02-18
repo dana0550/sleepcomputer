@@ -27,6 +27,8 @@ It provides two modes:
 
 ## Visual Identity
 
+Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app icon set).
+
 | App Icon | Normal Sleep | Stay Awake (Lid Open) | Stay Awake (Lid Closed) |
 |---|---|---|---|
 | <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | <img src="Design/icons/awakebar-off.svg" width="22" alt="Off icon" /> | <img src="Design/icons/awakebar-open.svg" width="22" alt="Open icon" /> | <img src="Design/icons/awakebar-closed.svg" width="22" alt="Closed icon" /> |
