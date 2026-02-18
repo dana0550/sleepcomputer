@@ -1,102 +1,103 @@
-# AwakeBar
+<div align="center">
+  <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="96" alt="AwakeBar app icon" />
+  <h1>AwakeBar</h1>
+  <p><strong>Minimal macOS menu bar control for sleep behavior</strong></p>
+  <p>Fast toggles. Clear states. No credential storage.</p>
+</div>
 
-Lightweight macOS menu bar control for sleep behavior.
+## Overview
 
-AwakeBar gives you one-click control over two modes:
+AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 
-- `Full Caffeine`: keep the Mac awake while the lid is open.
-- `Closed-Lid Mode (Admin)`: toggle system-wide sleep disable (`pmset`) with native macOS admin authentication.
+It provides two modes:
 
-## Why This Exists
+- `Full Caffeine`: keeps your Mac awake while the lid is open.
+- `Closed-Lid Mode (Admin)`: toggles system-wide sleep disable with native macOS admin authentication.
 
-Built for people who need a fast, no-noise way to keep a Mac awake for long jobs, remote sessions, uploads, or demos, without digging through terminal commands every time.
+## Visual Identity
 
-## At a Glance
-
-| Mode | What it does | Admin prompt | Typical use |
+| App Icon | Off | Open-Lid Active | Closed-Lid Active |
 |---|---|---|---|
-| `Full Caffeine` | Prevents idle system sleep and display sleep while the Mac is open | No | Active desk work, builds, long local tasks |
-| `Closed-Lid Mode (Admin)` | Sets `pmset -a disablesleep 1` (and `0` when disabled) | Yes | Clamshell/closed-lid workflows where you intentionally override default sleep behavior |
+| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | <img src="Design/icons/awakebar-off.svg" width="22" alt="Off icon" /> | <img src="Design/icons/awakebar-open.svg" width="22" alt="Open icon" /> | <img src="Design/icons/awakebar-closed.svg" width="22" alt="Closed icon" /> |
+
+## What Each Mode Does
+
+| Mode | Behavior | Admin Prompt | Best For |
+|---|---|---|---|
+| `Full Caffeine` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
+| `Closed-Lid Mode (Admin)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | Yes | Intentional closed-lid operation when you understand thermal/power impact |
 
 ## Menu Controls
 
-- `Status`: current power mode (`Off`, `Open-Lid Active`, `Closed-Lid Active`, `External Closed-Lid Active`).
-- `Full Caffeine`: toggle non-privileged keep-awake behavior.
-- `Closed-Lid Mode (Admin)`: toggle privileged closed-lid behavior.
-- `Start automatically at login`: register/unregister as login item.
-- `Turn Everything Off`: disable both modes in one action.
-- `Quit`: close the app.
+- `Status`: shows `Off`, `Open-Lid Active`, `Closed-Lid Active`, or `External Closed-Lid Active`.
+- `Full Caffeine`: non-privileged keep-awake toggle.
+- `Closed-Lid Mode (Admin)`: privileged closed-lid toggle.
+- `Start automatically at login`: login item registration toggle.
+- `Turn Everything Off`: disables all active modes.
+- `Quit`: exits the app.
 
-Tip: hover controls in the menu for inline explanations.
+Hover any control to view quick inline help text.
 
-## Safety Notes
+## Safety
 
-- `Closed-Lid Mode (Admin)` changes system sleep policy and can increase thermals and battery drain.
-- AwakeBar does **not** store your admin password or credentials.
-- If `SleepDisabled` was enabled outside AwakeBar, startup will show `External Closed-Lid Active`.
+- `Closed-Lid Mode (Admin)` can increase thermals and battery drain.
+- AwakeBar does not save or cache admin credentials.
+- If sleep disable was turned on outside AwakeBar, startup displays `External Closed-Lid Active`.
 
 ## Requirements
 
 - macOS 14.0+
 - Xcode 26.2+
 - Swift 6
-- `xcodegen` (for generating the Xcode project)
+- `xcodegen` (`brew install xcodegen`)
 
-Install xcodegen:
-
-```bash
-brew install xcodegen
-```
-
-## Quick Start (Developers)
-
-1. Generate project files:
+## Install and Run (Release)
 
 ```bash
+cd /Users/dshakiba/sleepcomputer
 xcodegen generate
-```
-
-2. Build:
-
-```bash
-xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' build
-```
-
-3. Test:
-
-```bash
-xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' test
-```
-
-## Build a Release App and Install to Applications
-
-```bash
 xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -destination 'platform=macOS' build
 APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -showBuildSettings | awk '/TARGET_BUILD_DIR =/{dir=$3} /FULL_PRODUCT_NAME =/{name=$3} END{print dir"/"name}')"
+rm -rf /Applications/AwakeBar.app
 ditto "$APP_PATH" /Applications/AwakeBar.app
 open /Applications/AwakeBar.app
 ```
 
-## Project Structure
+## Developer Workflow
+
+```bash
+# Generate project
+xcodegen generate
+
+# Build debug
+xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' build
+
+# Run tests
+xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' test
+```
+
+## Project Layout
 
 ```text
 AwakeBar/
-  App/          # SwiftUI app + menu-bar controller
-  Domain/       # App state + mode mapping
-  Services/     # pmset, assertions, auth runner, login item control
-  State/        # Persistence layer
-  UI/           # Menu content
-AwakeBarTests/  # Unit tests + controller tests with mocks
-Design/icons/   # Source-of-truth SVG icons
-Scripts/        # Asset build scripts
-docs/           # Product spec system (FEATURES.md is SSOT)
+  App/          # app entry + menu controller
+  Domain/       # state + mode mapping
+  Services/     # pmset, assertions, login, auth runner
+  State/        # persistence
+  UI/           # menu UI
+AwakeBarTests/  # tests with mocks
+Design/icons/   # menu icon source SVGs
+docs/           # product spec system (FEATURES.md SSOT)
 ```
 
-## Icon Pipeline
+## Asset Handoff for Designers
 
-Source icons live in `Design/icons/*.svg`.
+Use these files for icon delivery requirements:
 
-Regenerate asset catalog PDFs after icon edits:
+- `Design/ICON_ASSET_SPECS.csv`
+- `Design/MENU_COPY.csv`
+
+After new SVG icon drop-ins:
 
 ```bash
 ./Scripts/build-icons.sh
@@ -104,23 +105,12 @@ Regenerate asset catalog PDFs after icon edits:
 
 ## Documentation System
 
-This repository uses a docs spec workflow where `docs/FEATURES.md` is the source of truth for feature IDs and hierarchy.
+This repo uses a spec workflow with `docs/FEATURES.md` as source of truth.
 
 - Update `docs/FEATURES.md` first.
-- Then update corresponding files in `docs/features/`.
-- Keep `docs/PRODUCT_MAP.md` synchronized.
-
-## Troubleshooting
-
-- App does not appear in menu bar:
-  - Confirm `AwakeBar.app` is running in Activity Monitor.
-  - Relaunch with `open /Applications/AwakeBar.app`.
-- Closed-lid toggle fails:
-  - Check if admin auth was cancelled.
-  - Verify current state with `pmset -g | grep SleepDisabled`.
-- Login item toggle fails:
-  - Re-open AwakeBar and toggle it again.
+- Then update `docs/features/*.md`.
+- Keep `docs/PRODUCT_MAP.md` in sync.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT (`LICENSE`).
