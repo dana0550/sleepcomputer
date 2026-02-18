@@ -7,8 +7,8 @@ owner: dshakiba
 parent: null
 children: []
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.1.0
+last_reviewed: 2026-02-18
 tags:
   - power
   - admin
@@ -34,16 +34,18 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 
 ## Requirements
 
-- R1: Enabling closed-lid mode prompts for administrator authentication.
-- R2: Disabling closed-lid mode prompts for administrator authentication.
-- R3: Startup probe reports existing `SleepDisabled=1` as external mode state.
-- R4: Errors/cancellation preserve prior toggle state.
+- R1: First privileged closed-lid action performs one-time administrator setup for passwordless `pmset` toggles.
+- R2: After successful setup, enable/disable toggles run without repeated password prompts.
+- R3: If one-time setup is unavailable or canceled, app falls back to native administrator prompt for the current action.
+- R4: Startup probe reports existing `SleepDisabled=1` as external mode state.
+- R5: Errors/cancellation preserve prior toggle state.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [ ] R1
 - [ ] R2
 - [ ] R3
 - [ ] R4
+- [ ] R5
 
 ## Acceptance Criteria
 
@@ -59,10 +61,11 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R2 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R3 | test | AwakeBarTests/ClosedLidPmsetControllerTests.swift |
-| R4 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| R1 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
+| R2 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
+| R3 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
+| R4 | test | AwakeBarTests/ClosedLidPmsetControllerTests.swift |
+| R5 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC1 | manual | `pmset -g` verification |
 | AC2 | manual | `pmset -g` verification |
 
@@ -90,7 +93,8 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] Uses native admin prompt
+- [x] Uses one-time native admin prompt for passwordless setup
+- [x] Falls back to native admin prompt if setup unavailable
 - [x] Does not persist credentials
 
 ## Budget
@@ -111,3 +115,4 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-17: Added one-time passwordless setup with prompt fallback behavior.

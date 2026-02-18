@@ -17,7 +17,7 @@ final class ClosedLidPmsetController: ClosedLidSleepControlling {
     private let shellRunner: ShellCommandRunning
 
     init(
-        privilegedRunner: PrivilegedCommandRunning = AppleScriptPrivilegedCommandRunner(),
+        privilegedRunner: PrivilegedCommandRunning = AdaptivePrivilegedCommandRunner(),
         shellRunner: ShellCommandRunning = ProcessShellCommandRunner()
     ) {
         self.privilegedRunner = privilegedRunner

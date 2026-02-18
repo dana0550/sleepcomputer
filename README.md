@@ -23,7 +23,7 @@ AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 It provides two modes:
 
 - `Full Caffeine`: keeps your Mac awake while the lid is open.
-- `Closed-Lid Mode (Admin)`: toggles system-wide sleep disable with native macOS admin authentication.
+- `Closed-Lid Mode (Admin)`: toggles system-wide sleep disable with one-time admin setup, then passwordless toggles.
 
 ## Visual Identity
 
@@ -36,16 +36,16 @@ It provides two modes:
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
 | `Full Caffeine` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Closed-Lid Mode (Admin)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | Yes | Intentional closed-lid operation when you understand thermal/power impact |
+| `Closed-Lid Mode (Admin)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup (fallback prompt only if setup unavailable) | Intentional closed-lid operation when you understand thermal/power impact |
 
 ## Menu Controls
 
 - `Status`: shows `Off`, `Open-Lid Active`, `Closed-Lid Active`, or `External Closed-Lid Active`.
-- `Full Caffeine`: non-privileged keep-awake toggle.
-- `Closed-Lid Mode (Admin)`: privileged closed-lid toggle.
-- `Start automatically at login`: login item registration toggle.
+- `Full Caffeine`: button to toggle non-privileged keep-awake.
+- `Closed-Lid Mode (Admin)`: button to toggle privileged closed-lid mode.
+- `Start at Login`: button to toggle login item registration.
 - `Turn Everything Off`: disables all active modes.
-- `Quit`: exits the app.
+- `Quit AwakeBar`: exits the app.
 
 Hover any control to view quick inline help text.
 
@@ -53,6 +53,7 @@ Hover any control to view quick inline help text.
 
 - `Closed-Lid Mode (Admin)` can increase thermals and battery drain.
 - AwakeBar does not save or cache admin credentials.
+- Closed-lid passwordless mode uses a scoped `sudoers` rule limited to `pmset -a disablesleep 0/1`.
 - If sleep disable was turned on outside AwakeBar, startup displays `External Closed-Lid Active`.
 
 ## Requirements

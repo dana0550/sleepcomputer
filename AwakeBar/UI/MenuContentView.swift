@@ -33,7 +33,7 @@ struct MenuContentView: View {
                     state: closedLidRowState,
                     isBusy: controller.isApplyingClosedLidChange,
                     disabled: controller.isApplyingClosedLidChange,
-                    helpText: "Prompts for administrator access to run pmset -a disablesleep 1 or 0."
+                    helpText: "Uses one-time admin setup for passwordless toggles. If unavailable, macOS will prompt for admin access."
                 ) {
                     controller.requestClosedLidChange(!controller.isClosedLidToggleOn)
                 }
