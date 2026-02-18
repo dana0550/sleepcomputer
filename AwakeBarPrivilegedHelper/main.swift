@@ -5,12 +5,13 @@ let delegate = PrivilegedServiceListenerDelegate()
 
 listener.delegate = delegate
 
-let teamID = CodeSigningRequirementBuilder.configuredTeamID()
-let requirement = CodeSigningRequirementBuilder.requirement(
-    for: PrivilegedServiceConstants.appBundleIdentifier,
-    teamID: teamID
-)
-listener.setConnectionCodeSigningRequirement(requirement)
+if let teamID = CodeSigningRequirementBuilder.configuredTeamID() {
+    let requirement = CodeSigningRequirementBuilder.requirement(
+        for: PrivilegedServiceConstants.appBundleIdentifier,
+        teamID: teamID
+    )
+    listener.setConnectionCodeSigningRequirement(requirement)
+}
 
 listener.activate()
 RunLoop.main.run()

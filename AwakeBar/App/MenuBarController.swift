@@ -5,6 +5,7 @@ import SwiftUI
 final class MenuBarController: ObservableObject {
     @Published private(set) var state: AppState
     @Published private(set) var isApplyingFullAwakeChange = false
+    @Published private(set) var pendingFullAwakeTarget: Bool?
 
     private let stateStore: AppStateStore
     private let openLidController: OpenLidSleepControlling
@@ -62,6 +63,10 @@ final class MenuBarController: ObservableObject {
 
     var isFullAwakeEnabled: Bool {
         mode == .fullAwake
+    }
+
+    var fullAwakeSwitchIsOn: Bool {
+        pendingFullAwakeTarget ?? isFullAwakeEnabled
     }
 
     var launchAtLoginEnabled: Bool {
@@ -125,8 +130,25 @@ final class MenuBarController: ObservableObject {
         }
     }
 
+    func refreshSetupState() {
+        Task { [weak self] in
+            await self?.refreshClosedLidRuntimeState()
+        }
+    }
+
     func openLoginItemsSettingsForApproval() {
         closedLidSetupController.openSystemSettingsForApproval()
+
+        Task { [weak self] in
+            guard let self else { return }
+            for _ in 0..<30 {
+                await self.refreshClosedLidRuntimeState()
+                if self.state.closedLidSetupState.isReady {
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+        }
     }
 
     func setFullAwakeEnabled(_ enabled: Bool) async {
@@ -139,8 +161,10 @@ final class MenuBarController: ObservableObject {
         let previousExternal = state.externalClosedLidDetected
 
         isApplyingFullAwakeChange = true
+        pendingFullAwakeTarget = enabled
         defer {
             isApplyingFullAwakeChange = false
+            pendingFullAwakeTarget = nil
         }
 
         if enabled {
@@ -244,7 +268,9 @@ final class MenuBarController: ObservableObject {
         do {
             let sleepDisabled = try await closedLidController.readSleepDisabled()
             state.externalClosedLidDetected = sleepDisabled
-            state.closedLidEnabledByApp = false
+            if !sleepDisabled {
+                state.closedLidEnabledByApp = false
+            }
         } catch {
             state.externalClosedLidDetected = false
             state.closedLidEnabledByApp = false
@@ -293,15 +319,15 @@ final class MenuBarController: ObservableObject {
     private func fullAwakeSetupMessage(for setupState: ClosedLidSetupState) -> String {
         switch setupState {
         case .ready:
-            return "Full Awake is ready."
+            return "Ready."
         case .approvalRequired:
-            return "Approve AwakeBar in System Settings > Login Items, then toggle Full Awake again."
+            return "Approve helper in Login Items."
         case .notInApplications:
-            return "Move AwakeBar to /Applications to use Full Awake."
+            return "Move app to /Applications."
         case .notRegistered:
-            return "Full Awake needs one-time helper setup. Try toggling on again."
+            return "Finish one-time setup."
         case .unavailable(let detail):
-            return "Full Awake setup is unavailable: \(detail)"
+            return "Helper unavailable: \(detail)"
         }
     }
 }

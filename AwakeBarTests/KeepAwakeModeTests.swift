@@ -8,15 +8,23 @@ final class KeepAwakeModeTests: XCTestCase {
         XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
     }
 
-    func testModeIsFullAwakeWhenOpenLidAwakeIsEnabled() {
+    func testModeIsOffWhenOnlyOpenLidAwakeIsEnabled() {
         var state = AppState()
         state.openLidEnabled = true
 
-        XCTAssertEqual(KeepAwakeMode.from(state: state), .fullAwake)
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
     }
 
-    func testModeIsFullAwakeWhenClosedLidAwakeIsEnabledByApp() {
+    func testModeIsOffWhenOnlyClosedLidAwakeIsEnabledByApp() {
         var state = AppState()
+        state.closedLidEnabledByApp = true
+
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
+    }
+
+    func testModeIsFullAwakeWhenOpenAndClosedLidAwakeAreEnabled() {
+        var state = AppState()
+        state.openLidEnabled = true
         state.closedLidEnabledByApp = true
 
         XCTAssertEqual(KeepAwakeMode.from(state: state), .fullAwake)

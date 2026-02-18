@@ -77,12 +77,38 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             return .notInApplications
         }
 
-        do {
-            if daemonService.status != .enabled {
-                try daemonService.register()
+        if daemonService.status == .enabled {
+            if await waitForHelperReachable(maxAttempts: 2) {
+                return .ready
             }
+
+            // Repair stale registrations where service is marked enabled but XPC is unreachable.
+            _ = try? daemonService.unregister()
+            _ = try? daemonService.register()
+
+            if await waitForHelperReachable(maxAttempts: 3) {
+                return .ready
+            }
+
+            return await refreshStatus()
+        }
+
+        do {
+            try daemonService.register()
         } catch {
             return .unavailable("Could not register privileged helper: \(error.localizedDescription)")
+        }
+
+        if await waitForHelperReachable(maxAttempts: 3) {
+            return .ready
+        }
+
+        // One repair pass handles delayed launchd propagation after first-time registration.
+        _ = try? daemonService.unregister()
+        _ = try? daemonService.register()
+
+        if await waitForHelperReachable(maxAttempts: 3) {
+            return .ready
         }
 
         return await refreshStatus()
@@ -96,5 +122,25 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         let path = bundleURL.path
         return path.hasPrefix("/Applications/")
             || path == "/Applications"
+    }
+
+    private func isHelperReachable() async -> Bool {
+        (try? await daemonClient.ping()) == true
+    }
+
+    private func waitForHelperReachable(maxAttempts: Int) async -> Bool {
+        guard maxAttempts > 0 else {
+            return false
+        }
+
+        for attempt in 0..<maxAttempts {
+            if await isHelperReachable() {
+                return true
+            }
+            if attempt < maxAttempts - 1 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+        }
+        return false
     }
 }

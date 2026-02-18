@@ -51,6 +51,24 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.registerCalls, 1)
     }
 
+    func testStartSetupRepairsEnabledServiceWhenPingInitiallyFails() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingSequence = [false, false, true]
+        let service = MockDaemonService(status: .enabled)
+
+        let controller = ClosedLidSetupController(
+            daemonClient: daemon,
+            daemonService: service,
+            appBundleURLProvider: { URL(fileURLWithPath: "/Applications/AwakeBar.app") },
+            openSettings: {}
+        )
+
+        let state = await controller.startSetup()
+        XCTAssertEqual(state, .ready)
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+    }
+
     func testRefreshStatusMapsApprovalRequired() async {
         let daemon = MockDaemonClientForSetup()
         let service = MockDaemonService(status: .requiresApproval)
@@ -143,11 +161,15 @@ final class ClosedLidSetupControllerTests: XCTestCase {
 private final class MockDaemonClientForSetup: PrivilegedDaemonControlling {
     var pingValue = true
     var shouldThrowPing = false
+    var pingSequence: [Bool] = []
 
     func ping() async throws -> Bool {
         if shouldThrowPing {
             struct PingError: Error {}
             throw PingError()
+        }
+        if !pingSequence.isEmpty {
+            return pingSequence.removeFirst()
         }
         return pingValue
     }
@@ -167,6 +189,7 @@ private final class MockDaemonService: DaemonServiceManaging {
     var status: SMAppService.Status
     var registerError: Error?
     private(set) var registerCalls = 0
+    private(set) var unregisterCalls = 0
 
     init(status: SMAppService.Status) {
         self.status = status
@@ -181,6 +204,7 @@ private final class MockDaemonService: DaemonServiceManaging {
     }
 
     func unregister() throws {
+        unregisterCalls += 1
         status = .notRegistered
     }
 }

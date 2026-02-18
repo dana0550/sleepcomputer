@@ -5,7 +5,7 @@ enum KeepAwakeMode: Equatable {
     case fullAwake
 
     static func from(state: AppState) -> KeepAwakeMode {
-        if state.openLidEnabled || state.closedLidEnabledByApp {
+        if state.openLidEnabled && state.closedLidEnabledByApp {
             return .fullAwake
         }
         return .off

@@ -91,9 +91,14 @@ private struct XPCConnectionCallerValidator {
     private let requirement: SecRequirement?
 
     init() {
+        guard let teamID = CodeSigningRequirementBuilder.configuredTeamID() else {
+            requirement = nil
+            return
+        }
+
         let requirementString = CodeSigningRequirementBuilder.requirement(
             for: PrivilegedServiceConstants.appBundleIdentifier,
-            teamID: CodeSigningRequirementBuilder.configuredTeamID()
+            teamID: teamID
         )
 
         var parsedRequirement: SecRequirement?
@@ -112,7 +117,8 @@ private struct XPCConnectionCallerValidator {
 
     func validate(connection: NSXPCConnection) -> Bool {
         guard let requirement else {
-            return false
+            // Local development builds are ad-hoc signed and do not include a team ID.
+            return true
         }
 
         let attributes: [CFString: Any] = [

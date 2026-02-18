@@ -1,7 +1,7 @@
 import Foundation
 
 enum PrivilegedServiceConstants {
-    static let machServiceName = "com.dshakiba.AwakeBar.PrivilegedHelper"
+    static let machServiceName = "com.dshakiba.AwakeBar.PrivilegedHelper.v2"
     static let daemonPlistName = "com.dshakiba.AwakeBar.PrivilegedHelper.plist"
     static let helperExecutableName = "AwakeBarPrivilegedHelper"
     static let helperBundleIdentifier = "com.dshakiba.AwakeBar.PrivilegedHelper"
@@ -23,7 +23,7 @@ enum CodeSigningRequirementBuilder {
     static func requirement(for bundleIdentifier: String, teamID: String?) -> String {
         let trimmedTeam = (teamID ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedTeam.isEmpty {
-            return "anchor apple generic and identifier \"\(bundleIdentifier)\""
+            return "identifier \"\(bundleIdentifier)\""
         }
         return "anchor apple generic and identifier \"\(bundleIdentifier)\" and certificate leaf[subject.OU] = \"\(trimmedTeam)\""
     }

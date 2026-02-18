@@ -127,11 +127,13 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
         )
         connection.remoteObjectInterface = NSXPCInterface(with: AwakeBarPrivilegedServiceXPC.self)
 
-        let requirement = CodeSigningRequirementBuilder.requirement(
-            for: PrivilegedServiceConstants.helperBundleIdentifier,
-            teamID: CodeSigningRequirementBuilder.configuredTeamID()
-        )
-        connection.setCodeSigningRequirement(requirement)
+        if let teamID = CodeSigningRequirementBuilder.configuredTeamID() {
+            let requirement = CodeSigningRequirementBuilder.requirement(
+                for: PrivilegedServiceConstants.helperBundleIdentifier,
+                teamID: teamID
+            )
+            connection.setCodeSigningRequirement(requirement)
+        }
         return connection
     }
 

@@ -25,4 +25,25 @@ final class PrivilegedDaemonClientTests: XCTestCase {
             XCTAssertEqual(error as? PrivilegedDaemonClientError, .invalidCleanupPayload)
         }
     }
+
+    func testCodeSigningRequirementFallsBackToIdentifierWithoutTeamID() {
+        let requirement = CodeSigningRequirementBuilder.requirement(
+            for: "com.dshakiba.AwakeBar",
+            teamID: nil
+        )
+
+        XCTAssertEqual(requirement, "identifier \"com.dshakiba.AwakeBar\"")
+    }
+
+    func testCodeSigningRequirementIncludesAnchorAndTeamIDWhenPresent() {
+        let requirement = CodeSigningRequirementBuilder.requirement(
+            for: "com.dshakiba.AwakeBar",
+            teamID: "ABCDE12345"
+        )
+
+        XCTAssertEqual(
+            requirement,
+            "anchor apple generic and identifier \"com.dshakiba.AwakeBar\" and certificate leaf[subject.OU] = \"ABCDE12345\""
+        )
+    }
 }
