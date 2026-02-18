@@ -23,11 +23,11 @@ dependencies:
 
 ## Summary
 
-Persist safe state and expose launch-at-login as a user-controlled toggle.
+Persist safe state and keep launch-at-login preference control available through app controllers.
 
 ## Goals
 
-- Restore Full Caffeine and login preference across relaunches.
+- Restore Full Awake intent and login preference across relaunches.
 - Avoid auto-restoring closed-lid mode.
 - Persist migration completion state for one-time cleanup behavior.
 
@@ -51,7 +51,7 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 
 ## Acceptance Criteria
 
-- AC1: Relaunch restores prior open-lid and launch-at-login preferences.
+- AC1: Relaunch restores prior Full Awake intent (via open-lid persistence) and launch-at-login preference.
 - AC2: Relaunch does not auto-enable closed-lid by-app state.
 - AC3: Login toggle changes are persisted and reloaded.
 
@@ -128,3 +128,4 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added migration marker persistence for daemon cutover cleanup idempotency.
 - 2026-02-18: Split persistence and login-item responsibilities into child specs.
+- 2026-02-18: Updated Full Awake terminology for persisted awake intent.

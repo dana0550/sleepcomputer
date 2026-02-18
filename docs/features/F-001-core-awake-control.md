@@ -23,11 +23,11 @@ dependencies:
 
 ## Summary
 
-Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
+Provide the open-lid assertion layer used by the Full Awake control path.
 
 ## Goals
 
-- Keep system and display awake while Full Caffeine is enabled.
+- Keep system and display awake while Full Awake is enabled.
 - Provide deterministic toggle behavior from the menu bar.
 - Fail safely when assertion creation or release fails.
 
@@ -38,10 +38,10 @@ Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
 
 ## Requirements
 
-- R1: Enabling Full Caffeine must create both NoIdleSleep and NoDisplaySleep assertions.
-- R2: Disabling Full Caffeine must release all created assertions.
+- R1: Enabling the Full Awake path must create both NoIdleSleep and NoDisplaySleep assertions.
+- R2: Disabling the Full Awake path must release all created assertions.
 - R3: Partial assertion-creation failures must roll back any assertion already created.
-- R4: Open-lid failures must surface as transient errors without leaving stale state enabled.
+- R4: Open-lid failures must surface as transient errors and must not leave Full Awake in a stale enabled state.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
@@ -51,8 +51,8 @@ Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
 
 ## Acceptance Criteria
 
-- AC1: `pmset -g assertions` shows AwakeBar sleep-prevention assertions when open-lid mode is enabled.
-- AC2: Assertions are absent after disabling Full Caffeine.
+- AC1: `pmset -g assertions` shows AwakeBar sleep-prevention assertions when Full Awake is enabled.
+- AC2: Assertions are absent after disabling Full Awake.
 - AC3: Failed assertion operations return the app to a safe, non-stuck state.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
@@ -126,3 +126,4 @@ Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
 
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Expanded requirement coverage and linked child lifecycle spec.
+- 2026-02-18: Updated terminology and behavior mapping to Full Awake single-toggle model.

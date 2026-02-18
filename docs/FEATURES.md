@@ -9,7 +9,7 @@ last_synced: 2026-02-18
 | ID | Name | Status | Parent ID | Spec Path | Owner | Aliases |
 |---|---|---|---|---|---|---|
 | F-001 | Core Awake Control | active | - | ./features/F-001-core-awake-control.md | dshakiba | - |
-| F-001.01 | Open-Lid Assertion Lifecycle | active | F-001 | ./features/F-001.01-open-lid-assertion-lifecycle.md | dshakiba | Full Caffeine Assertions |
+| F-001.01 | Open-Lid Assertion Lifecycle | active | F-001 | ./features/F-001.01-open-lid-assertion-lifecycle.md | dshakiba | Full Awake Assertions |
 | F-002 | Menu Bar Experience | active | - | ./features/F-002-menu-bar-experience.md | dshakiba | - |
 | F-002.01 | Mode and Status Modeling | active | F-002 | ./features/F-002.01-mode-and-status-modeling.md | dshakiba | Mode Derivation |
 | F-003 | Closed-Lid Daemon Control | active | - | ./features/F-003-closed-lid-admin-control.md | dshakiba | Closed-Lid Admin Control |

@@ -23,7 +23,7 @@ dependencies:
 
 ## Summary
 
-Define source SVG icon assets and deterministic conversion into Xcode asset entries used by menu status and controls.
+Define source SVG icon assets and deterministic conversion into Xcode asset entries for OFF/OPEN/CLOSED state visuals.
 
 ## Goals
 
@@ -41,7 +41,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 - R1: Source SVG files for off/open/closed states must exist in `Design/icons/` with stable names.
 - R2: Build script must regenerate `.imageset` SVG + `Contents.json` entries for all three states.
 - R3: Generated `Contents.json` must set `template-rendering-intent` to `template`.
-- R4: Menu UI must resolve state icons through `MenuIconCatalog` mappings.
+- R4: `MenuIconCatalog` must provide deterministic OFF/ON asset mappings for current two-state mode and toggle semantics.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
@@ -53,7 +53,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 
 - AC1: Running `./Scripts/build-icons.sh` updates icon assets deterministically.
 - AC2: OFF/OPEN/CLOSED states map to distinct menu icon assets.
-- AC3: Menu icon rendering adapts tint correctly via template assets.
+- AC3: Generated image sets preserve template tint behavior via asset metadata.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [ ] AC1
@@ -73,7 +73,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 | R4 | code | AwakeBar/UI/MenuIconCatalog.swift |
 | AC1 | manual | `./Scripts/build-icons.sh` execution |
 | AC2 | test | AwakeBarTests/MenuIconCatalogTests.swift |
-| AC3 | code | AwakeBar/App/AwakeBarApp.swift |
+| AC3 | code | AwakeBar/Assets.xcassets/AwakeBarStatusOff.imageset/Contents.json |
 
 ## Children
 
@@ -92,12 +92,12 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `MenuIconCatalog.statusBarAssetName(for:)`
-- `MenuIconCatalog.dropdownPair(for:)`
+- `MenuIconCatalog.fullAwakeToggleAssetName(isOn:)`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- Controls icon readability and state affordance in menu bar and row actions.
+- Controls icon readability and state affordance in reusable state assets.
 - Couples design sources to generated Xcode assets.
 
 ## Security
@@ -127,3 +127,4 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added deterministic generation and visual handoff child specs.
+- 2026-02-18: Aligned icon mapping requirements with current two-state catalog API.

@@ -20,59 +20,58 @@
 
 AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 
-It provides two modes:
+It provides a single primary control:
 
-- `Keep Awake (Lid Open)`: keeps your Mac and display awake while the lid stays open.
-- `Keep Awake (Lid Closed)`: disables system sleep so your Mac can keep running with the lid closed.
+- `Full Awake` (ON): keeps your Mac awake with the lid open and with the lid closed.
+- `Off`: restores normal macOS sleep behavior.
 
 ## Visual Identity
 
 Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app icon set).
 
-| App Icon | Normal Sleep | Stay Awake (Lid Open) | Stay Awake (Lid Closed) |
-|---|---|---|---|
-| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | <img src="Design/icons/awakebar-off.svg" width="22" alt="Off icon" /> | <img src="Design/icons/awakebar-open.svg" width="22" alt="Open icon" /> | <img src="Design/icons/awakebar-closed.svg" width="22" alt="Closed icon" /> |
+| App Icon | Menu Bar OFF | Menu Bar ON |
+|---|---|---|
+| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | Gray ring indicator | Blue ring + blue center indicator |
 
 ## What Each Mode Does
 
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
-| `Keep Awake (Lid Open)` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Keep Awake (Lid Closed)` | Calls a privileged helper daemon to run `pmset -a disablesleep 1` (and `0` when disabled) | One-time helper setup + approval in System Settings | Closed-lid operation when you understand thermal/power impact |
+| `Off` | Restores normal macOS sleep behavior | No | Default energy-saving behavior |
+| `Full Awake` | Enables open-lid assertions and closed-lid sleep disable (`pmset -a disablesleep 1`) | One-time helper setup + approval in System Settings (if not already approved) | Long-running tasks that must not sleep |
 
 ## Menu Controls
 
-- `Status`: shows `Normal Sleep`, `Stay Awake (Lid Open)`, `Stay Awake (Lid Closed)`, or `Stay Awake (External)`.
-- `Keep Awake (Lid Open)`: button to toggle non-privileged keep-awake.
-- `Keep Awake (Lid Closed)`: button to toggle privileged closed-lid keep-awake (enabled only after setup).
-- `Start at Login`: button to toggle login item registration.
-- `Turn Everything Off`: disables all active modes.
+- `Status`: shows `Awake is OFF`, `Awake is ON`, or transitional `Turning ON/OFF...`.
+- `Full Awake`: one toggle for all awake behavior.
+- `Finish Setup...`: appears when helper approval/setup is required.
+- `Inline message`: explains setup blockers or helper errors in menu context.
 - `Quit AwakeBar`: exits the app.
 
-Hover any control to view quick inline help text.
+Hover the `Full Awake` toggle to view quick inline help text.
 
 ## Closed-Lid Setup
 
-Closed-lid control requires privileged helper registration.
+`Full Awake` requires privileged helper registration for the closed-lid portion.
 
 1. Install `AwakeBar.app` in `/Applications`.
-2. Open AwakeBar and click `Enable Closed-Lid Control`.
-3. If prompted, open `Login Items` settings and approve the helper.
-4. Return to AwakeBar; status should show `Closed-Lid Control Ready`.
+2. Open AwakeBar and turn `Full Awake` ON.
+3. If prompted, click `Finish Setup...`, then approve the helper in `Login Items`.
+4. Return to AwakeBar and toggle `Full Awake` ON again.
 
 Architecture details:
 
 - Helper registration uses `SMAppService.daemon(plistName:)`.
-- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper`) with code-signing requirements in both directions.
+- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper.v2`) with code-signing requirements in both directions.
 - Runtime does not use `sudo`, AppleScript, or Touch ID/PAM mutation fallbacks.
 
 ## Safety
 
-- `Keep Awake (Lid Closed)` can increase thermals and battery drain.
+- `Full Awake` can increase thermals and battery drain, especially when the lid is closed.
 - AwakeBar does not save or cache admin credentials.
-- Closed-lid mode uses a scoped privileged helper with a fixed command surface.
+- Closed-lid control uses a scoped privileged helper with a fixed command surface.
 - Legacy `sudoers`/PAM artifacts from prior versions are backed up and cleaned once helper setup is healthy.
-- If sleep disable was turned on outside AwakeBar, startup displays `Stay Awake (External)`.
+- If helper state is unavailable, AwakeBar keeps Full Awake OFF and shows an inline reason.
 
 ## Requirements
 

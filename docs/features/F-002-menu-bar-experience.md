@@ -25,13 +25,13 @@ dependencies:
 
 ## Summary
 
-Deliver a minimal, menu bar-first control surface with clear status, guided closed-lid setup, and one-click shutdown.
+Deliver a minimal, menu bar-first control surface with one Full Awake toggle, clear ON/OFF status, and guided setup messaging.
 
 ## Goals
 
-- Keep all primary actions in one menu.
-- Keep mode/status visibility explicit.
-- Surface setup and error states inline.
+- Keep the primary sleep control in one menu toggle.
+- Keep ON/OFF visibility explicit at a glance.
+- Surface setup and helper errors inline without extra windows.
 
 ## Non-Goals
 
@@ -40,10 +40,10 @@ Deliver a minimal, menu bar-first control surface with clear status, guided clos
 
 ## Requirements
 
-- R1: Menu must expose status header, open-lid toggle, closed-lid toggle, launch-at-login toggle, turn-off action, and quit action.
-- R2: Closed-lid row must be disabled while setup is not ready and while privileged toggles are in-flight.
-- R3: Setup and approval-required states must render actionable guidance cards.
-- R4: Transient errors and legacy-cleanup notices must be visible in menu context.
+- R1: Menu must expose a status header, a single `Full Awake` toggle, optional setup action, inline state/error messaging, and a quit action.
+- R2: `Full Awake` toggle must be disabled while an ON/OFF change is in-flight.
+- R3: When setup is not ready, toggle attempts must keep state OFF and render actionable setup guidance.
+- R4: ON/OFF states must be visually explicit with blue ON indicators in both menu bar glyph and menu status dot.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
@@ -53,9 +53,9 @@ Deliver a minimal, menu bar-first control surface with clear status, guided clos
 
 ## Acceptance Criteria
 
-- AC1: `Turn Everything Off` disables both open-lid and closed-lid states.
-- AC2: Setup-required closed-lid attempts surface `approvalRequired`/non-ready state and do not flip toggle state.
-- AC3: All rows are accessible and stateful from the menu without opening additional windows.
+- AC1: Turning `Full Awake` OFF disables both open-lid and closed-lid awake paths.
+- AC2: Setup-required ON attempts surface non-ready/approval-required guidance and do not remain ON.
+- AC3: Menu stays compact with single-column controls and no secondary preferences window.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [x] AC1
@@ -71,9 +71,10 @@ Deliver a minimal, menu bar-first control surface with clear status, guided clos
 | R2 | code | AwakeBar/UI/MenuContentView.swift |
 | R3 | code | AwakeBar/UI/MenuContentView.swift |
 | R4 | code | AwakeBar/UI/MenuContentView.swift |
+| R4 | code | AwakeBar/App/AwakeBarApp.swift |
 | AC1 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC2 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| AC3 | manual | Menu walkthrough on macOS host |
+| AC3 | code | AwakeBar/UI/MenuContentView.swift |
 
 ## Children
 
@@ -94,12 +95,12 @@ Deliver a minimal, menu bar-first control surface with clear status, guided clos
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `MenuBarController`
 - `MenuContentView`
-- `MenuIconCatalog`
+- `AwakeBarApp`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- Primary user interaction path for all sleep controls.
+- Primary user interaction path for Full Awake ON/OFF control.
 - Governs UX safety affordances for privileged actions.
 
 ## Security
@@ -129,3 +130,4 @@ Deliver a minimal, menu bar-first control surface with clear status, guided clos
 
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added setup/error UX requirements and child mode-modeling spec.
+- 2026-02-18: Simplified requirements to single-toggle Full Awake UX and explicit ON/OFF visuals.
