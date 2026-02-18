@@ -251,6 +251,7 @@
 			buildPhases = (
 				8A56613B68BD66AC9A6670D8 /* Sources */,
 				D305AB5C266BBB46BBF5F816 /* Resources */,
+				9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */,
 			);
 			buildRules = (
 			);
@@ -366,6 +367,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Privileged Helper";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/AwakeBarPrivilegedHelper\"\nHELPER_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/HelperTools\"\nHELPER_DST=\"${HELPER_DST_DIR}/AwakeBarPrivilegedHelper\"\nDAEMON_SRC=\"${SRCROOT}/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\nDAEMON_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons\"\nDAEMON_DST=\"${DAEMON_DST_DIR}/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\n\nmkdir -p \"${HELPER_DST_DIR}\" \"${DAEMON_DST_DIR}\"\n/usr/bin/install -m 755 \"${HELPER_SRC}\" \"${HELPER_DST}\"\n/usr/bin/install -m 644 \"${DAEMON_SRC}\" \"${DAEMON_DST}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0A0382BBD5C45F59E16F0660 /* Sources */ = {

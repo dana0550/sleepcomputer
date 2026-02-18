@@ -21,7 +21,7 @@ targets:
       - target: AwakeBarPrivilegedHelper
         embed: false
         link: false
-    buildScripts:
+    postBuildScripts:
       - name: Embed Privileged Helper
         basedOnDependencyAnalysis: false
         script: |
