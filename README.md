@@ -3,6 +3,17 @@
   <h1>AwakeBar</h1>
   <p><strong>Minimal macOS menu bar control for sleep behavior</strong></p>
   <p>Fast toggles. Clear states. No credential storage.</p>
+  <p>
+    <img src="https://img.shields.io/badge/macOS-14%2B-black?logo=apple" alt="macOS 14+" />
+    <img src="https://img.shields.io/badge/Swift-6.0-orange?logo=swift" alt="Swift 6.0" />
+    <img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT License" />
+  </p>
+  <p>
+    <a href="#install-and-run-release">Install</a> •
+    <a href="#what-each-mode-does">Modes</a> •
+    <a href="#menu-controls">Menu</a> •
+    <a href="#asset-handoff-for-designers">Designer Handoff</a>
+  </p>
 </div>
 
 ## Overview

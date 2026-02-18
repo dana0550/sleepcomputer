@@ -5,81 +5,130 @@ struct MenuContentView: View {
     @ObservedObject var controller: MenuBarController
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Status")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 8, height: 8)
 
-            Text(controller.statusText)
-                .font(.headline)
-                .help(controller.statusDetailText)
+                    Text(controller.statusText)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .help(controller.statusDetailText)
 
-            Text(controller.statusDetailText)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+
+                    Image(systemName: statusSymbol)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(statusColor)
+                }
+
+                Text(controller.statusDetailText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             if let message = controller.state.transientErrorMessage {
-                Text(message)
+                Label(message, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
                     .foregroundStyle(.red)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            Divider()
+
             Toggle(
-                "Full Caffeine",
                 isOn: Binding(
                     get: { controller.isOpenLidEnabled },
                     set: { controller.setOpenLidEnabled($0) }
                 )
-            )
+            ) {
+                Label("Full Caffeine", systemImage: "bolt.circle.fill")
+            }
             .help("Prevents idle and display sleep while your Mac stays open.")
 
             Toggle(
-                "Closed-Lid Mode (Admin)",
                 isOn: Binding(
                     get: { controller.isClosedLidToggleOn },
                     set: { controller.requestClosedLidChange($0) }
                 )
-            )
+            ) {
+                Label("Closed-Lid Mode (Admin)", systemImage: "lock.shield.fill")
+            }
             .disabled(controller.isApplyingClosedLidChange)
             .help("Uses administrator permission to run: pmset -a disablesleep 1 or 0.")
 
             if controller.isApplyingClosedLidChange {
-                Text("Waiting for administrator authorization...")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Waiting for administrator authorization...")
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             }
 
             Toggle(
-                "Start automatically at login",
                 isOn: Binding(
                     get: { controller.launchAtLoginEnabled },
                     set: { controller.setLaunchAtLoginEnabled($0) }
                 )
-            )
+            ) {
+                Label("Start automatically at login", systemImage: "arrow.triangle.2.circlepath")
+            }
             .help("Launch AwakeBar automatically after you sign in.")
 
-            Button("Turn Everything Off") {
+            Divider()
+
+            Button {
                 Task {
                     await controller.turnEverythingOff()
                 }
+            } label: {
+                Label("Turn Everything Off", systemImage: "power.circle")
             }
             .disabled(!controller.isOpenLidEnabled && !controller.isClosedLidToggleOn)
             .help("Turns off Full Caffeine and Closed-Lid Mode.")
 
-            Divider()
-
-            Button("Quit") {
+            Button {
                 NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit", systemImage: "xmark.circle")
             }
             .help("Closes AwakeBar.")
 
-            Text("Tip: hover any control to see a quick explanation.")
+            Text("Hover any control to see quick help.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
-        .padding(10)
-        .frame(minWidth: 320)
+        .padding(12)
+        .frame(minWidth: 340)
+    }
+
+    private var statusColor: Color {
+        switch controller.mode {
+        case .off:
+            return .secondary
+        case .openLid:
+            return .green
+        case .closedLid:
+            return .orange
+        case .externalClosedLid:
+            return .yellow
+        }
+    }
+
+    private var statusSymbol: String {
+        switch controller.mode {
+        case .off:
+            return "moon.zzz"
+        case .openLid:
+            return "bolt.fill"
+        case .closedLid:
+            return "lock.fill"
+        case .externalClosedLid:
+            return "exclamationmark.shield"
+        }
     }
 }
