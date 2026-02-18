@@ -9,6 +9,7 @@ struct AwakeBarApp: App {
             MenuContentView(controller: controller)
         } label: {
             Image(controller.menuIconName)
+                .renderingMode(.template)
         }
         .menuBarExtraStyle(.menu)
 
