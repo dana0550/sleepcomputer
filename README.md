@@ -36,7 +36,7 @@ It provides two modes:
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
 | `Keep Awake (Lid Open)` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Keep Awake (Lid Closed)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup (fallback prompt only if setup unavailable) | Closed-lid operation when you understand thermal/power impact |
+| `Keep Awake (Lid Closed)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup, then passwordless (if needed, macOS fallback prompt supports Touch ID/password) | Closed-lid operation when you understand thermal/power impact |
 
 ## Menu Controls
 
@@ -54,6 +54,7 @@ Hover any control to view quick inline help text.
 - `Keep Awake (Lid Closed)` can increase thermals and battery drain.
 - AwakeBar does not save or cache admin credentials.
 - Closed-lid passwordless mode uses a scoped `sudoers` rule limited to `pmset -a disablesleep 0/1`.
+- AwakeBar attempts to enable Touch ID fallback for `sudo` by configuring `pam_tid.so` in `/etc/pam.d/sudo_local` when macOS allows it.
 - If sleep disable was turned on outside AwakeBar, startup displays `Stay Awake (External)`.
 
 ## Requirements

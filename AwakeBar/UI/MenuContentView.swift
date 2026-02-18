@@ -35,7 +35,7 @@ struct MenuContentView: View {
                     isSelected: closedLidRowState.isSelected,
                     isBusy: controller.isApplyingClosedLidChange,
                     disabled: controller.isApplyingClosedLidChange,
-                    helpText: "Keeps your Mac running with the lid closed. Uses one-time admin setup for passwordless toggles."
+                    helpText: "Keeps your Mac running with the lid closed. One-time setup enables passwordless toggles; if needed, macOS falls back to Touch ID/password."
                 ) {
                     controller.requestClosedLidChange(!controller.isClosedLidToggleOn)
                 }

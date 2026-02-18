@@ -164,21 +164,36 @@ final class AdaptivePrivilegedCommandRunner: PrivilegedCommandRunning {
         let tempFile = "\(sudoersDir)/awakebar_pmset_tmp"
         let finalFile = "\(sudoersDir)/awakebar_pmset"
         let legacyFile = "\(sudoersDir)/com.awakebar.pmset"
+        let sudoLocalFile = "/etc/pam.d/sudo_local"
+        let sudoLocalTemplateFile = "/etc/pam.d/sudo_local.template"
+        let touchIDLine = "auth       sufficient     pam_tid.so"
         let ruleLine = "\(userName) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1"
 
         let setupCommand = """
-        /bin/mkdir -p \(sudoersDir) && \
-        /usr/bin/printf '%s\\n' '\(ruleLine)' > \(tempFile) && \
-        /usr/sbin/chown root:wheel \(tempFile) && \
-        /bin/chmod 440 \(tempFile) && \
-        /usr/sbin/visudo -cf \(tempFile) && \
-        /bin/rm -f \(legacyFile) && \
-        /bin/mv \(tempFile) \(finalFile)
+        ( \
+          /bin/mkdir -p \(sudoersDir) && \
+          /usr/bin/printf '%s\\n' '\(ruleLine)' > \(tempFile) && \
+          /usr/sbin/chown root:wheel \(tempFile) && \
+          /bin/chmod 440 \(tempFile) && \
+          /usr/sbin/visudo -cf \(tempFile) && \
+          /bin/rm -f \(legacyFile) && \
+          /bin/mv \(tempFile) \(finalFile) \
+        ) || exit 1; \
+        ( \
+          if [ -f \(sudoLocalFile) ] || [ -w /private/etc/pam.d ]; then \
+            if [ ! -f \(sudoLocalFile) ]; then \
+              if [ -f \(sudoLocalTemplateFile) ]; then /bin/cp \(sudoLocalTemplateFile) \(sudoLocalFile); else /usr/bin/printf '%s\\n' '# sudo_local: local config file which survives system update and is included for sudo' > \(sudoLocalFile); fi; \
+            fi; \
+            if ! /usr/bin/grep -Eq '^[[:space:]]*auth[[:space:]]+sufficient[[:space:]]+pam_tid\\.so([[:space:]]|$)' \(sudoLocalFile); then /usr/bin/printf '%s\\n' '\(touchIDLine)' >> \(sudoLocalFile); fi; \
+            /usr/sbin/chown root:wheel \(sudoLocalFile); \
+            /bin/chmod 644 \(sudoLocalFile); \
+          fi \
+        ) >/dev/null 2>&1 || true
         """
 
         try await appleScriptRunner.runPrivileged(
             command: setupCommand,
-            prompt: "AwakeBar needs one-time admin setup so Closed Lid can run without repeated password prompts."
+            prompt: "AwakeBar needs one-time admin setup to enable passwordless Closed Lid toggles and Touch ID fallback where supported."
         )
     }
 

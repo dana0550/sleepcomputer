@@ -7,7 +7,7 @@ owner: dshakiba
 parent: null
 children: []
 aliases: []
-version: 1.1.0
+version: 1.2.1
 last_reviewed: 2026-02-18
 tags:
   - power
@@ -36,9 +36,11 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 
 - R1: First privileged closed-lid action performs one-time administrator setup for passwordless `pmset` toggles.
 - R2: After successful setup, enable/disable toggles run without repeated password prompts.
-- R3: If one-time setup is unavailable or canceled, app falls back to native administrator prompt for the current action.
-- R4: Startup probe reports existing `SleepDisabled=1` as external mode state.
-- R5: Errors/cancellation preserve prior toggle state.
+- R3: One-time setup attempts to enable Touch ID fallback for `sudo` by configuring `pam_tid.so` in `/etc/pam.d/sudo_local` when writable.
+- R4: Touch ID fallback setup failures do not block passwordless `pmset` sudoers setup.
+- R5: If one-time setup is unavailable or canceled, app falls back to native administrator prompt for the current action.
+- R6: Startup probe reports existing `SleepDisabled=1` as external mode state.
+- R7: Errors/cancellation preserve prior toggle state.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [ ] R1
@@ -46,6 +48,8 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 - [ ] R3
 - [ ] R4
 - [ ] R5
+- [ ] R6
+- [ ] R7
 
 ## Acceptance Criteria
 
@@ -64,8 +68,10 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 | R1 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
 | R2 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
 | R3 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R4 | test | AwakeBarTests/ClosedLidPmsetControllerTests.swift |
-| R5 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| R4 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
+| R5 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
+| R6 | test | AwakeBarTests/ClosedLidPmsetControllerTests.swift |
+| R7 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC1 | manual | `pmset -g` verification |
 | AC2 | manual | `pmset -g` verification |
 
@@ -94,6 +100,7 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
 - [x] Uses one-time native admin prompt for passwordless setup
+- [x] Attempts Touch ID fallback for sudo prompts where writable
 - [x] Falls back to native admin prompt if setup unavailable
 - [x] Does not persist credentials
 
@@ -116,3 +123,4 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 
 - 2026-02-17: Initial spec created.
 - 2026-02-17: Added one-time passwordless setup with prompt fallback behavior.
+- 2026-02-18: Added best-effort Touch ID sudo fallback setup during privileged initialization.

@@ -1,7 +1,7 @@
 ---
 doc_type: feature_index
-version: 1.0.0
-last_synced: 2026-02-17
+version: 1.0.1
+last_synced: 2026-02-18
 ---
 
 # Features Index
