@@ -51,7 +51,7 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(closedMock.setCalls, [true, false])
     }
 
-    func testFullAwakeSetupRequiredRollsBackOpenLidChange() async {
+    func testFullAwakeSetupRequiredDoesNotEnableAndOpensSettings() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
         let closedMock = ClosedLidMock()
@@ -75,8 +75,9 @@ final class MenuBarControllerTests: XCTestCase {
 
         XCTAssertFalse(controller.isFullAwakeEnabled)
         XCTAssertEqual(controller.closedLidSetupState, .approvalRequired)
-        XCTAssertEqual(openMock.setCalls, [true, false])
+        XCTAssertEqual(openMock.setCalls, [])
         XCTAssertEqual(closedMock.setCalls, [])
+        XCTAssertEqual(setupMock.openSettingsCalls, 1)
     }
 
     func testFullAwakeFailureRollsBackBothStates() async {
@@ -171,6 +172,7 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
 private final class ClosedLidSetupMock: ClosedLidSetupControlling {
     var refreshResult: ClosedLidSetupState = .ready
     var startResult: ClosedLidSetupState = .ready
+    private(set) var openSettingsCalls = 0
 
     func refreshStatus() async -> ClosedLidSetupState {
         refreshResult
@@ -180,7 +182,9 @@ private final class ClosedLidSetupMock: ClosedLidSetupControlling {
         startResult
     }
 
-    func openSystemSettingsForApproval() {}
+    func openSystemSettingsForApproval() {
+        openSettingsCalls += 1
+    }
 }
 
 private final class LoginItemMock: LoginItemControlling {

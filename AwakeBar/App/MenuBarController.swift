@@ -72,6 +72,13 @@ final class MenuBarController: ObservableObject {
         state.closedLidSetupState
     }
 
+    var fullAwakeBlockedMessage: String? {
+        guard !state.closedLidSetupState.isReady else {
+            return nil
+        }
+        return fullAwakeSetupMessage(for: state.closedLidSetupState)
+    }
+
     func bootstrapIfNeeded() async {
         guard !didBootstrap else {
             return
@@ -118,6 +125,10 @@ final class MenuBarController: ObservableObject {
         }
     }
 
+    func openLoginItemsSettingsForApproval() {
+        closedLidSetupController.openSystemSettingsForApproval()
+    }
+
     func setFullAwakeEnabled(_ enabled: Bool) async {
         guard !isApplyingFullAwakeChange else {
             return
@@ -137,6 +148,14 @@ final class MenuBarController: ObservableObject {
                 if !state.closedLidSetupState.isReady {
                     let setupState = await closedLidSetupController.startSetup()
                     state.closedLidSetupState = setupState
+
+                    guard setupState.isReady else {
+                        if case .approvalRequired = setupState {
+                            closedLidSetupController.openSystemSettingsForApproval()
+                        }
+                        setTransientError(fullAwakeSetupMessage(for: setupState))
+                        return
+                    }
                 }
 
                 try openLidController.setEnabled(true)
@@ -153,7 +172,10 @@ final class MenuBarController: ObservableObject {
                     state.openLidEnabled = previousOpen
                     state.closedLidEnabledByApp = previousByApp
                     state.externalClosedLidDetected = previousExternal
-                    setTransientError("Full Awake needs one-time setup. Approve AwakeBar in Login Items.")
+                    if case .approvalRequired = setupState {
+                        closedLidSetupController.openSystemSettingsForApproval()
+                    }
+                    setTransientError(fullAwakeSetupMessage(for: setupState))
                 } catch {
                     try? openLidController.setEnabled(previousOpen)
                     state.openLidEnabled = previousOpen
@@ -265,6 +287,21 @@ final class MenuBarController: ObservableObject {
                 return
             }
             self?.state.transientErrorMessage = nil
+        }
+    }
+
+    private func fullAwakeSetupMessage(for setupState: ClosedLidSetupState) -> String {
+        switch setupState {
+        case .ready:
+            return "Full Awake is ready."
+        case .approvalRequired:
+            return "Approve AwakeBar in System Settings > Login Items, then toggle Full Awake again."
+        case .notInApplications:
+            return "Move AwakeBar to /Applications to use Full Awake."
+        case .notRegistered:
+            return "Full Awake needs one-time helper setup. Try toggling on again."
+        case .unavailable(let detail):
+            return "Full Awake setup is unavailable: \(detail)"
         }
     }
 }
