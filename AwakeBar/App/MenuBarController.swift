@@ -4,7 +4,7 @@ import SwiftUI
 @MainActor
 final class MenuBarController: ObservableObject {
     @Published private(set) var state: AppState
-    @Published private(set) var isApplyingClosedLidChange = false
+    @Published private(set) var isApplyingFullAwakeChange = false
 
     private let stateStore: AppStateStore
     private let openLidController: OpenLidSleepControlling
@@ -60,12 +60,8 @@ final class MenuBarController: ObservableObject {
         MenuIconCatalog.statusBarAssetName(for: mode)
     }
 
-    var isOpenLidEnabled: Bool {
-        state.openLidEnabled
-    }
-
-    var isClosedLidToggleOn: Bool {
-        state.closedLidEnabledByApp || state.externalClosedLidDetected
+    var isFullAwakeEnabled: Bool {
+        mode == .fullAwake
     }
 
     var launchAtLoginEnabled: Bool {
@@ -76,10 +72,6 @@ final class MenuBarController: ObservableObject {
         state.closedLidSetupState
     }
 
-    var isClosedLidReady: Bool {
-        state.closedLidSetupState.isReady
-    }
-
     func bootstrapIfNeeded() async {
         guard !didBootstrap else {
             return
@@ -87,6 +79,8 @@ final class MenuBarController: ObservableObject {
         didBootstrap = true
 
         var loaded = stateStore.load()
+        let shouldRestoreFullAwake = loaded.openLidEnabled
+        loaded.openLidEnabled = false
         loaded.closedLidEnabledByApp = false
         loaded.externalClosedLidDetected = false
         loaded.closedLidSetupState = .notRegistered
@@ -94,11 +88,11 @@ final class MenuBarController: ObservableObject {
         state = loaded
 
         do {
-            try openLidController.setEnabled(loaded.openLidEnabled)
+            try openLidController.setEnabled(false)
         } catch {
             state.openLidEnabled = false
             persistSafeState()
-            setTransientError("Could not enable Full Caffeine: \(error.localizedDescription)")
+            setTransientError("Could not restore default sleep: \(error.localizedDescription)")
         }
 
         do {
@@ -112,61 +106,93 @@ final class MenuBarController: ObservableObject {
 
         await refreshClosedLidRuntimeState()
         await runLegacyCleanupIfNeeded()
-    }
 
-    func setOpenLidEnabled(_ enabled: Bool) {
-        do {
-            try openLidController.setEnabled(enabled)
-            state.openLidEnabled = enabled
-            persistSafeState()
-        } catch {
-            setTransientError("Full Caffeine update failed: \(error.localizedDescription)")
+        if shouldRestoreFullAwake {
+            await setFullAwakeEnabled(true)
         }
     }
 
-    func requestClosedLidChange(_ enabled: Bool) {
+    func requestFullAwakeChange(_ enabled: Bool) {
         Task { [weak self] in
-            await self?.setClosedLidEnabled(enabled)
+            await self?.setFullAwakeEnabled(enabled)
         }
     }
 
-    func requestClosedLidSetup() {
-        Task { [weak self] in
-            await self?.runClosedLidSetup()
-        }
-    }
-
-    func openClosedLidApprovalSettings() {
-        closedLidSetupController.openSystemSettingsForApproval()
-    }
-
-    func setClosedLidEnabled(_ enabled: Bool) async {
-        guard !isApplyingClosedLidChange else {
+    func setFullAwakeEnabled(_ enabled: Bool) async {
+        guard !isApplyingFullAwakeChange else {
             return
         }
 
+        let previousOpen = state.openLidEnabled
         let previousByApp = state.closedLidEnabledByApp
         let previousExternal = state.externalClosedLidDetected
 
-        isApplyingClosedLidChange = true
+        isApplyingFullAwakeChange = true
         defer {
-            isApplyingClosedLidChange = false
+            isApplyingFullAwakeChange = false
+        }
+
+        if enabled {
+            do {
+                if !state.closedLidSetupState.isReady {
+                    let setupState = await closedLidSetupController.startSetup()
+                    state.closedLidSetupState = setupState
+                }
+
+                try openLidController.setEnabled(true)
+                state.openLidEnabled = true
+
+                do {
+                    try await closedLidController.setEnabled(true)
+                    state.closedLidEnabledByApp = true
+                    state.externalClosedLidDetected = true
+                    persistSafeState()
+                } catch let ClosedLidControlError.setupRequired(setupState) {
+                    state.closedLidSetupState = setupState
+                    try? openLidController.setEnabled(previousOpen)
+                    state.openLidEnabled = previousOpen
+                    state.closedLidEnabledByApp = previousByApp
+                    state.externalClosedLidDetected = previousExternal
+                    setTransientError("Full Awake needs one-time setup. Approve AwakeBar in Login Items.")
+                } catch {
+                    try? openLidController.setEnabled(previousOpen)
+                    state.openLidEnabled = previousOpen
+                    state.closedLidEnabledByApp = previousByApp
+                    state.externalClosedLidDetected = previousExternal
+                    setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
+                }
+            } catch {
+                try? openLidController.setEnabled(previousOpen)
+                state.openLidEnabled = previousOpen
+                state.closedLidEnabledByApp = previousByApp
+                state.externalClosedLidDetected = previousExternal
+                setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
+            }
+            return
         }
 
         do {
-            try await closedLidController.setEnabled(enabled)
-            state.closedLidEnabledByApp = enabled
-            state.externalClosedLidDetected = enabled
+            try openLidController.setEnabled(false)
+            state.openLidEnabled = false
+        } catch {
+            state.openLidEnabled = previousOpen
+            setTransientError("Could not disable open-lid awake: \(error.localizedDescription)")
+        }
+
+        do {
+            try await closedLidController.setEnabled(false)
+            state.closedLidEnabledByApp = false
+            state.externalClosedLidDetected = false
         } catch let ClosedLidControlError.setupRequired(setupState) {
             state.closedLidSetupState = setupState
-            state.closedLidEnabledByApp = previousByApp
-            state.externalClosedLidDetected = previousExternal
-            setTransientError("Closed-Lid setup required: \(setupState.detail)")
         } catch {
             state.closedLidEnabledByApp = previousByApp
             state.externalClosedLidDetected = previousExternal
-            setTransientError("Closed-Lid Mode update failed: \(error.localizedDescription)")
+            setTransientError("Could not disable closed-lid awake: \(error.localizedDescription)")
         }
+
+        await refreshClosedLidRuntimeState()
+        persistSafeState()
     }
 
     func setLaunchAtLoginEnabled(_ enabled: Bool) {
@@ -180,22 +206,7 @@ final class MenuBarController: ObservableObject {
     }
 
     func turnEverythingOff() async {
-        setOpenLidEnabled(false)
-        if isClosedLidToggleOn {
-            await setClosedLidEnabled(false)
-        }
-    }
-
-    private func runClosedLidSetup() async {
-        let setupState = await closedLidSetupController.startSetup()
-        state.closedLidSetupState = setupState
-
-        guard setupState.isReady else {
-            return
-        }
-
-        await refreshClosedLidRuntimeState()
-        await runLegacyCleanupIfNeeded()
+        await setFullAwakeEnabled(false)
     }
 
     private func refreshClosedLidRuntimeState() async {

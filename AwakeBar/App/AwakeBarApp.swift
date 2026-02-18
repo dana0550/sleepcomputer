@@ -12,7 +12,8 @@ struct AwakeBarApp: App {
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 18, height: 18)
+                .frame(width: 20, height: 20)
+                .foregroundStyle(controller.isFullAwakeEnabled ? .blue : .primary)
         }
         .menuBarExtraStyle(.menu)
 
