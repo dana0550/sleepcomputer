@@ -75,6 +75,28 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertTrue(loaded.launchAtLoginEnabled)
         XCTAssertEqual(loginMock.setCalls, [true])
     }
+
+    func testClosedLidSetupRequiredStateIsSurfaced() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let loginMock = LoginItemMock()
+        closedMock.setupRequiredState = .approvalRequired
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setClosedLidEnabled(true)
+
+        XCTAssertEqual(controller.closedLidSetupState, .approvalRequired)
+        XCTAssertFalse(controller.isClosedLidToggleOn)
+        XCTAssertEqual(closedMock.setCalls, [])
+    }
 }
 
 private final class OpenLidMock: OpenLidSleepControlling {
@@ -89,9 +111,13 @@ private final class OpenLidMock: OpenLidSleepControlling {
 
 private final class ClosedLidMock: ClosedLidSleepControlling {
     var shouldThrow = false
+    var setupRequiredState: ClosedLidSetupState?
     private(set) var setCalls: [Bool] = []
 
     func setEnabled(_ enabled: Bool) async throws {
+        if let setupRequiredState {
+            throw ClosedLidControlError.setupRequired(setupRequiredState)
+        }
         if shouldThrow {
             struct MockError: Error {}
             throw MockError()
@@ -101,6 +127,10 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
 
     func readSleepDisabled() async throws -> Bool {
         false
+    }
+
+    func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport {
+        LegacyCleanupReport(cleanedPaths: [], skippedPaths: [], backupDirectory: "")
     }
 }
 

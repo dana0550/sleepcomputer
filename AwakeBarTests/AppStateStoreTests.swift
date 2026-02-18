@@ -17,6 +17,9 @@ final class AppStateStoreTests: XCTestCase {
             closedLidEnabledByApp: true,
             externalClosedLidDetected: true,
             launchAtLoginEnabled: true,
+            closedLidSetupState: .ready,
+            legacyCleanupCompleted: true,
+            legacyCleanupNotice: "x",
             transientErrorMessage: "x"
         )
 
@@ -25,8 +28,11 @@ final class AppStateStoreTests: XCTestCase {
 
         XCTAssertTrue(loaded.openLidEnabled)
         XCTAssertTrue(loaded.launchAtLoginEnabled)
+        XCTAssertTrue(loaded.legacyCleanupCompleted)
         XCTAssertFalse(loaded.closedLidEnabledByApp)
         XCTAssertFalse(loaded.externalClosedLidDetected)
+        XCTAssertEqual(loaded.closedLidSetupState, .notRegistered)
+        XCTAssertNil(loaded.legacyCleanupNotice)
         XCTAssertNil(loaded.transientErrorMessage)
     }
 }

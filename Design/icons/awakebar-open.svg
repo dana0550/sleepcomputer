@@ -1,54 +1,81 @@
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- OPEN EYE - Awake/Active State (Open-Lid) -->
-  <!-- 20x20 canvas as per CSV specification -->
-  <!-- Clearly an OPEN eye with visible iris and eyelashes -->
+  <!-- Canvas: 20x20, Live area: 17x17 centered (1.5px margin on all sides) -->
+  <!-- ~1.5x larger perceived size with enhanced details -->
   
-  <!-- Eye outline (almond shape) -->
-  <path d="M 4 10 Q 4 8 10 8 Q 16 8 16 10 Q 16 12 10 12 Q 4 12 4 10 Z" 
+  <!-- Eye outline (almond shape, larger and more detailed) -->
+  <path d="M 2.5 10 Q 2.5 7.5 10 7.5 Q 17.5 7.5 17.5 10 Q 17.5 12.5 10 12.5 Q 2.5 12.5 2.5 10 Z" 
         stroke="currentColor" 
-        stroke-width="1.5" 
+        stroke-width="1.8" 
         fill="none"/>
   
-  <!-- Iris (filled circle) -->
-  <circle cx="10" cy="10" r="2.4" 
+  <!-- Iris (large filled circle) -->
+  <circle cx="10" cy="10" r="3.2" 
           fill="currentColor"/>
   
-  <!-- Pupil highlight (small dot for detail) -->
-  <circle cx="10.7" cy="9.3" r="0.6" 
+  <!-- Inner pupil detail (smaller circle for depth) -->
+  <circle cx="10" cy="10" r="1.6" 
+          fill="currentColor"
+          opacity="0.4"/>
+  
+  <!-- Highlight reflection (small bright spot) -->
+  <circle cx="11" cy="9" r="0.8" 
           fill="currentColor" 
-          opacity="0.3"/>
+          opacity="0.25"/>
   
-  <!-- Upper eyelashes (5 lashes for detail) -->
-  <path d="M 6 8 L 5.5 6.5" 
+  <!-- Upper eyelashes (6 lashes, varying lengths) -->
+  <!-- Left outer -->
+  <path d="M 4 7.5 L 3 5" 
         stroke="currentColor" 
-        stroke-width="0.7" 
-        stroke-linecap="round"/>
-  <path d="M 7.5 7.8 L 7.3 6" 
-        stroke="currentColor" 
-        stroke-width="0.7" 
-        stroke-linecap="round"/>
-  <path d="M 10 7.8 L 10 5.8" 
-        stroke="currentColor" 
-        stroke-width="0.8" 
-        stroke-linecap="round"/>
-  <path d="M 12.5 7.8 L 12.7 6" 
-        stroke="currentColor" 
-        stroke-width="0.7" 
-        stroke-linecap="round"/>
-  <path d="M 14 8 L 14.5 6.5" 
-        stroke="currentColor" 
-        stroke-width="0.7" 
+        stroke-width="1.3" 
         stroke-linecap="round"/>
   
-  <!-- Lower eyelashes (2 subtle lashes) -->
-  <path d="M 7 12 L 6.8 13" 
+  <!-- Left center-outer -->
+  <path d="M 6 7.3 L 5.5 4.8" 
         stroke="currentColor" 
-        stroke-width="0.5" 
+        stroke-width="1.3" 
+        stroke-linecap="round"/>
+  
+  <!-- Left center -->
+  <path d="M 8 7.3 L 7.8 4.5" 
+        stroke="currentColor" 
+        stroke-width="1.4" 
+        stroke-linecap="round"/>
+  
+  <!-- Right center -->
+  <path d="M 12 7.3 L 12.2 4.5" 
+        stroke="currentColor" 
+        stroke-width="1.4" 
+        stroke-linecap="round"/>
+  
+  <!-- Right center-outer -->
+  <path d="M 14 7.3 L 14.5 4.8" 
+        stroke="currentColor" 
+        stroke-width="1.3" 
+        stroke-linecap="round"/>
+  
+  <!-- Right outer -->
+  <path d="M 16 7.5 L 17 5" 
+        stroke="currentColor" 
+        stroke-width="1.3" 
+        stroke-linecap="round"/>
+  
+  <!-- Lower eyelashes (3 subtle lashes) -->
+  <path d="M 6 12.5 L 5.5 14" 
+        stroke="currentColor" 
+        stroke-width="1.25" 
         stroke-linecap="round"
         opacity="0.6"/>
-  <path d="M 13 12 L 13.2 13" 
+  
+  <path d="M 10 12.5 L 10 14.2" 
         stroke="currentColor" 
-        stroke-width="0.5" 
+        stroke-width="1.25" 
+        stroke-linecap="round"
+        opacity="0.6"/>
+  
+  <path d="M 14 12.5 L 14.5 14" 
+        stroke="currentColor" 
+        stroke-width="1.25" 
         stroke-linecap="round"
         opacity="0.6"/>
 </svg>

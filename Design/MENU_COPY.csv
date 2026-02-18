@@ -5,7 +5,7 @@ status_open_lid,Stay Awake (Lid Open),"Keeps your Mac and display awake while th
 status_closed_lid,Stay Awake (Lid Closed),"Disables system sleep, including with lid closed, until you turn it off.",23,72
 status_external_closed_lid,Stay Awake (External),"System sleep was disabled outside AwakeBar. Turn it off here to restore defaults.",21,82
 toggle_full_caffeine,Keep Awake (Lid Open),"Keeps your Mac and display awake while the lid is open.",21,58
-toggle_closed_lid,Keep Awake (Lid Closed),"Keeps your Mac running with the lid closed. One-time setup enables passwordless toggles; if needed, macOS falls back to Touch ID/password.",23,129
+toggle_closed_lid,Keep Awake (Lid Closed),"Keeps your Mac running with the lid closed. Requires one-time helper setup and approval in System Settings.",23,104
 toggle_login,Start at Login,"Launch AwakeBar automatically after you sign in.",14,50
 action_turn_off,Turn Everything Off,"Turns off both Keep Awake modes.",18,34
 action_quit,Quit AwakeBar,"Closes AwakeBar.",12,20

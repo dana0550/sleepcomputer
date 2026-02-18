@@ -30,12 +30,12 @@ enum MenuIconCatalog {
         switch row {
         case .openLid:
             return DropdownIconPair(
-                offAssetName: "AwakeBarStatusOpen",
+                offAssetName: "AwakeBarStatusOff",
                 onAssetName: "AwakeBarStatusOpen"
             )
         case .closedLid:
             return DropdownIconPair(
-                offAssetName: "AwakeBarStatusClosed",
+                offAssetName: "AwakeBarStatusOff",
                 onAssetName: "AwakeBarStatusClosed"
             )
         }

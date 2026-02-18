@@ -10,6 +10,9 @@ struct AwakeBarApp: App {
         } label: {
             Image(controller.menuIconName)
                 .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
         }
         .menuBarExtraStyle(.menu)
 

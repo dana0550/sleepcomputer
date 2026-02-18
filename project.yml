@@ -6,6 +6,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: 6.0
+    AWAKEBAR_TEAM_ID: ""
 targets:
   AwakeBar:
     type: application
@@ -13,20 +14,57 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: AwakeBar
+      - path: AwakeBarShared
     resources:
       - path: AwakeBar/Assets.xcassets
+    dependencies:
+      - target: AwakeBarPrivilegedHelper
+        embed: false
+        link: false
+    buildScripts:
+      - name: Embed Privileged Helper
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          HELPER_SRC="${BUILT_PRODUCTS_DIR}/AwakeBarPrivilegedHelper"
+          HELPER_DST_DIR="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/HelperTools"
+          HELPER_DST="${HELPER_DST_DIR}/AwakeBarPrivilegedHelper"
+          DAEMON_SRC="${SRCROOT}/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist"
+          DAEMON_DST_DIR="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons"
+          DAEMON_DST="${DAEMON_DST_DIR}/com.dshakiba.AwakeBar.PrivilegedHelper.plist"
+
+          mkdir -p "${HELPER_DST_DIR}" "${DAEMON_DST_DIR}"
+          /usr/bin/install -m 755 "${HELPER_SRC}" "${HELPER_DST}"
+          /usr/bin/install -m 644 "${DAEMON_SRC}" "${DAEMON_DST}"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dshakiba.AwakeBar
         PRODUCT_NAME: AwakeBar
         INFOPLIST_FILE: AwakeBar/Info.plist
         GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_KEY_AwakeBarTeamID: $(AWAKEBAR_TEAM_ID)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_STYLE: Automatic
     scheme:
       testTargets:
         - AwakeBarTests
+        - AwakeBarPrivilegedHelperTests
+  AwakeBarPrivilegedHelper:
+    type: tool
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: AwakeBarPrivilegedHelper
+      - path: AwakeBarShared
+    settings:
+      base:
+        PRODUCT_NAME: AwakeBarPrivilegedHelper
+        PRODUCT_BUNDLE_IDENTIFIER: com.dshakiba.AwakeBar.PrivilegedHelper
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: AwakeBarPrivilegedHelper
+        INFOPLIST_KEY_AwakeBarTeamID: $(AWAKEBAR_TEAM_ID)
+        CODE_SIGN_STYLE: Automatic
   AwakeBarTests:
     type: bundle.unit-test
     platform: macOS
@@ -41,3 +79,17 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AwakeBar.app/Contents/MacOS/AwakeBar"
         BUNDLE_LOADER: "$(TEST_HOST)"
         PRODUCT_BUNDLE_IDENTIFIER: com.dshakiba.AwakeBarTests
+  AwakeBarPrivilegedHelperTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: AwakeBarPrivilegedHelper
+        excludes:
+          - main.swift
+      - path: AwakeBarShared
+      - path: AwakeBarPrivilegedHelperTests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.dshakiba.AwakeBarPrivilegedHelperTests

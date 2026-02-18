@@ -10,7 +10,7 @@ last_rendered: 2026-02-18
 
 - [F-001] Core Awake Control
 - [F-002] Menu Bar Experience
-- [F-003] Closed-Lid Admin Control
+- [F-003] Closed-Lid Daemon Control
 - [F-004] State Persistence and Login
 - [F-005] Iconography and Asset Pipeline
 

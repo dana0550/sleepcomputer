@@ -10,6 +10,14 @@ protocol OpenLidSleepControlling {
 protocol ClosedLidSleepControlling {
     func setEnabled(_ enabled: Bool) async throws
     func readSleepDisabled() async throws -> Bool
+    func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport
+}
+
+@MainActor
+protocol ClosedLidSetupControlling {
+    func refreshStatus() async -> ClosedLidSetupState
+    func startSetup() async -> ClosedLidSetupState
+    func openSystemSettingsForApproval()
 }
 
 @MainActor

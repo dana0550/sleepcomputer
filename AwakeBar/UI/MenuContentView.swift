@@ -15,6 +15,17 @@ struct MenuContentView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            if !controller.isClosedLidReady {
+                closedLidSetupCard
+            }
+
+            if let notice = controller.state.legacyCleanupNotice {
+                Label(notice, systemImage: "checkmark.shield")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             Divider()
 
             VStack(spacing: 8) {
@@ -23,6 +34,7 @@ struct MenuContentView: View {
                     icon: .asset(openLidMenuIconName),
                     state: controller.isOpenLidEnabled ? .on : .off,
                     isSelected: controller.isOpenLidEnabled,
+                    tint: controller.isOpenLidEnabled ? .accentColor : .secondary,
                     helpText: "Keeps your Mac and display awake while the lid is open."
                 ) {
                     controller.setOpenLidEnabled(!controller.isOpenLidEnabled)
@@ -33,9 +45,10 @@ struct MenuContentView: View {
                     icon: .asset(closedLidMenuIconName),
                     state: closedLidRowState,
                     isSelected: closedLidRowState.isSelected,
+                    tint: closedLidRowState.isSelected ? .accentColor : .secondary,
                     isBusy: controller.isApplyingClosedLidChange,
-                    disabled: controller.isApplyingClosedLidChange,
-                    helpText: "Keeps your Mac running with the lid closed. One-time setup enables passwordless toggles; if needed, macOS falls back to Touch ID/password."
+                    disabled: !controller.isClosedLidReady || controller.isApplyingClosedLidChange,
+                    helpText: "Keeps your Mac running with the lid closed. Requires one-time helper setup and approval in System Settings."
                 ) {
                     controller.requestClosedLidChange(!controller.isClosedLidToggleOn)
                 }
@@ -45,6 +58,7 @@ struct MenuContentView: View {
                     icon: .system("arrow.triangle.2.circlepath"),
                     state: controller.launchAtLoginEnabled ? .on : .off,
                     isSelected: controller.launchAtLoginEnabled,
+                    tint: controller.launchAtLoginEnabled ? .accentColor : .secondary,
                     helpText: "Launches AwakeBar automatically after you sign in."
                 ) {
                     controller.setLaunchAtLoginEnabled(!controller.launchAtLoginEnabled)
@@ -86,6 +100,44 @@ struct MenuContentView: View {
         }
         .padding(12)
         .frame(minWidth: 338)
+    }
+
+    private var closedLidSetupCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(controller.closedLidSetupState.title)
+                .font(.system(size: 12, weight: .semibold))
+
+            Text(controller.closedLidSetupState.detail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 8) {
+                Button("Enable Closed-Lid Control") {
+                    controller.requestClosedLidSetup()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(controller.closedLidSetupState == .approvalRequired || controller.closedLidSetupState == .notInApplications)
+
+                if controller.closedLidSetupState == .approvalRequired {
+                    Button("Open Login Items Settings") {
+                        controller.openClosedLidApprovalSettings()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.06))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        )
     }
 
     private var headerCard: some View {
@@ -212,6 +264,8 @@ struct MenuContentView: View {
 }
 
 private struct ActionRow: View {
+    private static let onCircleColor = Color(red: 0.04, green: 0.52, blue: 1.0)
+
     let title: String
     let icon: ActionIcon
     let state: RowState?
@@ -223,8 +277,8 @@ private struct ActionRow: View {
         HStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(isSelected ? .blue : Color.primary.opacity(0.08))
-                    .frame(width: 22, height: 22)
+                    .fill(isSelected ? Self.onCircleColor : Color.primary.opacity(0.08))
+                    .frame(width: 26, height: 26)
 
                 icon.image(isSelected: isSelected, tint: tint)
             }
@@ -247,11 +301,11 @@ private struct ActionRow: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? .blue.opacity(0.11) : Color.primary.opacity(0.05))
+                .fill(Color.primary.opacity(0.05))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isSelected ? .blue.opacity(0.35) : .clear, lineWidth: 1)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
     }
 }
@@ -265,14 +319,14 @@ private enum ActionIcon: Equatable {
         switch self {
         case .system(let iconName):
             Image(systemName: iconName)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(isSelected ? .white : tint)
         case .asset(let assetName):
             Image(assetName)
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 12, height: 12)
+                .frame(width: 14, height: 14)
                 .foregroundStyle(isSelected ? .white : tint)
         }
     }

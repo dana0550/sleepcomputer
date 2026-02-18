@@ -5,18 +5,18 @@ final class MenuIconCatalogTests: XCTestCase {
     func testOpenRowProvidesExplicitOffAndOnMappings() {
         let pair = MenuIconCatalog.dropdownPair(for: .openLid)
 
-        XCTAssertEqual(pair.offAssetName, "AwakeBarStatusOpen")
+        XCTAssertEqual(pair.offAssetName, "AwakeBarStatusOff")
         XCTAssertEqual(pair.onAssetName, "AwakeBarStatusOpen")
-        XCTAssertEqual(pair.assetName(for: false), "AwakeBarStatusOpen")
+        XCTAssertEqual(pair.assetName(for: false), "AwakeBarStatusOff")
         XCTAssertEqual(pair.assetName(for: true), "AwakeBarStatusOpen")
     }
 
     func testClosedRowProvidesExplicitOffAndOnMappings() {
         let pair = MenuIconCatalog.dropdownPair(for: .closedLid)
 
-        XCTAssertEqual(pair.offAssetName, "AwakeBarStatusClosed")
+        XCTAssertEqual(pair.offAssetName, "AwakeBarStatusOff")
         XCTAssertEqual(pair.onAssetName, "AwakeBarStatusClosed")
-        XCTAssertEqual(pair.assetName(for: false), "AwakeBarStatusClosed")
+        XCTAssertEqual(pair.assetName(for: false), "AwakeBarStatusOff")
         XCTAssertEqual(pair.assetName(for: true), "AwakeBarStatusClosed")
     }
 

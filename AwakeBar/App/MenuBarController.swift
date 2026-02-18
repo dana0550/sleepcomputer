@@ -9,6 +9,7 @@ final class MenuBarController: ObservableObject {
     private let stateStore: AppStateStore
     private let openLidController: OpenLidSleepControlling
     private let closedLidController: ClosedLidSleepControlling
+    private let closedLidSetupController: ClosedLidSetupControlling
     private let loginItemController: LoginItemControlling
 
     private var didBootstrap = false
@@ -17,13 +18,18 @@ final class MenuBarController: ObservableObject {
     init(
         stateStore: AppStateStore = AppStateStore(),
         openLidController: OpenLidSleepControlling = OpenLidAssertionController(),
-        closedLidController: ClosedLidSleepControlling = ClosedLidPmsetController(),
+        closedLidController: ClosedLidSleepControlling? = nil,
+        closedLidSetupController: ClosedLidSetupControlling? = nil,
         loginItemController: LoginItemControlling = LoginItemController(),
         autoBootstrap: Bool = true
     ) {
+        let resolvedSetupController = closedLidSetupController ?? ClosedLidSetupController()
+        let resolvedClosedLidController = closedLidController ?? ClosedLidPmsetController(setupController: resolvedSetupController)
+
         self.stateStore = stateStore
         self.openLidController = openLidController
-        self.closedLidController = closedLidController
+        self.closedLidController = resolvedClosedLidController
+        self.closedLidSetupController = resolvedSetupController
         self.loginItemController = loginItemController
         self.state = stateStore.load()
 
@@ -66,6 +72,14 @@ final class MenuBarController: ObservableObject {
         state.launchAtLoginEnabled
     }
 
+    var closedLidSetupState: ClosedLidSetupState {
+        state.closedLidSetupState
+    }
+
+    var isClosedLidReady: Bool {
+        state.closedLidSetupState.isReady
+    }
+
     func bootstrapIfNeeded() async {
         guard !didBootstrap else {
             return
@@ -75,6 +89,7 @@ final class MenuBarController: ObservableObject {
         var loaded = stateStore.load()
         loaded.closedLidEnabledByApp = false
         loaded.externalClosedLidDetected = false
+        loaded.closedLidSetupState = .notRegistered
         loaded.transientErrorMessage = nil
         state = loaded
 
@@ -95,13 +110,8 @@ final class MenuBarController: ObservableObject {
             setTransientError("Could not apply launch-at-login setting: \(error.localizedDescription)")
         }
 
-        do {
-            let sleepDisabled = try await closedLidController.readSleepDisabled()
-            state.externalClosedLidDetected = sleepDisabled
-            state.closedLidEnabledByApp = false
-        } catch {
-            setTransientError("Could not read current sleep policy: \(error.localizedDescription)")
-        }
+        await refreshClosedLidRuntimeState()
+        await runLegacyCleanupIfNeeded()
     }
 
     func setOpenLidEnabled(_ enabled: Bool) {
@@ -118,6 +128,16 @@ final class MenuBarController: ObservableObject {
         Task { [weak self] in
             await self?.setClosedLidEnabled(enabled)
         }
+    }
+
+    func requestClosedLidSetup() {
+        Task { [weak self] in
+            await self?.runClosedLidSetup()
+        }
+    }
+
+    func openClosedLidApprovalSettings() {
+        closedLidSetupController.openSystemSettingsForApproval()
     }
 
     func setClosedLidEnabled(_ enabled: Bool) async {
@@ -137,6 +157,11 @@ final class MenuBarController: ObservableObject {
             try await closedLidController.setEnabled(enabled)
             state.closedLidEnabledByApp = enabled
             state.externalClosedLidDetected = enabled
+        } catch let ClosedLidControlError.setupRequired(setupState) {
+            state.closedLidSetupState = setupState
+            state.closedLidEnabledByApp = previousByApp
+            state.externalClosedLidDetected = previousExternal
+            setTransientError("Closed-Lid setup required: \(setupState.detail)")
         } catch {
             state.closedLidEnabledByApp = previousByApp
             state.externalClosedLidDetected = previousExternal
@@ -158,6 +183,61 @@ final class MenuBarController: ObservableObject {
         setOpenLidEnabled(false)
         if isClosedLidToggleOn {
             await setClosedLidEnabled(false)
+        }
+    }
+
+    private func runClosedLidSetup() async {
+        let setupState = await closedLidSetupController.startSetup()
+        state.closedLidSetupState = setupState
+
+        guard setupState.isReady else {
+            return
+        }
+
+        await refreshClosedLidRuntimeState()
+        await runLegacyCleanupIfNeeded()
+    }
+
+    private func refreshClosedLidRuntimeState() async {
+        let setupState = await closedLidSetupController.refreshStatus()
+        state.closedLidSetupState = setupState
+
+        guard setupState.isReady else {
+            state.externalClosedLidDetected = false
+            state.closedLidEnabledByApp = false
+            return
+        }
+
+        do {
+            let sleepDisabled = try await closedLidController.readSleepDisabled()
+            state.externalClosedLidDetected = sleepDisabled
+            state.closedLidEnabledByApp = false
+        } catch {
+            state.externalClosedLidDetected = false
+            state.closedLidEnabledByApp = false
+            setTransientError("Could not read current sleep policy: \(error.localizedDescription)")
+        }
+    }
+
+    private func runLegacyCleanupIfNeeded() async {
+        guard state.closedLidSetupState.isReady else {
+            return
+        }
+        guard !state.legacyCleanupCompleted else {
+            return
+        }
+
+        do {
+            let report = try await closedLidController.cleanupLegacyArtifacts()
+            state.legacyCleanupCompleted = true
+            if !report.skippedPaths.isEmpty {
+                state.legacyCleanupNotice = "Some legacy files were left untouched for safety."
+            } else {
+                state.legacyCleanupNotice = nil
+            }
+            persistSafeState()
+        } catch {
+            setTransientError("Legacy cleanup failed: \(error.localizedDescription)")
         }
     }
 

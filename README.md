@@ -38,25 +38,40 @@ Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app ic
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
 | `Keep Awake (Lid Open)` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Keep Awake (Lid Closed)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup, then passwordless (if needed, macOS fallback prompt supports Touch ID/password) | Closed-lid operation when you understand thermal/power impact |
+| `Keep Awake (Lid Closed)` | Calls a privileged helper daemon to run `pmset -a disablesleep 1` (and `0` when disabled) | One-time helper setup + approval in System Settings | Closed-lid operation when you understand thermal/power impact |
 
 ## Menu Controls
 
 - `Status`: shows `Normal Sleep`, `Stay Awake (Lid Open)`, `Stay Awake (Lid Closed)`, or `Stay Awake (External)`.
 - `Keep Awake (Lid Open)`: button to toggle non-privileged keep-awake.
-- `Keep Awake (Lid Closed)`: button to toggle privileged closed-lid keep-awake.
+- `Keep Awake (Lid Closed)`: button to toggle privileged closed-lid keep-awake (enabled only after setup).
 - `Start at Login`: button to toggle login item registration.
 - `Turn Everything Off`: disables all active modes.
 - `Quit AwakeBar`: exits the app.
 
 Hover any control to view quick inline help text.
 
+## Closed-Lid Setup
+
+Closed-lid control requires privileged helper registration.
+
+1. Install `AwakeBar.app` in `/Applications`.
+2. Open AwakeBar and click `Enable Closed-Lid Control`.
+3. If prompted, open `Login Items` settings and approve the helper.
+4. Return to AwakeBar; status should show `Closed-Lid Control Ready`.
+
+Architecture details:
+
+- Helper registration uses `SMAppService.daemon(plistName:)`.
+- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper`) with code-signing requirements in both directions.
+- Runtime does not use `sudo`, AppleScript, or Touch ID/PAM mutation fallbacks.
+
 ## Safety
 
 - `Keep Awake (Lid Closed)` can increase thermals and battery drain.
 - AwakeBar does not save or cache admin credentials.
-- Closed-lid passwordless mode uses a scoped `sudoers` rule limited to `pmset -a disablesleep 0/1`.
-- AwakeBar attempts to enable Touch ID fallback for `sudo` by configuring `pam_tid.so` in `/etc/pam.d/sudo_local` when macOS allows it.
+- Closed-lid mode uses a scoped privileged helper with a fixed command surface.
+- Legacy `sudoers`/PAM artifacts from prior versions are backed up and cleaned once helper setup is healthy.
 - If sleep disable was turned on outside AwakeBar, startup displays `Stay Awake (External)`.
 
 ## Requirements
@@ -91,15 +106,35 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' test
 ```
 
+## Signed/Notarized Release
+
+- CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
+- Local parity script: `Scripts/release-notarize.sh`.
+
+Required environment variables/secrets:
+
+- `APPLE_TEAM_ID`
+- `ASC_KEY_ID`
+- `ASC_ISSUER_ID`
+- `ASC_API_KEY_P8_BASE64`
+- `DEVELOPER_ID_APP_CERT_P12_BASE64`
+- `DEVELOPER_ID_APP_CERT_PASSWORD`
+- `KEYCHAIN_PASSWORD`
+
+Release scripts set `AWAKEBAR_TEAM_ID` from `APPLE_TEAM_ID` so XPC code-sign checks bind both bundle ID and team ID in production builds.
+
 ## Project Layout
 
 ```text
 AwakeBar/
   App/          # app entry + menu controller
   Domain/       # state + mode mapping
-  Services/     # pmset, assertions, login, auth runner
+  Services/     # setup controller, helper client, assertions, login
   State/        # persistence
   UI/           # menu UI
+AwakeBarPrivilegedHelper/      # privileged daemon executable
+AwakeBarPrivilegedHelperTests/ # helper tests
+AwakeBarShared/                # shared XPC protocol/constants
 AwakeBarTests/  # tests with mocks
 Design/icons/   # menu icon source SVGs
 docs/           # product spec system (FEATURES.md SSOT)

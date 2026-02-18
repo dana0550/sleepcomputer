@@ -7,8 +7,8 @@ owner: dshakiba
 parent: null
 children: []
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.1.0
+last_reviewed: 2026-02-18
 tags:
   - persistence
   - login-item
@@ -37,11 +37,13 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 - R1: Persist open-lid and launch-at-login settings to local defaults.
 - R2: Do not persist closed-lid enabled state.
 - R3: Login setting toggles SMAppService registration state.
+- R4: Persist legacy cleanup completion marker so privileged migration runs once.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [ ] R1
 - [ ] R2
 - [ ] R3
+- [ ] R4
 
 ## Acceptance Criteria
 
@@ -62,6 +64,7 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 | R1 | test | AwakeBarTests/AppStateStoreTests.swift |
 | R2 | test | AwakeBarTests/AppStateStoreTests.swift |
 | R3 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| R4 | test | AwakeBarTests/AppStateStoreTests.swift |
 | AC1 | manual | Relaunch validation |
 | AC2 | manual | Relaunch validation |
 | AC3 | manual | Login item validation |
@@ -110,3 +113,4 @@ Persist safe state and expose launch-at-login as a user-controlled toggle.
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-18: Added migration marker persistence for daemon cutover cleanup idempotency.

@@ -5,7 +5,7 @@ version: 1.0.0
 status: active
 owners:
   - dshakiba
-last_reviewed: 2026-02-17
+last_reviewed: 2026-02-18
 ---
 
 # AwakeBar Documentation
@@ -16,3 +16,4 @@ This directory follows a Markdown-only specification system.
 - `features/` contains per-feature implementation and acceptance specs.
 - `PRODUCT_MAP.md` is a rendered hierarchy from `FEATURES.md`.
 - `MASTER_SPEC.md` captures product-level constraints and release scope.
+- `DECISIONS/` records architecture decisions (ADRs) tied to feature IDs.
