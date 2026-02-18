@@ -22,6 +22,7 @@ struct MenuContentView: View {
                     title: "Full Caffeine",
                     icon: "bolt.fill",
                     state: controller.isOpenLidEnabled ? .on : .off,
+                    isSelected: controller.isOpenLidEnabled,
                     helpText: "Keeps your Mac awake while the lid is open (prevents idle and display sleep)."
                 ) {
                     controller.setOpenLidEnabled(!controller.isOpenLidEnabled)
@@ -31,6 +32,7 @@ struct MenuContentView: View {
                     title: "Closed Lid (Admin)",
                     icon: "lock.fill",
                     state: closedLidRowState,
+                    isSelected: closedLidRowState.isSelected,
                     isBusy: controller.isApplyingClosedLidChange,
                     disabled: controller.isApplyingClosedLidChange,
                     helpText: "Uses one-time admin setup for passwordless toggles. If unavailable, macOS will prompt for admin access."
@@ -42,6 +44,7 @@ struct MenuContentView: View {
                     title: "Start at Login",
                     icon: "arrow.triangle.2.circlepath",
                     state: controller.launchAtLoginEnabled ? .on : .off,
+                    isSelected: controller.launchAtLoginEnabled,
                     helpText: "Launches AwakeBar automatically after you sign in."
                 ) {
                     controller.setLaunchAtLoginEnabled(!controller.launchAtLoginEnabled)
@@ -55,6 +58,7 @@ struct MenuContentView: View {
                     title: "Turn Everything Off",
                     icon: "power",
                     state: nil,
+                    isSelected: false,
                     tint: .red,
                     disabled: !controller.isOpenLidEnabled && !controller.isClosedLidToggleOn,
                     helpText: "Turns off Full Caffeine and Closed Lid mode."
@@ -68,6 +72,7 @@ struct MenuContentView: View {
                     title: "Quit AwakeBar",
                     icon: "xmark",
                     state: nil,
+                    isSelected: false,
                     tint: .secondary,
                     helpText: "Closes the app."
                 ) {
@@ -115,6 +120,7 @@ struct MenuContentView: View {
         title: String,
         icon: String,
         state: RowState?,
+        isSelected: Bool,
         tint: Color = .accentColor,
         isBusy: Bool = false,
         disabled: Bool = false,
@@ -126,6 +132,7 @@ struct MenuContentView: View {
                 title: title,
                 icon: icon,
                 state: state,
+                isSelected: isSelected,
                 tint: tint,
                 isBusy: isBusy
             )
@@ -200,6 +207,7 @@ private struct ActionRow: View {
     let title: String
     let icon: String
     let state: RowState?
+    let isSelected: Bool
     let tint: Color
     let isBusy: Bool
 
@@ -207,12 +215,12 @@ private struct ActionRow: View {
         HStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(isSelected ? .blue : Color.primary.opacity(0.08))
                     .frame(width: 22, height: 22)
 
                 Image(systemName: icon)
                     .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(tint)
+                    .foregroundStyle(isSelected ? .white : tint)
             }
 
             Text(title)
@@ -233,7 +241,11 @@ private struct ActionRow: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+                .fill(isSelected ? .blue.opacity(0.11) : Color.primary.opacity(0.05))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(isSelected ? .blue.opacity(0.35) : .clear, lineWidth: 1)
         )
     }
 }
@@ -278,6 +290,15 @@ private enum RowState {
             return .secondary
         case .external:
             return .orange
+        }
+    }
+
+    var isSelected: Bool {
+        switch self {
+        case .on, .external:
+            return true
+        case .off:
+            return false
         }
     }
 }
