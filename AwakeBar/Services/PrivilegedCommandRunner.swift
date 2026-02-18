@@ -161,8 +161,9 @@ final class AdaptivePrivilegedCommandRunner: PrivilegedCommandRunning {
         }
 
         let sudoersDir = "/private/etc/sudoers.d"
-        let tempFile = "\(sudoersDir)/.com.awakebar.pmset.tmp"
-        let finalFile = "\(sudoersDir)/com.awakebar.pmset"
+        let tempFile = "\(sudoersDir)/awakebar_pmset_tmp"
+        let finalFile = "\(sudoersDir)/awakebar_pmset"
+        let legacyFile = "\(sudoersDir)/com.awakebar.pmset"
         let ruleLine = "\(userName) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1"
 
         let setupCommand = """
@@ -171,6 +172,7 @@ final class AdaptivePrivilegedCommandRunner: PrivilegedCommandRunning {
         /usr/sbin/chown root:wheel \(tempFile) && \
         /bin/chmod 440 \(tempFile) && \
         /usr/sbin/visudo -cf \(tempFile) && \
+        /bin/rm -f \(legacyFile) && \
         /bin/mv \(tempFile) \(finalFile)
         """
 
