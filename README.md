@@ -22,12 +22,12 @@ AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 
 It provides two modes:
 
-- `Full Caffeine`: keeps your Mac awake while the lid is open.
-- `Closed-Lid Mode (Admin)`: toggles system-wide sleep disable with one-time admin setup, then passwordless toggles.
+- `Keep Awake (Lid Open)`: keeps your Mac and display awake while the lid stays open.
+- `Keep Awake (Lid Closed)`: disables system sleep so your Mac can keep running with the lid closed.
 
 ## Visual Identity
 
-| App Icon | Off | Open-Lid Active | Closed-Lid Active |
+| App Icon | Normal Sleep | Stay Awake (Lid Open) | Stay Awake (Lid Closed) |
 |---|---|---|---|
 | <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | <img src="Design/icons/awakebar-off.svg" width="22" alt="Off icon" /> | <img src="Design/icons/awakebar-open.svg" width="22" alt="Open icon" /> | <img src="Design/icons/awakebar-closed.svg" width="22" alt="Closed icon" /> |
 
@@ -35,14 +35,14 @@ It provides two modes:
 
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
-| `Full Caffeine` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Closed-Lid Mode (Admin)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup (fallback prompt only if setup unavailable) | Intentional closed-lid operation when you understand thermal/power impact |
+| `Keep Awake (Lid Open)` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
+| `Keep Awake (Lid Closed)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup (fallback prompt only if setup unavailable) | Closed-lid operation when you understand thermal/power impact |
 
 ## Menu Controls
 
-- `Status`: shows `Off`, `Open-Lid Active`, `Closed-Lid Active`, or `External Closed-Lid Active`.
-- `Full Caffeine`: button to toggle non-privileged keep-awake.
-- `Closed-Lid Mode (Admin)`: button to toggle privileged closed-lid mode.
+- `Status`: shows `Normal Sleep`, `Stay Awake (Lid Open)`, `Stay Awake (Lid Closed)`, or `Stay Awake (External)`.
+- `Keep Awake (Lid Open)`: button to toggle non-privileged keep-awake.
+- `Keep Awake (Lid Closed)`: button to toggle privileged closed-lid keep-awake.
 - `Start at Login`: button to toggle login item registration.
 - `Turn Everything Off`: disables all active modes.
 - `Quit AwakeBar`: exits the app.
@@ -51,10 +51,10 @@ Hover any control to view quick inline help text.
 
 ## Safety
 
-- `Closed-Lid Mode (Admin)` can increase thermals and battery drain.
+- `Keep Awake (Lid Closed)` can increase thermals and battery drain.
 - AwakeBar does not save or cache admin credentials.
 - Closed-lid passwordless mode uses a scoped `sudoers` rule limited to `pmset -a disablesleep 0/1`.
-- If sleep disable was turned on outside AwakeBar, startup displays `External Closed-Lid Active`.
+- If sleep disable was turned on outside AwakeBar, startup displays `Stay Awake (External)`.
 
 ## Requirements
 

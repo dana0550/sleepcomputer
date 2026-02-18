@@ -22,26 +22,26 @@ enum KeepAwakeMode: Equatable {
     var statusText: String {
         switch self {
         case .off:
-            return "Off"
+            return "Normal Sleep"
         case .openLid:
-            return "Open-Lid Active"
+            return "Stay Awake (Lid Open)"
         case .closedLid:
-            return "Closed-Lid Active"
+            return "Stay Awake (Lid Closed)"
         case .externalClosedLid:
-            return "External Closed-Lid Active"
+            return "Stay Awake (External)"
         }
     }
 
     var statusDetailText: String {
         switch self {
         case .off:
-            return "Normal macOS sleep behavior is active."
+            return "Uses your normal macOS sleep settings."
         case .openLid:
-            return "Keeps your Mac awake while the lid is open."
+            return "Keeps your Mac and display awake while the lid is open."
         case .closedLid:
-            return "Sleep is disabled system-wide until you turn this off."
+            return "Disables system sleep, including with lid closed, until you turn it off."
         case .externalClosedLid:
-            return "Sleep is disabled outside this app. Toggle off to restore default behavior."
+            return "System sleep was disabled outside AwakeBar. Turn it off here to restore defaults."
         }
     }
 

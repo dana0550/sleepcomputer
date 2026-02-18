@@ -19,23 +19,23 @@ struct MenuContentView: View {
 
             VStack(spacing: 8) {
                 menuButton(
-                    title: "Full Caffeine",
+                    title: "Keep Awake (Lid Open)",
                     icon: "bolt.fill",
                     state: controller.isOpenLidEnabled ? .on : .off,
                     isSelected: controller.isOpenLidEnabled,
-                    helpText: "Keeps your Mac awake while the lid is open (prevents idle and display sleep)."
+                    helpText: "Keeps your Mac and display awake while the lid is open."
                 ) {
                     controller.setOpenLidEnabled(!controller.isOpenLidEnabled)
                 }
 
                 menuButton(
-                    title: "Closed Lid (Admin)",
+                    title: "Keep Awake (Lid Closed)",
                     icon: "lock.fill",
                     state: closedLidRowState,
                     isSelected: closedLidRowState.isSelected,
                     isBusy: controller.isApplyingClosedLidChange,
                     disabled: controller.isApplyingClosedLidChange,
-                    helpText: "Uses one-time admin setup for passwordless toggles. If unavailable, macOS will prompt for admin access."
+                    helpText: "Keeps your Mac running with the lid closed. Uses one-time admin setup for passwordless toggles."
                 ) {
                     controller.requestClosedLidChange(!controller.isClosedLidToggleOn)
                 }
@@ -61,7 +61,7 @@ struct MenuContentView: View {
                     isSelected: false,
                     tint: .red,
                     disabled: !controller.isOpenLidEnabled && !controller.isClosedLidToggleOn,
-                    helpText: "Turns off Full Caffeine and Closed Lid mode."
+                    helpText: "Turns off both Keep Awake modes."
                 ) {
                     Task {
                         await controller.turnEverythingOff()
@@ -155,13 +155,13 @@ struct MenuContentView: View {
     private var modeSummaryText: String {
         switch controller.mode {
         case .off:
-            return "Sleep Normal"
+            return "Normal Sleep"
         case .openLid:
-            return "Open-Lid Awake"
+            return "Stay Awake (Lid Open)"
         case .closedLid:
-            return "Closed-Lid Awake"
+            return "Stay Awake (Lid Closed)"
         case .externalClosedLid:
-            return "External Sleep Lock"
+            return "Stay Awake (External)"
         }
     }
 
