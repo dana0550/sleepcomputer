@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */; };
+		119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */; };
 		126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */; };
 		35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */; };
 		42D0573E565E8F34D56475DB /* PrivilegedCommandRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */; };
@@ -20,6 +21,7 @@
 		9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */; };
 		A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */; };
 		A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E74433634A0685516D19AF8 /* Protocols.swift */; };
+		B7137AD826FB5C9B066CDB69 /* MenuIconCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09996340B6B4EC228208612 /* MenuIconCatalog.swift */; };
 		BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */; };
 		BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */; };
 		C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */; };
@@ -46,11 +48,13 @@
 		368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarControllerTests.swift; sourceTree = "<group>"; };
 		443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLidAssertionController.swift; sourceTree = "<group>"; };
 		5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedCommandRunnerTests.swift; sourceTree = "<group>"; };
+		6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalogTests.swift; sourceTree = "<group>"; };
 		7BE7136CC16EA1FC30BE6850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStoreTests.swift; sourceTree = "<group>"; };
 		9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeModeTests.swift; sourceTree = "<group>"; };
 		9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AwakeBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedCommandRunner.swift; sourceTree = "<group>"; };
+		C09996340B6B4EC228208612 /* MenuIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalog.swift; sourceTree = "<group>"; };
 		CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
 		DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		E534796D72E7DC597B4ADE4B /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
@@ -67,6 +71,7 @@
 				2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */,
 				9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */,
 				368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */,
+				6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */,
 				5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */,
 			);
 			path = AwakeBarTests;
@@ -85,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				14474E440CBEBFF91DDB212A /* MenuContentView.swift */,
+				C09996340B6B4EC228208612 /* MenuIconCatalog.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -243,6 +249,7 @@
 				126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */,
 				07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */,
 				35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */,
+				119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */,
 				42D0573E565E8F34D56475DB /* PrivilegedCommandRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -259,6 +266,7 @@
 				67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */,
 				BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */,
 				CEB85C9EDE283ED298C2F619 /* MenuContentView.swift in Sources */,
+				B7137AD826FB5C9B066CDB69 /* MenuIconCatalog.swift in Sources */,
 				C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */,
 				A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */,
 				A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */,

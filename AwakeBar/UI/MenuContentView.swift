@@ -20,7 +20,7 @@ struct MenuContentView: View {
             VStack(spacing: 8) {
                 menuButton(
                     title: "Keep Awake (Lid Open)",
-                    icon: "bolt.fill",
+                    icon: .asset(openLidMenuIconName),
                     state: controller.isOpenLidEnabled ? .on : .off,
                     isSelected: controller.isOpenLidEnabled,
                     helpText: "Keeps your Mac and display awake while the lid is open."
@@ -30,7 +30,7 @@ struct MenuContentView: View {
 
                 menuButton(
                     title: "Keep Awake (Lid Closed)",
-                    icon: "lock.fill",
+                    icon: .asset(closedLidMenuIconName),
                     state: closedLidRowState,
                     isSelected: closedLidRowState.isSelected,
                     isBusy: controller.isApplyingClosedLidChange,
@@ -42,7 +42,7 @@ struct MenuContentView: View {
 
                 menuButton(
                     title: "Start at Login",
-                    icon: "arrow.triangle.2.circlepath",
+                    icon: .system("arrow.triangle.2.circlepath"),
                     state: controller.launchAtLoginEnabled ? .on : .off,
                     isSelected: controller.launchAtLoginEnabled,
                     helpText: "Launches AwakeBar automatically after you sign in."
@@ -56,7 +56,7 @@ struct MenuContentView: View {
             VStack(spacing: 8) {
                 menuButton(
                     title: "Turn Everything Off",
-                    icon: "power",
+                    icon: .system("power"),
                     state: nil,
                     isSelected: false,
                     tint: .red,
@@ -70,7 +70,7 @@ struct MenuContentView: View {
 
                 menuButton(
                     title: "Quit AwakeBar",
-                    icon: "xmark",
+                    icon: .system("xmark"),
                     state: nil,
                     isSelected: false,
                     tint: .secondary,
@@ -118,7 +118,7 @@ struct MenuContentView: View {
 
     private func menuButton(
         title: String,
-        icon: String,
+        icon: ActionIcon,
         state: RowState?,
         isSelected: Bool,
         tint: Color = .accentColor,
@@ -140,6 +140,14 @@ struct MenuContentView: View {
         .buttonStyle(.plain)
         .disabled(disabled)
         .help(helpText)
+    }
+
+    private var openLidMenuIconName: String {
+        MenuIconCatalog.dropdownPair(for: .openLid).assetName(for: controller.isOpenLidEnabled)
+    }
+
+    private var closedLidMenuIconName: String {
+        MenuIconCatalog.dropdownPair(for: .closedLid).assetName(for: closedLidRowState.isSelected)
     }
 
     private var closedLidRowState: RowState {
@@ -205,7 +213,7 @@ struct MenuContentView: View {
 
 private struct ActionRow: View {
     let title: String
-    let icon: String
+    let icon: ActionIcon
     let state: RowState?
     let isSelected: Bool
     let tint: Color
@@ -218,9 +226,7 @@ private struct ActionRow: View {
                     .fill(isSelected ? .blue : Color.primary.opacity(0.08))
                     .frame(width: 22, height: 22)
 
-                Image(systemName: icon)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : tint)
+                icon.image(isSelected: isSelected, tint: tint)
             }
 
             Text(title)
@@ -247,6 +253,28 @@ private struct ActionRow: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .stroke(isSelected ? .blue.opacity(0.35) : .clear, lineWidth: 1)
         )
+    }
+}
+
+private enum ActionIcon: Equatable {
+    case system(String)
+    case asset(String)
+
+    @ViewBuilder
+    func image(isSelected: Bool, tint: Color) -> some View {
+        switch self {
+        case .system(let iconName):
+            Image(systemName: iconName)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(isSelected ? .white : tint)
+        case .asset(let assetName):
+            Image(assetName)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 12, height: 12)
+                .foregroundStyle(isSelected ? .white : tint)
+        }
     }
 }
 

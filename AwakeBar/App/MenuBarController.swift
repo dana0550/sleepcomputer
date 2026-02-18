@@ -51,7 +51,7 @@ final class MenuBarController: ObservableObject {
     }
 
     var menuIconName: String {
-        mode.iconAssetName
+        MenuIconCatalog.statusBarAssetName(for: mode)
     }
 
     var isOpenLidEnabled: Bool {

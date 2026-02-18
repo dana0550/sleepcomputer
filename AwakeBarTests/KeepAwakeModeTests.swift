@@ -38,4 +38,11 @@ final class KeepAwakeModeTests: XCTestCase {
             "System sleep was disabled outside AwakeBar. Turn it off here to restore defaults."
         )
     }
+
+    func testIconAssetNameMapsEachMode() {
+        XCTAssertEqual(KeepAwakeMode.off.iconAssetName, "AwakeBarStatusOff")
+        XCTAssertEqual(KeepAwakeMode.openLid.iconAssetName, "AwakeBarStatusOpen")
+        XCTAssertEqual(KeepAwakeMode.closedLid.iconAssetName, "AwakeBarStatusClosed")
+        XCTAssertEqual(KeepAwakeMode.externalClosedLid.iconAssetName, "AwakeBarStatusClosed")
+    }
 }

@@ -108,6 +108,7 @@ docs/           # product spec system (FEATURES.md SSOT)
 Use these files for icon delivery requirements:
 
 - `Design/ICON_ASSET_SPECS.csv`
+- `Design/ICON_MANIFEST.json`
 - `Design/MENU_COPY.csv`
 
 After new SVG icon drop-ins:
