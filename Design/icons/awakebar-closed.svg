@@ -11,7 +11,7 @@
 
   <circle cx="10" cy="10" r="3.3" fill="currentColor"/>
 
-  <g transform="translate(13.2 13.4)">
+  <g transform="translate(13.2 12.9)">
     <rect x="0.6" y="1.8" width="5.2" height="4.8" rx="1.1" fill="currentColor"/>
     <path d="M2 1.8V1C2 0.2 2.7 -0.5 3.5 -0.5C4.3 -0.5 5 0.2 5 1V1.8"
           stroke="currentColor"

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MenuContentView: View {
     @ObservedObject var controller: MenuBarController
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -54,6 +55,13 @@ struct MenuContentView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            Button("Settings…") {
+                openSettings()
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12))
+            .foregroundStyle(.secondary)
+
             Divider()
 
             Button("Quit AwakeBar") {
@@ -101,5 +109,29 @@ struct MenuContentView: View {
             return controller.fullAwakeSwitchIsOn ? "Turning ON…" : "Turning OFF…"
         }
         return controller.isFullAwakeEnabled ? "Awake is ON" : "Awake is OFF"
+    }
+}
+
+struct SettingsContentView: View {
+    @ObservedObject var controller: MenuBarController
+
+    var body: some View {
+        Form {
+            Toggle("Launch at Login", isOn: launchAtLoginBinding)
+            Text("Automatically start AwakeBar after you sign in.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(width: 320)
+    }
+
+    private var launchAtLoginBinding: Binding<Bool> {
+        Binding(
+            get: { controller.launchAtLoginEnabled },
+            set: { isOn in
+                controller.setLaunchAtLoginEnabled(isOn)
+            }
+        )
     }
 }

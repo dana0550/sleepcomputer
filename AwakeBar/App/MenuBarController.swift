@@ -49,14 +49,6 @@ final class MenuBarController: ObservableObject {
         KeepAwakeMode.from(state: state)
     }
 
-    var statusText: String {
-        mode.statusText
-    }
-
-    var statusDetailText: String {
-        mode.statusDetailText
-    }
-
     var menuIconName: String {
         let displayMode: KeepAwakeMode = fullAwakeSwitchIsOn ? .fullAwake : .off
         return MenuIconCatalog.statusBarAssetName(for: displayMode)

@@ -18,7 +18,7 @@ struct AwakeBarApp: App {
         .menuBarExtraStyle(.window)
 
         Settings {
-            EmptyView()
+            SettingsContentView(controller: controller)
         }
     }
 }
