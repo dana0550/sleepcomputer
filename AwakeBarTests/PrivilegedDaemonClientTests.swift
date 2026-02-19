@@ -46,4 +46,11 @@ final class PrivilegedDaemonClientTests: XCTestCase {
             "anchor apple generic and identifier \"com.dshakiba.AwakeBar\" and certificate leaf[subject.OU] = \"ABCDE12345\""
         )
     }
+
+    func testHelperCodeSigningIdentifierMatchesSignedToolIdentifier() {
+        XCTAssertEqual(
+            PrivilegedServiceConstants.helperCodeSigningIdentifier,
+            "AwakeBarPrivilegedHelper"
+        )
+    }
 }

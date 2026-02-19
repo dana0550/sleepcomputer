@@ -179,6 +179,38 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(setupMock.openSettingsCalls, 1)
     }
 
+    func testBootstrapWithOffIntentReconcilesClosedLidPolicyToDisabled() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        defaults.set(false, forKey: "awakebar.openLidEnabled")
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.bootstrapIfNeeded()
+
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertTrue(closedMock.setCalls.contains(false))
+    }
+
     func testFullAwakeFailureRollsBackBothStates() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()

@@ -108,6 +108,13 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
           spctl --assess --type exec --verbose=4 "$APP_PATH"
 
+      - name: Smoke-check packaged app
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          ./Scripts/smoke-check-app.sh "$APP_PATH" "$APPLE_TEAM_ID"
+
       - name: Zip for notarization
         run: |
           set -euo pipefail

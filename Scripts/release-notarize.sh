@@ -125,6 +125,7 @@ ditto "$ARCHIVE_PATH/Products/Applications/AwakeBar.app" "$APP_PATH"
 
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 spctl --assess --type exec --verbose=4 "$APP_PATH"
+"$ROOT/Scripts/smoke-check-app.sh" "$APP_PATH" "$APPLE_TEAM_ID"
 
 ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_UNSIGNED"
 

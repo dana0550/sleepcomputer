@@ -122,6 +122,9 @@ final class MenuBarController: ObservableObject {
 
         if shouldRestoreFullAwake {
             await setFullAwakeEnabled(true)
+        } else {
+            // Reconcile system policy with persisted OFF intent on launch.
+            await setFullAwakeEnabled(false)
         }
     }
 

@@ -13,6 +13,7 @@
 		07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */; };
 		119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */; };
 		126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */; };
+		1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */; };
 		2432E05DBFC7434A7412314D /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
 		319BDD8FD78E4105A0C15942 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
 		35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */; };
@@ -97,6 +98,7 @@
 		A65CD3E8953A0E7E493844A9 /* LegacyCleanupPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCleanupPolicyTests.swift; sourceTree = "<group>"; };
 		AE32D2B6F5B8638BE4C540B2 /* PrivilegedDaemonClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedDaemonClient.swift; sourceTree = "<group>"; };
 		C09996340B6B4EC228208612 /* MenuIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalog.swift; sourceTree = "<group>"; };
+		C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedServiceContractTests.swift; sourceTree = "<group>"; };
 		CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
 		DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		E534796D72E7DC597B4ADE4B /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 				368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */,
 				6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */,
 				1CF2B376A4370DC737445EEF /* PrivilegedDaemonClientTests.swift */,
+				C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */,
 			);
 			path = AwakeBarTests;
 			sourceTree = "<group>";
@@ -435,6 +438,7 @@
 				35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */,
 				119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */,
 				00A5536E9D3AB15A0010260A /* PrivilegedDaemonClientTests.swift in Sources */,
+				1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

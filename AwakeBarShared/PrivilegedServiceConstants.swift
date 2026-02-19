@@ -4,7 +4,9 @@ enum PrivilegedServiceConstants {
     static let machServiceName = "com.dshakiba.AwakeBar.PrivilegedHelper.v2"
     static let daemonPlistName = "com.dshakiba.AwakeBar.PrivilegedHelper.plist"
     static let helperExecutableName = "AwakeBarPrivilegedHelper"
-    static let helperBundleIdentifier = "com.dshakiba.AwakeBar.PrivilegedHelper"
+    // The helper target is a signed tool (not a bundle), so its designated identifier
+    // is the executable identifier shown by codesign.
+    static let helperCodeSigningIdentifier = "AwakeBarPrivilegedHelper"
     static let appBundleIdentifier = "com.dshakiba.AwakeBar"
 
     static let legacyBackupRoot = "/Library/Application Support/AwakeBar/legacy-backup"

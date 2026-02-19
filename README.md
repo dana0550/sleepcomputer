@@ -117,12 +117,19 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 
 # Run tests
 xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' test
+
+# Build Release bundle and run artifact smoke checks
+xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -destination 'generic/platform=macOS' build
+APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -showBuildSettings | awk '/TARGET_BUILD_DIR =/{dir=$3} /FULL_PRODUCT_NAME =/{name=$3} END{print dir\"/\"name}')"
+./Scripts/smoke-check-app.sh "$APP_PATH"
 ```
 
 ## Signed/Notarized Release
 
+- CI validation workflow: `.github/workflows/ci-macos.yml` (PRs + branch pushes + manual runs).
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
+- Artifact smoke checks script: `Scripts/smoke-check-app.sh` (runs in PR CI and release flows).
 - CI workflow also supports `workflow_dispatch` once this workflow exists on `main`; publication remains tag-scoped.
 - Release archives now enforce Hardened Runtime for both `AwakeBar` and `AwakeBarPrivilegedHelper` (required for notarization acceptance).
 
