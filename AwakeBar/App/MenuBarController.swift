@@ -204,24 +204,24 @@ final class MenuBarController: ObservableObject {
                     persistSafeState()
                 } catch let ClosedLidControlError.setupRequired(setupState) {
                     state.closedLidSetupState = setupState
-                    try? openLidController.setEnabled(previousOpen)
-                    state.openLidEnabled = previousOpen
+                    let rollbackIssue = rollbackOpenLidState(to: previousOpen)
                     state.closedLidEnabledByApp = previousByApp
                     if case .approvalRequired = setupState {
                         closedLidSetupController.openSystemSettingsForApproval()
                     }
-                    setTransientError(fullAwakeSetupMessage(for: setupState))
+                    let baseMessage = fullAwakeSetupMessage(for: setupState)
+                    setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
                 } catch {
-                    try? openLidController.setEnabled(previousOpen)
-                    state.openLidEnabled = previousOpen
+                    let rollbackIssue = rollbackOpenLidState(to: previousOpen)
                     state.closedLidEnabledByApp = previousByApp
-                    setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
+                    let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
+                    setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
                 }
             } catch {
-                try? openLidController.setEnabled(previousOpen)
-                state.openLidEnabled = previousOpen
+                let rollbackIssue = rollbackOpenLidState(to: previousOpen)
                 state.closedLidEnabledByApp = previousByApp
-                setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
+                let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
+                setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
             }
             return
         }
@@ -373,6 +373,27 @@ final class MenuBarController: ObservableObject {
 
     private func persistSafeState() {
         stateStore.save(state)
+    }
+
+    private func rollbackOpenLidState(to previousOpen: Bool) -> String? {
+        do {
+            try openLidController.setEnabled(previousOpen)
+            state.openLidEnabled = previousOpen
+            return nil
+        } catch {
+            state.openLidEnabled = openLidController.isEnabled
+            guard state.openLidEnabled != previousOpen else {
+                return nil
+            }
+            return "Open-lid awake may still be active because rollback failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func composeErrorMessage(base: String, rollbackIssue: String?) -> String {
+        guard let rollbackIssue else {
+            return base
+        }
+        return "\(base) \(rollbackIssue)"
     }
 
     private func setTransientError(_ message: String) {

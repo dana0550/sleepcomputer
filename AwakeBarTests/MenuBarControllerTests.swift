@@ -269,6 +269,65 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(closedMock.setCalls, [])
     }
 
+    func testFullAwakeFailureRollbackTracksActualOpenLidStateWhenRollbackFails() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.shouldThrow = true
+        openMock.disableFailureMode = .throwAndStayEnabled
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertTrue(controller.state.openLidEnabled)
+        XCTAssertTrue(openMock.isEnabled)
+        XCTAssertEqual(openMock.setCalls, [true, false])
+        XCTAssertEqual(closedMock.setCalls, [])
+        XCTAssertTrue(controller.state.transientErrorMessage?.contains("Open-lid awake may still be active") == true)
+    }
+
+    func testFullAwakeSetupRequiredRollbackTracksActualOpenLidStateWhenRollbackFails() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.setupRequiredState = .approvalRequired
+        openMock.disableFailureMode = .throwAndStayEnabled
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertEqual(controller.closedLidSetupState, .approvalRequired)
+        XCTAssertTrue(controller.state.openLidEnabled)
+        XCTAssertTrue(openMock.isEnabled)
+        XCTAssertEqual(openMock.setCalls, [true, false])
+        XCTAssertEqual(setupMock.openSettingsCalls, 1)
+        XCTAssertTrue(controller.state.transientErrorMessage?.contains("Open-lid awake may still be active") == true)
+    }
+
     func testSetLaunchAtLoginPersistsState() {
         let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
