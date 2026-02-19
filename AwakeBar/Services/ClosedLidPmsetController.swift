@@ -47,6 +47,28 @@ final class ClosedLidPmsetController: ClosedLidSleepControlling {
         return try await daemonClient.readSleepDisabled()
     }
 
+    func captureManagedOverridesBaseline() async throws -> ClosedLidOverrideSnapshot {
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+
+        let sleepDisabled = try await daemonClient.readSleepDisabled()
+        return ClosedLidOverrideSnapshot(sleepDisabled: sleepDisabled)
+    }
+
+    func restoreManagedOverrides(from snapshot: ClosedLidOverrideSnapshot) async throws {
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+        guard let sleepDisabled = snapshot[.sleepDisabled] else {
+            return
+        }
+
+        try await daemonClient.setSleepDisabled(sleepDisabled)
+    }
+
     func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport {
         let setupState = await setupController.refreshStatus()
         guard setupState.isReady else {

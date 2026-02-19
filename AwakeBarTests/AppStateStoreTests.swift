@@ -24,7 +24,7 @@ final class AppStateStoreTests: XCTestCase {
         store.save(input)
         let loaded = store.load()
 
-        XCTAssertTrue(loaded.openLidEnabled)
+        XCTAssertFalse(loaded.openLidEnabled)
         XCTAssertTrue(loaded.launchAtLoginEnabled)
         XCTAssertTrue(loaded.legacyCleanupCompleted)
         XCTAssertFalse(loaded.closedLidEnabledByApp)
@@ -32,7 +32,25 @@ final class AppStateStoreTests: XCTestCase {
         XCTAssertNil(loaded.transientErrorMessage)
     }
 
-    func testSavePersistsRestoreIntentOnlyWhenFullAwakeIsEnabled() {
+    func testSaveClearsLegacyRestoreIntentKey() {
+        let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create UserDefaults suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        defaults.set(true, forKey: "awakebar.openLidEnabled")
+
+        let store = AppStateStore(userDefaults: defaults)
+        store.save(AppState())
+
+        XCTAssertNil(defaults.object(forKey: "awakebar.openLidEnabled"))
+        XCTAssertFalse(store.load().openLidEnabled)
+    }
+
+    func testOverrideSessionRoundTrips() {
         let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             return XCTFail("Could not create UserDefaults suite")
@@ -42,18 +60,32 @@ final class AppStateStoreTests: XCTestCase {
         }
 
         let store = AppStateStore(userDefaults: defaults)
-        let input = AppState(
-            openLidEnabled: true,
-            closedLidEnabledByApp: false,
-            launchAtLoginEnabled: false,
-            closedLidSetupState: .ready,
-            legacyCleanupCompleted: false,
-            transientErrorMessage: nil
-        )
+        let session = ClosedLidOverrideSession(snapshot: ClosedLidOverrideSnapshot(sleepDisabled: true))
 
-        store.save(input)
-        let loaded = store.load()
+        store.saveOverrideSession(session)
 
-        XCTAssertFalse(loaded.openLidEnabled)
+        XCTAssertEqual(store.loadOverrideSession(), session)
+
+        store.saveOverrideSession(nil)
+        XCTAssertNil(store.loadOverrideSession())
+    }
+
+    func testLoadOverrideSessionDropsUnknownSchema() throws {
+        let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create UserDefaults suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        var session = ClosedLidOverrideSession(snapshot: ClosedLidOverrideSnapshot(sleepDisabled: true))
+        session.schemaVersion = ClosedLidOverrideSession.currentSchemaVersion + 1
+        let data = try JSONEncoder().encode(session)
+        defaults.set(data, forKey: "awakebar.overrideSession.v1")
+
+        XCTAssertNil(store.loadOverrideSession())
+        XCTAssertNil(defaults.object(forKey: "awakebar.overrideSession.v1"))
     }
 }

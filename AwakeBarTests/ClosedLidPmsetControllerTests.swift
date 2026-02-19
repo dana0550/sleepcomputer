@@ -32,6 +32,28 @@ final class ClosedLidPmsetControllerTests: XCTestCase {
         XCTAssertEqual(daemon.readCalls, 1)
     }
 
+    func testCaptureManagedOverridesReadsBaselineWhenReady() async throws {
+        let daemon = MockDaemonClient()
+        daemon.sleepDisabledValue = true
+        let setup = MockSetupController(state: .ready)
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        let snapshot = try await controller.captureManagedOverridesBaseline()
+
+        XCTAssertEqual(snapshot[.sleepDisabled], true)
+        XCTAssertEqual(daemon.readCalls, 1)
+    }
+
+    func testRestoreManagedOverridesAppliesSleepDisabledValue() async throws {
+        let daemon = MockDaemonClient()
+        let setup = MockSetupController(state: .ready)
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        try await controller.restoreManagedOverrides(from: ClosedLidOverrideSnapshot(sleepDisabled: false))
+
+        XCTAssertEqual(daemon.setCalls, [false])
+    }
+
     func testCleanupUsesDaemonWhenReady() async throws {
         let daemon = MockDaemonClient()
         daemon.cleanupResult = LegacyCleanupReport(
