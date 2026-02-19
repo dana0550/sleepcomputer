@@ -58,7 +58,8 @@ final class MenuBarController: ObservableObject {
     }
 
     var menuIconName: String {
-        MenuIconCatalog.statusBarAssetName(for: mode)
+        let displayMode: KeepAwakeMode = fullAwakeSwitchIsOn ? .fullAwake : .off
+        return MenuIconCatalog.statusBarAssetName(for: displayMode)
     }
 
     var isFullAwakeEnabled: Bool {
@@ -258,6 +259,7 @@ final class MenuBarController: ObservableObject {
 
         guard setupState.isReady else {
             let wasOpenEnabled = state.openLidEnabled
+            state.closedLidEnabledByApp = false
 
             if state.openLidEnabled {
                 do {
@@ -271,8 +273,6 @@ final class MenuBarController: ObservableObject {
                     }
                 }
             }
-
-            state.closedLidEnabledByApp = false
 
             if wasOpenEnabled && !state.openLidEnabled {
                 persistSafeState()
