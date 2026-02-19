@@ -147,7 +147,7 @@ final class MenuBarController: ObservableObject {
 
     func refreshSetupState() {
         Task { [weak self] in
-            await self?.refreshClosedLidRuntimeState()
+            await self?.refreshClosedLidRuntimeState(allowDuringTransition: false)
         }
     }
 
@@ -248,7 +248,7 @@ final class MenuBarController: ObservableObject {
             setTransientError("Could not disable closed-lid awake: \(error.localizedDescription)")
         }
 
-        await refreshClosedLidRuntimeState()
+        await refreshClosedLidRuntimeState(allowDuringTransition: true)
         persistSafeState()
     }
 
@@ -280,7 +280,11 @@ final class MenuBarController: ObservableObject {
         await setFullAwakeEnabled(false)
     }
 
-    private func refreshClosedLidRuntimeState() async {
+    private func refreshClosedLidRuntimeState(allowDuringTransition: Bool = false) async {
+        guard allowDuringTransition || !isApplyingFullAwakeChange else {
+            return
+        }
+
         let setupState = await closedLidSetupController.refreshStatus()
         state.closedLidSetupState = setupState
 

@@ -112,6 +112,39 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertTrue(controller.isFullAwakeEnabled)
     }
 
+    func testRefreshSetupStateDoesNotMutateStateDuringEnableTransition() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.suspendNextEnable = true
+        setupMock.refreshResult = .approvalRequired
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        controller.requestFullAwakeChange(true)
+        await waitForCondition { closedMock.isWaitingToCompleteEnable }
+
+        controller.refreshSetupState()
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        XCTAssertEqual(openMock.setCalls, [true])
+        XCTAssertEqual(controller.closedLidSetupState, .ready)
+
+        closedMock.resumePendingEnableIfNeeded()
+        await waitForCondition { !controller.isApplyingFullAwakeChange }
+        XCTAssertTrue(controller.isFullAwakeEnabled)
+    }
+
     func testFullAwakeSetupRequiredDoesNotEnableAndOpensSettings() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
