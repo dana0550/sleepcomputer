@@ -65,7 +65,7 @@ struct MenuContentView: View {
             Divider()
 
             Button("Quit AwakeBar") {
-                NSApplication.shared.terminate(nil)
+                controller.requestQuit()
             }
             .buttonStyle(.plain)
             .font(.system(size: 13))
@@ -91,6 +91,9 @@ struct MenuContentView: View {
     private var stateMessage: String? {
         if let blocked = controller.fullAwakeBlockedMessage, !controller.isFullAwakeEnabled {
             return blocked
+        }
+        if let pendingRestore = controller.pendingRestoreMessage {
+            return pendingRestore
         }
         return controller.state.transientErrorMessage
     }

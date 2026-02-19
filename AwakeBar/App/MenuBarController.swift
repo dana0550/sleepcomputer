@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SwiftUI
 
@@ -402,6 +403,41 @@ final class MenuBarController: ObservableObject {
         } catch {
             setTransientError("Launch-at-login update failed: \(error.localizedDescription)")
         }
+    }
+
+    func requestQuit() {
+        NSApplication.shared.terminate(nil)
+    }
+
+    func prepareForTermination() async {
+        do {
+            try openLidController.setEnabled(false)
+            state.openLidEnabled = false
+        } catch {
+            state.openLidEnabled = openLidController.isEnabled
+        }
+
+        if overrideSession != nil {
+            switch await restoreOverrideSession(markPendingOnFailure: true) {
+            case .success:
+                state.closedLidEnabledByApp = false
+            case .failure:
+                state.closedLidEnabledByApp = false
+            }
+            persistSafeState()
+            return
+        }
+
+        if state.closedLidEnabledByApp {
+            do {
+                try await closedLidController.setEnabled(false)
+                state.closedLidEnabledByApp = false
+            } catch {
+                setTransientError("Could not restore previous sleep settings during quit: \(error.localizedDescription)")
+            }
+        }
+
+        persistSafeState()
     }
 
     func turnEverythingOff() async {

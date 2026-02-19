@@ -270,6 +270,86 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(closedMock.setCalls, [])
     }
 
+    func testBootstrapWithPendingSessionRestoresAndClearsPendingState() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        store.saveOverrideSession(
+            ClosedLidOverrideSession(
+                snapshot: ClosedLidOverrideSnapshot(sleepDisabled: false),
+                pendingRestore: true,
+                lastRestoreError: "previous failure"
+            )
+        )
+
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.bootstrapIfNeeded()
+
+        XCTAssertEqual(closedMock.restoreCalls.count, 1)
+        XCTAssertNil(store.loadOverrideSession())
+        XCTAssertNil(controller.pendingRestoreMessage)
+    }
+
+    func testBootstrapWithPendingSessionFailureKeepsPendingState() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        store.saveOverrideSession(
+            ClosedLidOverrideSession(
+                snapshot: ClosedLidOverrideSnapshot(sleepDisabled: false),
+                pendingRestore: true
+            )
+        )
+
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.restoreError = TerminationMockError()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.bootstrapIfNeeded()
+
+        let session = store.loadOverrideSession()
+        XCTAssertEqual(session?.pendingRestore, true)
+        XCTAssertNotNil(session?.lastRestoreError)
+        XCTAssertNotNil(controller.pendingRestoreMessage)
+    }
+
     func testFullAwakeFailureRollsBackBothStates() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -472,6 +552,75 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(openMock.setCalls, [true, false])
         XCTAssertEqual(closedMock.setCalls, [true])
         XCTAssertTrue(controller.isFullAwakeEnabled)
+    }
+
+    func testPrepareForTerminationRestoresAndClearsOverrideSession() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        await controller.prepareForTermination()
+
+        XCTAssertFalse(controller.state.openLidEnabled)
+        XCTAssertFalse(controller.state.closedLidEnabledByApp)
+        XCTAssertEqual(closedMock.restoreCalls.count, 1)
+        XCTAssertNil(store.loadOverrideSession())
+    }
+
+    func testPrepareForTerminationPersistsPendingSessionWhenRestoreFails() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        closedMock.restoreError = TerminationMockError()
+
+        await controller.prepareForTermination()
+
+        XCTAssertFalse(controller.state.openLidEnabled)
+        XCTAssertFalse(controller.state.closedLidEnabledByApp)
+        let session = store.loadOverrideSession()
+        XCTAssertEqual(session?.pendingRestore, true)
+        XCTAssertNotNil(session?.lastRestoreError)
     }
 
     func testDisableProceedsWhenOpenLidDisableThrowsButControllerReportsDisabled() async {
@@ -746,6 +895,12 @@ private final class LoginItemMock: LoginItemControlling {
 
     func readEnabled() -> Bool {
         value
+    }
+}
+
+private struct TerminationMockError: LocalizedError {
+    var errorDescription: String? {
+        "mock restore failure"
     }
 }
 
