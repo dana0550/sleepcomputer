@@ -77,7 +77,13 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             return .notInApplications
         }
 
-        if daemonService.status == .enabled {
+        let currentStatus = daemonService.status
+        switch currentStatus {
+        case .requiresApproval:
+            return .approvalRequired
+        case .notFound:
+            return .unavailable("Privileged helper was not found in the app bundle.")
+        case .enabled:
             if await waitForHelperReachable(maxAttempts: 2) {
                 return .ready
             }
@@ -91,6 +97,10 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             }
 
             return await refreshStatus()
+        case .notRegistered:
+            break
+        @unknown default:
+            return .unavailable("Unknown privileged helper status.")
         }
 
         do {

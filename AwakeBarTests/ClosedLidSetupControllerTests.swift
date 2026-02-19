@@ -102,6 +102,43 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertTrue(message.contains("not found"))
     }
 
+    func testStartSetupReturnsApprovalRequiredWithoutRegisterRetryLoop() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .requiresApproval)
+
+        let controller = ClosedLidSetupController(
+            daemonClient: daemon,
+            daemonService: service,
+            appBundleURLProvider: { URL(fileURLWithPath: "/Applications/AwakeBar.app") },
+            openSettings: {}
+        )
+
+        let state = await controller.startSetup()
+        XCTAssertEqual(state, .approvalRequired)
+        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertEqual(service.unregisterCalls, 0)
+    }
+
+    func testStartSetupReturnsNotFoundUnavailableWithoutRegisterAttempt() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .notFound)
+
+        let controller = ClosedLidSetupController(
+            daemonClient: daemon,
+            daemonService: service,
+            appBundleURLProvider: { URL(fileURLWithPath: "/Applications/AwakeBar.app") },
+            openSettings: {}
+        )
+
+        let state = await controller.startSetup()
+        guard case .unavailable(let message) = state else {
+            return XCTFail("Expected unavailable")
+        }
+        XCTAssertTrue(message.contains("not found"))
+        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertEqual(service.unregisterCalls, 0)
+    }
+
     func testRefreshStatusReturnsUnavailableWhenPingFails() async {
         let daemon = MockDaemonClientForSetup()
         daemon.shouldThrowPing = true
