@@ -2,11 +2,14 @@ import Foundation
 
 enum ClosedLidControlError: Error, LocalizedError {
     case setupRequired(ClosedLidSetupState)
+    case invalidRestoreSnapshot(String)
 
     var errorDescription: String? {
         switch self {
         case .setupRequired(let state):
             return state.detail
+        case .invalidRestoreSnapshot(let detail):
+            return detail
         }
     }
 }
@@ -45,6 +48,28 @@ final class ClosedLidPmsetController: ClosedLidSleepControlling {
         }
 
         return try await daemonClient.readSleepDisabled()
+    }
+
+    func captureManagedOverridesBaseline() async throws -> ClosedLidOverrideSnapshot {
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+
+        let sleepDisabled = try await daemonClient.readSleepDisabled()
+        return ClosedLidOverrideSnapshot(sleepDisabled: sleepDisabled)
+    }
+
+    func restoreManagedOverrides(from snapshot: ClosedLidOverrideSnapshot) async throws {
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+        guard let sleepDisabled = snapshot[.sleepDisabled] else {
+            throw ClosedLidControlError.invalidRestoreSnapshot("SleepDisabled baseline is missing.")
+        }
+
+        try await daemonClient.setSleepDisabled(sleepDisabled)
     }
 
     func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport {

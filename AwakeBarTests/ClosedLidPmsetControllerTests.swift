@@ -32,6 +32,45 @@ final class ClosedLidPmsetControllerTests: XCTestCase {
         XCTAssertEqual(daemon.readCalls, 1)
     }
 
+    func testCaptureManagedOverridesReadsBaselineWhenReady() async throws {
+        let daemon = MockDaemonClient()
+        daemon.sleepDisabledValue = true
+        let setup = MockSetupController(state: .ready)
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        let snapshot = try await controller.captureManagedOverridesBaseline()
+
+        XCTAssertEqual(snapshot[.sleepDisabled], true)
+        XCTAssertEqual(daemon.readCalls, 1)
+    }
+
+    func testRestoreManagedOverridesAppliesSleepDisabledValue() async throws {
+        let daemon = MockDaemonClient()
+        let setup = MockSetupController(state: .ready)
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        try await controller.restoreManagedOverrides(from: ClosedLidOverrideSnapshot(sleepDisabled: false))
+
+        XCTAssertEqual(daemon.setCalls, [false])
+    }
+
+    func testRestoreManagedOverridesThrowsWhenSnapshotMissingSleepDisabled() async {
+        let daemon = MockDaemonClient()
+        let setup = MockSetupController(state: .ready)
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        do {
+            try await controller.restoreManagedOverrides(from: ClosedLidOverrideSnapshot(values: [:]))
+            XCTFail("Expected invalid snapshot error")
+        } catch let ClosedLidControlError.invalidRestoreSnapshot(detail) {
+            XCTAssertTrue(detail.contains("SleepDisabled"))
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(daemon.setCalls, [])
+    }
+
     func testCleanupUsesDaemonWhenReady() async throws {
         let daemon = MockDaemonClient()
         daemon.cleanupResult = LegacyCleanupReport(

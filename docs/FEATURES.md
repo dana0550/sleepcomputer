@@ -1,6 +1,6 @@
 ---
 doc_type: feature_index
-version: 1.2.0
+version: 1.5.0
 last_synced: 2026-02-19
 ---
 
@@ -17,9 +17,12 @@ last_synced: 2026-02-19
 | F-003.02 | Privileged XPC Transport | active | F-003 | ./features/F-003.02-privileged-xpc-transport.md | dshakiba | Daemon Client |
 | F-003.03 | Legacy Privilege Cleanup | active | F-003 | ./features/F-003.03-legacy-privilege-cleanup.md | dshakiba | Migration Cleanup |
 | F-003.04 | Helper Packaging and LaunchDaemon Wiring | active | F-003 | ./features/F-003.04-helper-packaging-launchd.md | dshakiba | Embedded Helper Packaging |
+| F-003.05 | Helper Signing Identity and Launch Constraints | active | F-003 | ./features/F-003.05-helper-signing-identity-launch-constraints.md | dshakiba | Launch Constraint Stability |
+| F-003.06 | SMAppService NotFound Registration Recovery | active | F-003 | ./features/F-003.06-smappservice-notfound-registration-recovery.md | dshakiba | BTM Record Recovery |
 | F-004 | State Persistence and Login | active | - | ./features/F-004-state-persistence-login.md | dshakiba | - |
 | F-004.01 | Safe State Persistence Boundary | active | F-004 | ./features/F-004.01-safe-state-persistence-boundary.md | dshakiba | Safe Persistence |
 | F-004.02 | Launch-at-Login Control | active | F-004 | ./features/F-004.02-launch-at-login-control.md | dshakiba | Login Item Toggle |
+| F-004.03 | Closed-Lid Override Session Recovery | active | F-004 | ./features/F-004.03-closed-lid-override-session-recovery.md | dshakiba | Pending Restore Recovery |
 | F-005 | Iconography and Asset Pipeline | active | - | ./features/F-005-iconography-asset-pipeline.md | dshakiba | - |
 | F-005.01 | SVG-to-Asset Regeneration | active | F-005 | ./features/F-005.01-svg-to-asset-regeneration.md | dshakiba | Icon Build Script |
 | F-005.02 | Icon Visual Spec and Handoff | active | F-005 | ./features/F-005.02-icon-visual-spec-handoff.md | dshakiba | Hermes Green Pack |

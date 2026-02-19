@@ -8,8 +8,9 @@ parent: null
 children:
   - F-004.01
   - F-004.02
+  - F-004.03
 aliases: []
-version: 1.3.0
+version: 1.4.0
 last_reviewed: 2026-02-19
 tags:
   - persistence
@@ -23,13 +24,13 @@ dependencies:
 
 ## Summary
 
-Persist safe state and keep launch-at-login preference control available through app controllers.
+Persist only safe state, retain deterministic launch-at-login behavior, and preserve bounded restore metadata for closed-lid override recovery.
 
 ## Goals
 
-- Restore Full Awake intent and login preference across relaunches.
-- Avoid auto-restoring closed-lid mode.
-- Persist migration completion state for one-time cleanup behavior.
+- Keep relaunch behavior safe by default (no persisted Full Awake ON intent).
+- Restore previously captured system sleep policy after app-managed closed-lid sessions.
+- Persist login preference and migration completion state with explicit recovery metadata.
 
 ## Non-Goals
 
@@ -38,27 +39,31 @@ Persist safe state and keep launch-at-login preference control available through
 
 ## Requirements
 
-- R1: Persist open-lid enabled state, launch-at-login preference, and legacy cleanup completion marker.
-- R2: Never persist runtime closed-lid state (for example `closedLidEnabledByApp`) or transient UI/error fields.
-- R3: Bootstrap must reset closed-lid runtime state and refresh live setup/runtime status.
+- R1: Persist launch-at-login preference, legacy cleanup completion marker, and closed-lid override session metadata only.
+- R2: Never persist runtime closed-lid/open-lid state flags (for example `openLidEnabled`, `closedLidEnabledByApp`) or transient UI/error fields.
+- R3: Bootstrap must reset runtime awake flags, attempt pending override-session restore, and then refresh live setup/runtime status.
 - R4: Login toggle must drive `SMAppService.mainApp` registration state.
+- R5: Persistence layer must clear legacy restore-intent keying and drop unreadable/unknown override-session payloads.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
 - [x] R2
 - [x] R3
 - [x] R4
+- [x] R5
 
 ## Acceptance Criteria
 
-- AC1: Relaunch restores prior Full Awake intent (via open-lid persistence) and launch-at-login preference.
-- AC2: Relaunch does not auto-enable closed-lid by-app state.
+- AC1: Relaunch does not auto-enable Full Awake; runtime awake flags reset to OFF by default.
+- AC2: Pending override sessions retry on launch/refresh and clear persisted session state after a successful restore.
 - AC3: Login toggle changes are persisted and reloaded.
+- AC4: Invalid override-session payloads are discarded without crashing and legacy restore-intent key is removed.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [x] AC1
 - [x] AC2
 - [x] AC3
+- [x] AC4
 
 ## Traceability
 
@@ -66,18 +71,22 @@ Persist safe state and keep launch-at-login preference control available through
 | Item | Type | Evidence |
 |---|---|---|
 | R1 | code | AwakeBar/State/AppStateStore.swift |
+| R1 | code | AwakeBar/Domain/ClosedLidOverrideSession.swift |
 | R2 | code | AwakeBar/State/AppStateStore.swift |
 | R3 | code | AwakeBar/App/MenuBarController.swift |
 | R4 | code | AwakeBar/Services/LoginItemController.swift |
-| AC1 | test | AwakeBarTests/AppStateStoreTests.swift |
-| AC2 | test | AwakeBarTests/AppStateStoreTests.swift |
+| R5 | code | AwakeBar/State/AppStateStore.swift |
+| AC1 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC2 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC3 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC4 | test | AwakeBarTests/AppStateStoreTests.swift |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
 - [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
 - [F-004.02](./F-004.02-launch-at-login-control.md)
+- [F-004.03](./F-004.03-closed-lid-override-session-recovery.md)
 
 ## References
 
@@ -85,6 +94,7 @@ Persist safe state and keep launch-at-login preference control available through
 - [F-002](./F-002-menu-bar-experience.md)
 - [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
 - [F-004.02](./F-004.02-launch-at-login-control.md)
+- [F-004.03](./F-004.03-closed-lid-override-session-recovery.md)
 - [F-003](./F-003-closed-lid-admin-control.md)
 
 ## API Contract
@@ -92,6 +102,8 @@ Persist safe state and keep launch-at-login preference control available through
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `AppStateStore.load()`
 - `AppStateStore.save(_:)`
+- `AppStateStore.loadOverrideSession()`
+- `AppStateStore.saveOverrideSession(_:)`
 - `LoginItemControlling`
 
 ## Impact
@@ -99,12 +111,14 @@ Persist safe state and keep launch-at-login preference control available through
 <!-- AUTOGEN:IMPACT_MAP -->
 - Controls startup behavior and persistence safety boundaries.
 - Enables one-time migration cleanup idempotency across relaunches.
+- Enables deterministic closed-lid baseline restore and retry semantics across quit/relaunch.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
 - [x] Local-only persistence via `UserDefaults`
 - [x] Does not cache credentials or privileged tokens
+- [x] Drops unreadable or schema-mismatched override-session payloads
 
 ## Budget
 
@@ -130,3 +144,4 @@ Persist safe state and keep launch-at-login preference control available through
 - 2026-02-18: Split persistence and login-item responsibilities into child specs.
 - 2026-02-18: Updated Full Awake terminology for persisted awake intent.
 - 2026-02-19: Removed unused transient state fields from persistence boundary and clarified R2 wording.
+- 2026-02-19: Added closed-lid override session recovery semantics and child spec linkage.

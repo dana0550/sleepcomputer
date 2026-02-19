@@ -16,6 +16,7 @@
 		1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */; };
 		2432E05DBFC7434A7412314D /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
 		319BDD8FD78E4105A0C15942 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
+		352FBE482FF871154173E660 /* ClosedLidOverrideSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54507A6BAD64AA323D292A8 /* ClosedLidOverrideSession.swift */; };
 		35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */; };
 		37698417F22973EABC52ADA8 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
 		4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */; };
@@ -102,6 +103,7 @@
 		CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
 		DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		E534796D72E7DC597B4ADE4B /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
+		E54507A6BAD64AA323D292A8 /* ClosedLidOverrideSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidOverrideSession.swift; sourceTree = "<group>"; };
 		ED4A0D68A3278179B3733FEA /* AwakeBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwakeBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidPmsetController.swift; sourceTree = "<group>"; };
 		FBDE984A229007F093175C83 /* KeepAwakeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeMode.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				1CE46AD516F2BA51CA081BB3 /* AppState.swift */,
+				E54507A6BAD64AA323D292A8 /* ClosedLidOverrideSession.swift */,
 				0FC895E08B58D01FAD193FF5 /* ClosedLidSetupState.swift */,
 				FBDE984A229007F093175C83 /* KeepAwakeMode.swift */,
 			);
@@ -407,18 +410,21 @@
 /* Begin PBXShellScriptBuildPhase section */
 		9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/AwakeBarPrivilegedHelper",
+				"$(SRCROOT)/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist",
 			);
 			name = "Embed Privileged Helper";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/HelperTools/AwakeBarPrivilegedHelper",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -477,6 +483,7 @@
 				4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */,
 				BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */,
 				37698417F22973EABC52ADA8 /* AwakeBarPrivilegedServiceXPC.swift in Sources */,
+				352FBE482FF871154173E660 /* ClosedLidOverrideSession.swift in Sources */,
 				9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */,
 				9B3B1AD9500A397C879A9C72 /* ClosedLidSetupController.swift in Sources */,
 				C2C7B574709887D14AECE9C5 /* ClosedLidSetupState.swift in Sources */,
@@ -593,6 +600,7 @@
 		27698389119415E8B6F28FBB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -666,6 +674,7 @@
 		6DAA3996BFFCD3A57BB713A6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -724,6 +733,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
@@ -733,6 +743,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
 				PRODUCT_NAME = AwakeBarPrivilegedHelper;
 				SDKROOT = macosx;
@@ -765,6 +776,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
 				INFOPLIST_KEY_CFBundleDisplayName = AwakeBarPrivilegedHelper;
@@ -773,6 +785,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
 				PRODUCT_NAME = AwakeBarPrivilegedHelper;
 				SDKROOT = macosx;

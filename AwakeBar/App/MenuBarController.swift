@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import SwiftUI
 
@@ -16,9 +17,11 @@ final class MenuBarController: ObservableObject {
     private let approvalPollingIntervalNanoseconds: UInt64
 
     private var didBootstrap = false
+    private var overrideSession: ClosedLidOverrideSession?
     private var errorClearTask: Task<Void, Never>?
     private var setupStatusPollTask: Task<Void, Never>?
     private var setupStatusPollToken = UUID()
+    private var pendingRestoreRetryTask: Task<Void, Never>?
 
     init(
         stateStore: AppStateStore = AppStateStore(),
@@ -53,6 +56,7 @@ final class MenuBarController: ObservableObject {
         self.approvalPollingAttempts = max(1, approvalPollingAttempts)
         self.approvalPollingIntervalNanoseconds = approvalPollingIntervalNanoseconds
         self.state = stateStore.load()
+        self.overrideSession = stateStore.loadOverrideSession()
 
         if autoBootstrap {
             Task { [weak self] in
@@ -64,6 +68,7 @@ final class MenuBarController: ObservableObject {
     deinit {
         errorClearTask?.cancel()
         setupStatusPollTask?.cancel()
+        pendingRestoreRetryTask?.cancel()
     }
 
     var mode: KeepAwakeMode {
@@ -98,6 +103,16 @@ final class MenuBarController: ObservableObject {
         return fullAwakeSetupMessage(for: state.closedLidSetupState)
     }
 
+    var pendingRestoreMessage: String? {
+        guard let session = overrideSession, session.pendingRestore else {
+            return nil
+        }
+        if let error = session.lastRestoreError {
+            return "Sleep restore is pending: \(error)"
+        }
+        return "Sleep restore is pending and will retry."
+    }
+
     func bootstrapIfNeeded() async {
         guard !didBootstrap else {
             return
@@ -105,7 +120,6 @@ final class MenuBarController: ObservableObject {
         didBootstrap = true
 
         var loaded = stateStore.load()
-        let shouldRestoreFullAwake = loaded.openLidEnabled
         loaded.openLidEnabled = false
         loaded.closedLidEnabledByApp = false
         loaded.closedLidSetupState = .notRegistered
@@ -130,15 +144,17 @@ final class MenuBarController: ObservableObject {
             setTransientError("Could not apply launch-at-login setting: \(error.localizedDescription)")
         }
 
+        if overrideSession != nil {
+            switch await restoreOverrideSession(markPendingOnFailure: true) {
+            case .success:
+                break
+            case .failure(let error):
+                setTransientError("Could not restore previous sleep settings on launch: \(error.localizedDescription)")
+            }
+        }
+
         await refreshClosedLidRuntimeState()
         await runLegacyCleanupIfNeeded()
-
-        if shouldRestoreFullAwake {
-            await setFullAwakeEnabled(true)
-        } else {
-            // Reconcile system policy with persisted OFF intent on launch.
-            await setFullAwakeEnabled(false)
-        }
     }
 
     func requestFullAwakeChange(_ enabled: Bool) {
@@ -155,8 +171,10 @@ final class MenuBarController: ObservableObject {
     }
 
     func refreshSetupState() {
-        Task { [weak self] in
-            await self?.refreshClosedLidRuntimeState(allowDuringTransition: false)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.retryPendingRestoreIfNeeded()
+            await self.refreshClosedLidRuntimeState(allowDuringTransition: false)
         }
     }
 
@@ -203,54 +221,65 @@ final class MenuBarController: ObservableObject {
         let previousByApp = state.closedLidEnabledByApp
 
         if enabled {
-            do {
-                if !state.closedLidSetupState.isReady {
-                    let setupState = await closedLidSetupController.startSetup()
-                    state.closedLidSetupState = setupState
-
-                    guard setupState.isReady else {
-                        if case .approvalRequired = setupState {
-                            closedLidSetupController.openSystemSettingsForApproval()
-                        }
-                        setTransientError(fullAwakeSetupMessage(for: setupState))
-                        return
-                    }
-                }
-
-                try openLidController.setEnabled(true)
-                state.openLidEnabled = true
-
-                do {
-                    try await closedLidController.setEnabled(true)
-                    state.closedLidEnabledByApp = true
-                    persistSafeState()
-                } catch let ClosedLidControlError.setupRequired(setupState) {
-                    state.closedLidSetupState = setupState
-                    let rollbackIssue = rollbackOpenLidState(to: previousOpen)
-                    state.closedLidEnabledByApp = previousByApp
-                    if case .approvalRequired = setupState {
-                        closedLidSetupController.openSystemSettingsForApproval()
-                    }
-                    let baseMessage = fullAwakeSetupMessage(for: setupState)
-                    setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
-                    persistSafeState()
-                } catch {
-                    let rollbackIssue = rollbackOpenLidState(to: previousOpen)
-                    state.closedLidEnabledByApp = previousByApp
-                    let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
-                    setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
-                    persistSafeState()
-                }
-            } catch {
-                let rollbackIssue = rollbackOpenLidState(to: previousOpen)
-                state.closedLidEnabledByApp = previousByApp
-                let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
-                setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
-                persistSafeState()
-            }
+            await applyFullAwakeEnable(previousOpen: previousOpen, previousByApp: previousByApp)
             return
         }
 
+        await applyFullAwakeDisable(previousOpen: previousOpen, previousByApp: previousByApp)
+    }
+
+    private func applyFullAwakeEnable(previousOpen: Bool, previousByApp: Bool) async {
+        var capturedSessionThisAttempt = false
+
+        do {
+            await awaitPendingRestoreRetryIfNeeded()
+
+            if !state.closedLidSetupState.isReady {
+                let setupState = await closedLidSetupController.startSetup()
+                state.closedLidSetupState = setupState
+
+                guard setupState.isReady else {
+                    if case .approvalRequired = setupState {
+                        closedLidSetupController.openSystemSettingsForApproval()
+                    }
+                    setTransientError(fullAwakeSetupMessage(for: setupState))
+                    return
+                }
+            }
+
+            capturedSessionThisAttempt = try await ensureOverrideSessionCaptured()
+            try openLidController.setEnabled(true)
+            state.openLidEnabled = true
+            try await closedLidController.setEnabled(true)
+            state.closedLidEnabledByApp = true
+            markOverrideSessionActiveForManagedState()
+            persistSafeState()
+        } catch let ClosedLidControlError.setupRequired(setupState) {
+            state.closedLidSetupState = setupState
+            if case .approvalRequired = setupState {
+                closedLidSetupController.openSystemSettingsForApproval()
+            }
+            let rollbackIssue = await rollbackFailedEnable(
+                previousOpen: previousOpen,
+                previousByApp: previousByApp,
+                capturedSessionThisAttempt: capturedSessionThisAttempt
+            )
+            let baseMessage = fullAwakeSetupMessage(for: setupState)
+            setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+            persistSafeState()
+        } catch {
+            let rollbackIssue = await rollbackFailedEnable(
+                previousOpen: previousOpen,
+                previousByApp: previousByApp,
+                capturedSessionThisAttempt: capturedSessionThisAttempt
+            )
+            let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
+            setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+            persistSafeState()
+        }
+    }
+
+    private func applyFullAwakeDisable(previousOpen: Bool, previousByApp: Bool) async {
         do {
             try openLidController.setEnabled(false)
             state.openLidEnabled = false
@@ -263,50 +292,90 @@ final class MenuBarController: ObservableObject {
             }
         }
 
-        var closedLidDisableErrorMessage: String?
-        var shouldRetryClosedLidDisable = false
-
         do {
-            try await closedLidController.setEnabled(false)
+            if overrideSession != nil {
+                switch await restoreOverrideSession(markPendingOnFailure: false) {
+                case .success:
+                    break
+                case .failure(let error):
+                    throw error
+                }
+            } else {
+                try await closedLidController.setEnabled(false)
+            }
             state.closedLidEnabledByApp = false
+            persistSafeState()
         } catch let ClosedLidControlError.setupRequired(setupState) {
             state.closedLidSetupState = setupState
-            shouldRetryClosedLidDisable = true
+            let rollbackIssue = await rollbackFailedDisable(previousOpen: previousOpen, previousByApp: previousByApp)
+            let baseMessage = "Could not restore previous sleep settings: \(fullAwakeSetupMessage(for: setupState))"
+            setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+            persistSafeState()
         } catch {
-            state.closedLidEnabledByApp = previousByApp
-            closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(error.localizedDescription)"
+            let rollbackIssue = await rollbackFailedDisable(previousOpen: previousOpen, previousByApp: previousByApp)
+            let baseMessage = "Could not restore previous sleep settings: \(error.localizedDescription)"
+            setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+            persistSafeState()
+        }
+    }
+
+    private func markOverrideSessionActiveForManagedState() {
+        guard var session = overrideSession else {
+            return
+        }
+        session.pendingRestore = false
+        session.lastRestoreError = nil
+        overrideSession = session
+        persistOverrideSession()
+    }
+
+    private func rollbackFailedEnable(
+        previousOpen: Bool,
+        previousByApp: Bool,
+        capturedSessionThisAttempt: Bool
+    ) async -> String? {
+        var issues: [String] = []
+
+        if let rollbackIssue = rollbackOpenLidState(to: previousOpen) {
+            issues.append(rollbackIssue)
         }
 
-        await refreshClosedLidRuntimeState(allowDuringTransition: true)
-
-        if shouldRetryClosedLidDisable && state.closedLidSetupState.isReady {
-            do {
-                try await closedLidController.setEnabled(false)
-                state.closedLidEnabledByApp = false
-            } catch let ClosedLidControlError.setupRequired(retryState) {
-                state.closedLidSetupState = retryState
-                state.closedLidEnabledByApp = previousByApp
-                closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(fullAwakeSetupMessage(for: retryState))"
-            } catch {
-                state.closedLidEnabledByApp = previousByApp
-                closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(error.localizedDescription)"
+        if capturedSessionThisAttempt {
+            switch await restoreOverrideSession(markPendingOnFailure: false) {
+            case .success:
+                break
+            case .failure(let error):
+                issues.append("Could not restore baseline sleep settings: \(error.localizedDescription)")
             }
-
-            await refreshClosedLidRuntimeState(allowDuringTransition: true)
-        } else if shouldRetryClosedLidDisable && previousByApp {
-            state.closedLidEnabledByApp = previousByApp
-            closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(fullAwakeSetupMessage(for: state.closedLidSetupState))"
+        } else if state.closedLidEnabledByApp != previousByApp {
+            do {
+                try await closedLidController.setEnabled(previousByApp)
+            } catch {
+                issues.append("Closed-lid awake may be inconsistent because rollback failed: \(error.localizedDescription)")
+            }
         }
 
-        if state.closedLidEnabledByApp {
-            closedLidDisableErrorMessage = closedLidDisableErrorMessage ?? "Could not confirm closed-lid awake was disabled. Please try again."
+        state.closedLidEnabledByApp = previousByApp
+        return issues.isEmpty ? nil : issues.joined(separator: " ")
+    }
+
+    private func rollbackFailedDisable(previousOpen: Bool, previousByApp: Bool) async -> String? {
+        var issues: [String] = []
+
+        if let rollbackIssue = rollbackOpenLidState(to: previousOpen) {
+            issues.append(rollbackIssue)
         }
 
-        if let closedLidDisableErrorMessage {
-            setTransientError(closedLidDisableErrorMessage)
+        if previousByApp {
+            do {
+                try await closedLidController.setEnabled(true)
+            } catch {
+                issues.append("Closed-lid awake may be inconsistent because rollback failed: \(error.localizedDescription)")
+            }
         }
 
-        persistSafeState()
+        state.closedLidEnabledByApp = previousByApp
+        return issues.isEmpty ? nil : issues.joined(separator: " ")
     }
 
     private func beginFullAwakeTransition(to enabled: Bool) -> Bool {
@@ -331,6 +400,41 @@ final class MenuBarController: ObservableObject {
         } catch {
             setTransientError("Launch-at-login update failed: \(error.localizedDescription)")
         }
+    }
+
+    func requestQuit() {
+        NSApplication.shared.terminate(nil)
+    }
+
+    func prepareForTermination() async {
+        do {
+            try openLidController.setEnabled(false)
+            state.openLidEnabled = false
+        } catch {
+            state.openLidEnabled = openLidController.isEnabled
+        }
+
+        if overrideSession != nil {
+            switch await restoreOverrideSession(markPendingOnFailure: true) {
+            case .success:
+                state.closedLidEnabledByApp = false
+            case .failure:
+                state.closedLidEnabledByApp = false
+            }
+            persistSafeState()
+            return
+        }
+
+        if state.closedLidEnabledByApp {
+            do {
+                try await closedLidController.setEnabled(false)
+                state.closedLidEnabledByApp = false
+            } catch {
+                setTransientError("Could not restore previous sleep settings during quit: \(error.localizedDescription)")
+            }
+        }
+
+        persistSafeState()
     }
 
     func turnEverythingOff() async {
@@ -396,8 +500,91 @@ final class MenuBarController: ObservableObject {
         }
     }
 
+    @discardableResult
+    private func ensureOverrideSessionCaptured() async throws -> Bool {
+        guard overrideSession == nil else {
+            return false
+        }
+        let snapshot = try await closedLidController.captureManagedOverridesBaseline()
+        overrideSession = ClosedLidOverrideSession(snapshot: snapshot)
+        persistOverrideSession()
+        return true
+    }
+
+    @discardableResult
+    private func restoreOverrideSession(markPendingOnFailure: Bool) async -> Result<Void, Error> {
+        guard var session = overrideSession else {
+            return .success(())
+        }
+
+        session.lastRestoreAttemptAt = Date()
+        session.pendingRestore = false
+        session.lastRestoreError = nil
+        overrideSession = session
+        persistOverrideSession()
+        let inFlightSession = session
+
+        do {
+            try await closedLidController.restoreManagedOverrides(from: session.snapshot)
+            if overrideSession == inFlightSession {
+                overrideSession = nil
+                persistOverrideSession()
+            }
+            return .success(())
+        } catch {
+            session.pendingRestore = markPendingOnFailure
+            session.lastRestoreError = error.localizedDescription
+            session.lastRestoreAttemptAt = Date()
+            if overrideSession == inFlightSession {
+                overrideSession = session
+                persistOverrideSession()
+            }
+            return .failure(error)
+        }
+    }
+
+    private func retryPendingRestoreIfNeeded() async {
+        guard !isApplyingFullAwakeChange else {
+            return
+        }
+        guard overrideSession?.pendingRestore == true else {
+            return
+        }
+        if let pendingRestoreRetryTask {
+            await pendingRestoreRetryTask.value
+            return
+        }
+
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                self.pendingRestoreRetryTask = nil
+            }
+
+            switch await self.restoreOverrideSession(markPendingOnFailure: true) {
+            case .success:
+                break
+            case .failure(let error):
+                self.setTransientError("Could not restore previous sleep settings: \(error.localizedDescription)")
+            }
+        }
+
+        pendingRestoreRetryTask = task
+        await task.value
+    }
+
+    private func awaitPendingRestoreRetryIfNeeded() async {
+        if let pendingRestoreRetryTask {
+            await pendingRestoreRetryTask.value
+        }
+    }
+
     private func persistSafeState() {
         stateStore.save(state)
+    }
+
+    private func persistOverrideSession() {
+        stateStore.saveOverrideSession(overrideSession)
     }
 
     private func rollbackOpenLidState(to previousOpen: Bool) -> String? {

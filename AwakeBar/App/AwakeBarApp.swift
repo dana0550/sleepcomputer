@@ -1,10 +1,40 @@
+import AppKit
 import SwiftUI
+
+@MainActor
+final class AwakeBarAppDelegate: NSObject, NSApplicationDelegate {
+    weak var controller: MenuBarController?
+    private var terminationTask: Task<Void, Never>?
+
+    func attach(controller: MenuBarController) {
+        self.controller = controller
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard terminationTask == nil else {
+            return .terminateLater
+        }
+        guard let controller else {
+            return .terminateNow
+        }
+
+        terminationTask = Task { @MainActor [weak self] in
+            await controller.prepareForTermination()
+            sender.reply(toApplicationShouldTerminate: true)
+            self?.terminationTask = nil
+        }
+        return .terminateLater
+    }
+}
 
 @main
 struct AwakeBarApp: App {
+    @NSApplicationDelegateAdaptor(AwakeBarAppDelegate.self) private var appDelegate
     @StateObject private var controller = MenuBarController()
 
     var body: some Scene {
+        let _ = appDelegate.attach(controller: controller)
+
         MenuBarExtra {
             MenuContentView(controller: controller)
         } label: {

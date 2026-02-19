@@ -23,7 +23,7 @@ AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 It provides a single primary control:
 
 - `Full Awake` (ON): keeps your Mac awake with the lid open and with the lid closed.
-- `Off`: restores normal macOS sleep behavior.
+- `Off`: restores captured baseline sleep policy when available, otherwise normal macOS sleep behavior.
 
 ## Visual Identity
 
@@ -42,7 +42,7 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
-| `Off` | Restores normal macOS sleep behavior | No | Default energy-saving behavior |
+| `Off` | Restores captured pre-toggle `SleepDisabled` baseline when available, otherwise normal macOS sleep behavior | No | Default energy-saving behavior |
 | `Full Awake` | Enables open-lid assertions and closed-lid sleep disable (`pmset -a disablesleep 1`) | One-time helper setup + approval in System Settings (if not already approved) | Long-running tasks that must not sleep |
 
 ## Menu Controls
@@ -51,6 +51,7 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 - `Full Awake`: one toggle for all awake behavior.
 - `Finish Setup...`: appears when helper approval/setup is required.
 - `Inline message`: explains setup blockers or helper errors in menu context.
+- `Pending restore notice`: appears when previous sleep baseline restore is queued for retry.
 - `Quit AwakeBar`: exits the app.
 - `State indicator`: status dot is gray when OFF and blue when ON.
 - `Toggle tint`: switch tint is blue when ON.
@@ -73,10 +74,13 @@ Hover the `Full Awake` toggle to view quick inline help text.
 3. If prompted, click `Finish Setup...`, then approve the helper in `Login Items`.
 4. Return to AwakeBar and toggle `Full Awake` ON again.
 
+If setup still fails and the toggle returns to OFF, quit AwakeBar, reinstall it to `/Applications`, restart your Mac, then retry. If it still fails, reset Background Items with `sfltool resetbtm` and reboot.
+On first run, macOS may report the helper as "not found" until Background Items registration exists; AwakeBar now treats that state as setup-required and retries registration automatically.
+
 Architecture details:
 
 - Helper registration uses `SMAppService.daemon(plistName:)`.
-- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper.v2`) with code-signing requirements in both directions.
+- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper`) with code-signing requirements in both directions.
 - Runtime does not use `sudo`, AppleScript, or Touch ID/PAM mutation fallbacks.
 
 ## Safety
@@ -86,6 +90,7 @@ Architecture details:
 - Closed-lid control uses a scoped privileged helper with a fixed command surface.
 - Legacy `sudoers`/PAM artifacts from prior versions are backed up and cleaned once helper setup is healthy.
 - If helper state is unavailable, AwakeBar keeps Full Awake OFF and shows an inline reason.
+- On quit, AwakeBar attempts to restore the captured baseline sleep policy; if unavailable, it persists a bounded pending restore record and retries on relaunch/setup refresh.
 
 ## Requirements
 
@@ -127,6 +132,7 @@ APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configurati
 ## Signed/Notarized Release
 
 - CI validation workflow: `.github/workflows/ci-macos.yml` (PRs + branch pushes + manual runs).
+- Compatibility matrix in CI validates high-value restore/parser suites on `macos-14` and `macos-latest`.
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
 - Artifact smoke checks script: `Scripts/smoke-check-app.sh` (runs in PR CI and release flows).
@@ -149,6 +155,8 @@ Release signing certificate requirements:
 - Exporting an `Apple Development` certificate as `.p12` will fail release signing.
 
 Release scripts set `AWAKEBAR_TEAM_ID` from `APPLE_TEAM_ID` so XPC code-sign checks bind both bundle ID and team ID in production builds.
+
+Release packaging enforces helper code-signing identifier `com.dshakiba.AwakeBar.PrivilegedHelper` (`CREATE_INFOPLIST_SECTION_IN_BINARY=YES` + `OTHER_CODE_SIGN_FLAGS`) and validates it in `Scripts/smoke-check-app.sh`.
 
 Secret hygiene:
 

@@ -47,10 +47,32 @@ final class PrivilegedDaemonClientTests: XCTestCase {
         )
     }
 
-    func testHelperCodeSigningIdentifierMatchesSignedToolIdentifier() {
+    func testHelperCodeSigningIdentifierMatchesExpectedBundleIdentifier() {
         XCTAssertEqual(
             PrivilegedServiceConstants.helperCodeSigningIdentifier,
-            "AwakeBarPrivilegedHelper"
+            "com.dshakiba.AwakeBar.PrivilegedHelper"
         )
+    }
+
+    func testHelperBundleIdentifierMatchesCodeSigningIdentifier() {
+        XCTAssertEqual(
+            PrivilegedServiceConstants.helperBundleIdentifier,
+            PrivilegedServiceConstants.helperCodeSigningIdentifier
+        )
+    }
+
+    func testInvalidSleepDisabledResponseErrorDescriptionIsUserFacing() {
+        XCTAssertEqual(
+            PrivilegedDaemonClientError.invalidSleepDisabledResponse.errorDescription,
+            "Privileged helper returned an invalid sleep policy value."
+        )
+    }
+
+    func testParseSleepDisabledResponseAcceptsOnlyZeroOrOne() throws {
+        XCTAssertEqual(try PrivilegedDaemonClient.parseSleepDisabledResponse(NSNumber(value: 0)), false)
+        XCTAssertEqual(try PrivilegedDaemonClient.parseSleepDisabledResponse(NSNumber(value: 1)), true)
+        XCTAssertThrowsError(try PrivilegedDaemonClient.parseSleepDisabledResponse(NSNumber(value: 1.5)))
+        XCTAssertThrowsError(try PrivilegedDaemonClient.parseSleepDisabledResponse(NSNumber(value: 2)))
+        XCTAssertThrowsError(try PrivilegedDaemonClient.parseSleepDisabledResponse(nil))
     }
 }

@@ -3,10 +3,21 @@ import XCTest
 @testable import AwakeBar
 
 final class PrivilegedServiceContractTests: XCTestCase {
-    func testHelperCodeSigningIdentifierTracksExecutableName() {
+    func testHelperCodeSigningIdentifierTracksHelperBundleIdentifier() {
         XCTAssertEqual(
             PrivilegedServiceConstants.helperCodeSigningIdentifier,
+            PrivilegedServiceConstants.helperBundleIdentifier
+        )
+        XCTAssertNotEqual(
+            PrivilegedServiceConstants.helperCodeSigningIdentifier,
             PrivilegedServiceConstants.helperExecutableName
+        )
+    }
+
+    func testMachServiceNameTracksHelperBundleIdentifier() {
+        XCTAssertEqual(
+            PrivilegedServiceConstants.machServiceName,
+            PrivilegedServiceConstants.helperBundleIdentifier
         )
     }
 

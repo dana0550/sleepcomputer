@@ -10,6 +10,8 @@ protocol OpenLidSleepControlling {
 protocol ClosedLidSleepControlling {
     func setEnabled(_ enabled: Bool) async throws
     func readSleepDisabled() async throws -> Bool
+    func captureManagedOverridesBaseline() async throws -> ClosedLidOverrideSnapshot
+    func restoreManagedOverrides(from snapshot: ClosedLidOverrideSnapshot) async throws
     func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport
 }
 
