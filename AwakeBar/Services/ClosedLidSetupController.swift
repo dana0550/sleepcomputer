@@ -107,6 +107,15 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             return .unavailable("Could not register privileged helper: \(error.localizedDescription)")
         }
 
+        switch daemonService.status {
+        case .requiresApproval:
+            return .approvalRequired
+        case .notFound:
+            return .unavailable("Privileged helper was not found in the app bundle.")
+        default:
+            break
+        }
+
         if await waitForHelperReachable(maxAttempts: 3) {
             return .ready
         }
