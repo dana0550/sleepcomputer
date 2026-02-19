@@ -17,6 +17,7 @@ last_rendered: 2026-02-19
   - [F-003.02] Privileged XPC Transport
   - [F-003.03] Legacy Privilege Cleanup
   - [F-003.04] Helper Packaging and LaunchDaemon Wiring
+  - [F-003.05] Helper Signing Identity and Launch Constraints
 - [F-004] State Persistence and Login
   - [F-004.01] Safe State Persistence Boundary
   - [F-004.02] Launch-at-Login Control

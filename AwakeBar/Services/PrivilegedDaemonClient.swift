@@ -42,19 +42,26 @@ protocol PrivilegedDaemonControlling: Sendable {
 }
 
 final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Sendable {
+    private static let helperCodeSigningRequirement = CodeSigningRequirementBuilder.requirement(
+        for: PrivilegedServiceConstants.helperCodeSigningIdentifier,
+        teamID: CodeSigningRequirementBuilder.configuredTeamID()
+    )
     private let timeoutNanoseconds: UInt64
+    private let pingTimeoutNanoseconds: UInt64
     private let connectionFactory: () -> NSXPCConnection
 
     init(
         timeoutNanoseconds: UInt64 = 8_000_000_000,
+        pingTimeoutNanoseconds: UInt64 = 2_000_000_000,
         connectionFactory: (() -> NSXPCConnection)? = nil
     ) {
         self.timeoutNanoseconds = timeoutNanoseconds
+        self.pingTimeoutNanoseconds = pingTimeoutNanoseconds
         self.connectionFactory = connectionFactory ?? Self.makeConnection
     }
 
     func ping() async throws {
-        let _: Void = try await performRequest { proxy, finish in
+        let _: Void = try await performRequest(timeoutNanoseconds: pingTimeoutNanoseconds) { proxy, finish in
             proxy.ping { isAlive, message in
                 if isAlive {
                     finish(.success(()))
@@ -147,15 +154,12 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
             options: .privileged
         )
         connection.remoteObjectInterface = NSXPCInterface(with: AwakeBarPrivilegedServiceXPC.self)
-        let requirement = CodeSigningRequirementBuilder.requirement(
-            for: PrivilegedServiceConstants.helperCodeSigningIdentifier,
-            teamID: CodeSigningRequirementBuilder.configuredTeamID()
-        )
-        connection.setCodeSigningRequirement(requirement)
+        connection.setCodeSigningRequirement(helperCodeSigningRequirement)
         return connection
     }
 
     private func performRequest<T: Sendable>(
+        timeoutNanoseconds requestTimeoutNanoseconds: UInt64? = nil,
         _ call: @escaping (_ proxy: AwakeBarPrivilegedServiceXPC, _ finish: @escaping (Result<T, Error>) -> Void) -> Void
     ) async throws -> T {
         let connection = connectionFactory()
@@ -196,7 +200,8 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
 
             call(proxy, finish)
 
-            let timeoutSeconds = Double(timeoutNanoseconds) / 1_000_000_000
+            let resolvedTimeoutNanoseconds = requestTimeoutNanoseconds ?? timeoutNanoseconds
+            let timeoutSeconds = Double(resolvedTimeoutNanoseconds) / 1_000_000_000
             let finishBox = SendableFinishBox(callback: finish)
             DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + timeoutSeconds) {
                 finishBox.callback(.failure(PrivilegedDaemonClientError.timeout))

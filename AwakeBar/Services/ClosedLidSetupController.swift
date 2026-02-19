@@ -32,17 +32,20 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
     private let daemonClient: PrivilegedDaemonControlling
     private let daemonService: DaemonServiceManaging
     private let appBundleURLProvider: () -> URL
+    private let retryDelayNanoseconds: UInt64
     private let openSettings: () -> Void
 
     init(
         daemonClient: PrivilegedDaemonControlling = PrivilegedDaemonClient(),
         daemonService: DaemonServiceManaging = SMAppServiceDaemonService(plistName: PrivilegedServiceConstants.daemonPlistName),
         appBundleURLProvider: @escaping () -> URL = { Bundle.main.bundleURL },
+        retryDelayNanoseconds: UInt64 = 1_000_000_000,
         openSettings: @escaping () -> Void = { SMAppService.openSystemSettingsLoginItems() }
     ) {
         self.daemonClient = daemonClient
         self.daemonService = daemonService
         self.appBundleURLProvider = appBundleURLProvider
+        self.retryDelayNanoseconds = retryDelayNanoseconds
         self.openSettings = openSettings
     }
 
@@ -63,7 +66,7 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
                 try await daemonClient.ping()
                 return .ready
             } catch {
-                return .unavailable("Privileged helper is registered but unavailable: \(error.localizedDescription)")
+                return .unavailable(helperUnavailableMessage(error: error))
             }
         @unknown default:
             return .unavailable("Unknown privileged helper status.")
@@ -82,19 +85,10 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         case .notFound:
             return .unavailable("Privileged helper was not found in the app bundle.")
         case .enabled:
-            if await waitForHelperReachable(maxAttempts: 2) {
-                return .ready
-            }
-
-            // Repair stale registrations where service is marked enabled but XPC is unreachable.
-            _ = try? daemonService.unregister()
-            _ = try? daemonService.register()
-
             if await waitForHelperReachable(maxAttempts: 3) {
                 return .ready
             }
-
-            return await refreshStatus()
+            return .unavailable(helperUnavailableMessage(error: nil))
         case .notRegistered:
             break
         @unknown default:
@@ -112,23 +106,17 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             return .approvalRequired
         case .notFound:
             return .unavailable("Privileged helper was not found in the app bundle.")
+        case .notRegistered:
+            return .unavailable("Privileged helper registration did not persist.")
         default:
             break
         }
 
-        if await waitForHelperReachable(maxAttempts: 3) {
+        if await waitForHelperReachable(maxAttempts: 4) {
             return .ready
         }
 
-        // One repair pass handles delayed launchd propagation after first-time registration.
-        _ = try? daemonService.unregister()
-        _ = try? daemonService.register()
-
-        if await waitForHelperReachable(maxAttempts: 3) {
-            return .ready
-        }
-
-        return await refreshStatus()
+        return .unavailable(helperUnavailableMessage(error: nil))
     }
 
     func openSystemSettingsForApproval() {
@@ -149,13 +137,26 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         }
 
         for attempt in 0..<maxAttempts {
+            guard daemonService.status == .enabled else {
+                return false
+            }
             if await isHelperReachable() {
                 return true
             }
-            if attempt < maxAttempts - 1 {
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+            if attempt < maxAttempts - 1, retryDelayNanoseconds > 0 {
+                try? await Task.sleep(nanoseconds: retryDelayNanoseconds)
             }
         }
         return false
+    }
+
+    private func helperUnavailableMessage(error: Error?) -> String {
+        var segments = ["Privileged helper is registered but macOS did not launch it."]
+        if let error {
+            segments.append("Last error: \(error.localizedDescription).")
+        }
+        segments.append("Quit AwakeBar, reinstall it in /Applications, then restart your Mac.")
+        segments.append("If it still fails, reset Background Items with 'sfltool resetbtm' and reboot.")
+        return segments.joined(separator: " ")
     }
 }

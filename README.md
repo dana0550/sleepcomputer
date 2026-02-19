@@ -74,10 +74,12 @@ Hover the `Full Awake` toggle to view quick inline help text.
 3. If prompted, click `Finish Setup...`, then approve the helper in `Login Items`.
 4. Return to AwakeBar and toggle `Full Awake` ON again.
 
+If setup still fails and the toggle returns to OFF, quit AwakeBar, reinstall it to `/Applications`, restart your Mac, then retry. If it still fails, reset Background Items with `sfltool resetbtm` and reboot.
+
 Architecture details:
 
 - Helper registration uses `SMAppService.daemon(plistName:)`.
-- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper.v2`) with code-signing requirements in both directions.
+- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper`) with code-signing requirements in both directions.
 - Runtime does not use `sudo`, AppleScript, or Touch ID/PAM mutation fallbacks.
 
 ## Safety
@@ -152,6 +154,8 @@ Release signing certificate requirements:
 - Exporting an `Apple Development` certificate as `.p12` will fail release signing.
 
 Release scripts set `AWAKEBAR_TEAM_ID` from `APPLE_TEAM_ID` so XPC code-sign checks bind both bundle ID and team ID in production builds.
+
+Release packaging enforces helper code-signing identifier `com.dshakiba.AwakeBar.PrivilegedHelper` (`CREATE_INFOPLIST_SECTION_IN_BINARY=YES` + `OTHER_CODE_SIGN_FLAGS`) and validates it in `Scripts/smoke-check-app.sh`.
 
 Secret hygiene:
 

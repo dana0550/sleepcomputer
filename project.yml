@@ -66,8 +66,10 @@ targets:
         PRODUCT_NAME: AwakeBarPrivilegedHelper
         PRODUCT_BUNDLE_IDENTIFIER: com.dshakiba.AwakeBar.PrivilegedHelper
         GENERATE_INFOPLIST_FILE: YES
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
         INFOPLIST_KEY_CFBundleDisplayName: AwakeBarPrivilegedHelper
         INFOPLIST_KEY_AwakeBarTeamID: $(AWAKEBAR_TEAM_ID)
+        OTHER_CODE_SIGN_FLAGS: "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)"
         CODE_SIGN_STYLE: Automatic
       configs:
         Release:

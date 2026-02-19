@@ -730,6 +730,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
@@ -739,6 +740,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
 				PRODUCT_NAME = AwakeBarPrivilegedHelper;
 				SDKROOT = macosx;
@@ -771,6 +773,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
 				INFOPLIST_KEY_CFBundleDisplayName = AwakeBarPrivilegedHelper;
@@ -779,6 +782,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
 				PRODUCT_NAME = AwakeBarPrivilegedHelper;
 				SDKROOT = macosx;

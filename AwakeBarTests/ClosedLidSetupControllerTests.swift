@@ -51,22 +51,49 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.registerCalls, 1)
     }
 
-    func testStartSetupRepairsEnabledServiceWhenPingInitiallyFails() async {
+    func testStartSetupEnabledServiceWaitsForHelperWithoutReRegistration() async {
         let daemon = MockDaemonClientForSetup()
         daemon.pingSequence = [false, false, true]
         let service = MockDaemonService(status: .enabled)
 
-        let controller = ClosedLidSetupController(
-            daemonClient: daemon,
-            daemonService: service,
-            appBundleURLProvider: { URL(fileURLWithPath: "/Applications/AwakeBar.app") },
-            openSettings: {}
-        )
+        let controller = makeController(daemon: daemon, service: service)
 
         let state = await controller.startSetup()
         XCTAssertEqual(state, .ready)
-        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.unregisterCalls, 0)
+        XCTAssertEqual(service.registerCalls, 0)
+    }
+
+    func testStartSetupEnabledServiceFailureDoesNotUnregisterOrRegister() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingValue = false
+        let service = MockDaemonService(status: .enabled)
+
+        let controller = makeController(daemon: daemon, service: service)
+
+        let state = await controller.startSetup()
+        guard case .unavailable(let message) = state else {
+            return XCTFail("Expected unavailable")
+        }
+        XCTAssertTrue(message.contains("did not launch"))
+        XCTAssertEqual(service.unregisterCalls, 0)
+        XCTAssertEqual(service.registerCalls, 0)
+    }
+
+    func testStartSetupNotRegisteredFailureRegistersOnceWithoutRepairLoop() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingValue = false
+        let service = MockDaemonService(status: .notRegistered)
+
+        let controller = makeController(daemon: daemon, service: service)
+
+        let state = await controller.startSetup()
+        guard case .unavailable(let message) = state else {
+            return XCTFail("Expected unavailable")
+        }
+        XCTAssertTrue(message.contains("sfltool resetbtm"))
         XCTAssertEqual(service.registerCalls, 1)
+        XCTAssertEqual(service.unregisterCalls, 0)
     }
 
     func testRefreshStatusMapsApprovalRequired() async {
@@ -171,9 +198,10 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         )
 
         let state = await controller.refreshStatus()
-        guard case .unavailable = state else {
+        guard case .unavailable(let message) = state else {
             return XCTFail("Expected unavailable")
         }
+        XCTAssertTrue(message.contains("did not launch"))
     }
 
     func testStartSetupReturnsUnavailableWhenRegisterFails() async {
@@ -215,6 +243,21 @@ final class ClosedLidSetupControllerTests: XCTestCase {
     func testIsInApplicationsRejectsApplicationsDirectoryRoot() {
         XCTAssertFalse(ClosedLidSetupController.isInApplications(URL(fileURLWithPath: "/Applications")))
         XCTAssertTrue(ClosedLidSetupController.isInApplications(URL(fileURLWithPath: "/Applications/AwakeBar.app")))
+    }
+
+    private func makeController(
+        daemon: MockDaemonClientForSetup,
+        service: MockDaemonService,
+        appPath: String = "/Applications/AwakeBar.app",
+        openSettings: @escaping () -> Void = {}
+    ) -> ClosedLidSetupController {
+        ClosedLidSetupController(
+            daemonClient: daemon,
+            daemonService: service,
+            appBundleURLProvider: { URL(fileURLWithPath: appPath) },
+            retryDelayNanoseconds: 0,
+            openSettings: openSettings
+        )
     }
 }
 

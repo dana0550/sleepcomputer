@@ -47,10 +47,17 @@ final class PrivilegedDaemonClientTests: XCTestCase {
         )
     }
 
-    func testHelperCodeSigningIdentifierMatchesSignedToolIdentifier() {
+    func testHelperCodeSigningIdentifierMatchesExpectedBundleIdentifier() {
         XCTAssertEqual(
             PrivilegedServiceConstants.helperCodeSigningIdentifier,
-            "AwakeBarPrivilegedHelper"
+            "com.dshakiba.AwakeBar.PrivilegedHelper"
+        )
+    }
+
+    func testHelperBundleIdentifierMatchesCodeSigningIdentifier() {
+        XCTAssertEqual(
+            PrivilegedServiceConstants.helperBundleIdentifier,
+            PrivilegedServiceConstants.helperCodeSigningIdentifier
         )
     }
 
