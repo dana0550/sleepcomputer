@@ -31,4 +31,29 @@ final class AppStateStoreTests: XCTestCase {
         XCTAssertEqual(loaded.closedLidSetupState, .notRegistered)
         XCTAssertNil(loaded.transientErrorMessage)
     }
+
+    func testSavePersistsRestoreIntentOnlyWhenFullAwakeIsEnabled() {
+        let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create UserDefaults suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        let input = AppState(
+            openLidEnabled: true,
+            closedLidEnabledByApp: false,
+            launchAtLoginEnabled: false,
+            closedLidSetupState: .ready,
+            legacyCleanupCompleted: false,
+            transientErrorMessage: nil
+        )
+
+        store.save(input)
+        let loaded = store.load()
+
+        XCTAssertFalse(loaded.openLidEnabled)
+    }
 }

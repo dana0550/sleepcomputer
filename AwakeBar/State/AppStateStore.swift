@@ -25,7 +25,8 @@ final class AppStateStore {
     }
 
     func save(_ state: AppState) {
-        userDefaults.set(state.openLidEnabled, forKey: Keys.openLidEnabled)
+        let shouldRestoreFullAwake = state.openLidEnabled && state.closedLidEnabledByApp
+        userDefaults.set(shouldRestoreFullAwake, forKey: Keys.openLidEnabled)
         userDefaults.set(state.launchAtLoginEnabled, forKey: Keys.launchAtLoginEnabled)
         userDefaults.set(state.legacyCleanupCompleted, forKey: Keys.legacyCleanupCompleted)
     }

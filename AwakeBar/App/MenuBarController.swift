@@ -12,9 +12,13 @@ final class MenuBarController: ObservableObject {
     private let closedLidController: ClosedLidSleepControlling
     private let closedLidSetupController: ClosedLidSetupControlling
     private let loginItemController: LoginItemControlling
+    private let approvalPollingAttempts: Int
+    private let approvalPollingIntervalNanoseconds: UInt64
 
     private var didBootstrap = false
     private var errorClearTask: Task<Void, Never>?
+    private var setupStatusPollTask: Task<Void, Never>?
+    private var setupStatusPollToken = UUID()
 
     init(
         stateStore: AppStateStore = AppStateStore(),
@@ -22,6 +26,8 @@ final class MenuBarController: ObservableObject {
         closedLidController: ClosedLidSleepControlling? = nil,
         closedLidSetupController: ClosedLidSetupControlling? = nil,
         loginItemController: LoginItemControlling = LoginItemController(),
+        approvalPollingAttempts: Int = 30,
+        approvalPollingIntervalNanoseconds: UInt64 = 1_000_000_000,
         autoBootstrap: Bool = true
     ) {
         let resolvedClosedLidController: ClosedLidSleepControlling
@@ -44,6 +50,8 @@ final class MenuBarController: ObservableObject {
         self.closedLidController = resolvedClosedLidController
         self.closedLidSetupController = resolvedSetupController
         self.loginItemController = loginItemController
+        self.approvalPollingAttempts = max(1, approvalPollingAttempts)
+        self.approvalPollingIntervalNanoseconds = approvalPollingIntervalNanoseconds
         self.state = stateStore.load()
 
         if autoBootstrap {
@@ -55,6 +63,7 @@ final class MenuBarController: ObservableObject {
 
     deinit {
         errorClearTask?.cancel()
+        setupStatusPollTask?.cancel()
     }
 
     var mode: KeepAwakeMode {
@@ -154,14 +163,27 @@ final class MenuBarController: ObservableObject {
     func openLoginItemsSettingsForApproval() {
         closedLidSetupController.openSystemSettingsForApproval()
 
-        Task { [weak self] in
+        setupStatusPollTask?.cancel()
+        let pollToken = UUID()
+        setupStatusPollToken = pollToken
+
+        setupStatusPollTask = Task { [weak self] in
             guard let self else { return }
-            for _ in 0..<30 {
+            defer {
+                if self.setupStatusPollToken == pollToken {
+                    self.setupStatusPollTask = nil
+                }
+            }
+
+            for _ in 0..<self.approvalPollingAttempts {
+                guard !Task.isCancelled else {
+                    return
+                }
                 await self.refreshClosedLidRuntimeState()
                 if self.state.closedLidSetupState.isReady {
                     return
                 }
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                try? await Task.sleep(nanoseconds: self.approvalPollingIntervalNanoseconds)
             }
         }
     }
@@ -211,17 +233,20 @@ final class MenuBarController: ObservableObject {
                     }
                     let baseMessage = fullAwakeSetupMessage(for: setupState)
                     setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+                    persistSafeState()
                 } catch {
                     let rollbackIssue = rollbackOpenLidState(to: previousOpen)
                     state.closedLidEnabledByApp = previousByApp
                     let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
                     setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+                    persistSafeState()
                 }
             } catch {
                 let rollbackIssue = rollbackOpenLidState(to: previousOpen)
                 state.closedLidEnabledByApp = previousByApp
                 let baseMessage = "Could not enable Full Awake: \(error.localizedDescription)"
                 setTransientError(composeErrorMessage(base: baseMessage, rollbackIssue: rollbackIssue))
+                persistSafeState()
             }
             return
         }

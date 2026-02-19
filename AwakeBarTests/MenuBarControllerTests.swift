@@ -328,6 +328,72 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertTrue(controller.state.transientErrorMessage?.contains("Open-lid awake may still be active") == true)
     }
 
+    func testFailedEnableRollbackDoesNotPersistRestoreIntentWhenOtherSettingsAreSaved() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.shouldThrow = true
+        openMock.disableFailureMode = .throwAndStayEnabled
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        controller.setLaunchAtLoginEnabled(true)
+
+        let loaded = store.load()
+        XCTAssertTrue(controller.state.openLidEnabled)
+        XCTAssertFalse(loaded.openLidEnabled)
+        XCTAssertTrue(loaded.launchAtLoginEnabled)
+    }
+
+    func testOpenLoginItemsSettingsForApprovalCancelsPreviousPollingTask() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let attempts = 4
+
+        setupMock.refreshResult = .approvalRequired
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            approvalPollingAttempts: attempts,
+            approvalPollingIntervalNanoseconds: 20_000_000,
+            autoBootstrap: false
+        )
+
+        controller.openLoginItemsSettingsForApproval()
+        try? await Task.sleep(nanoseconds: 5_000_000)
+        controller.openLoginItemsSettingsForApproval()
+        try? await Task.sleep(nanoseconds: 140_000_000)
+
+        XCTAssertEqual(setupMock.openSettingsCalls, 2)
+        XCTAssertLessThanOrEqual(setupMock.refreshCalls, attempts + 1)
+    }
+
     func testSetLaunchAtLoginPersistsState() {
         let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
@@ -601,10 +667,12 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
 private final class ClosedLidSetupMock: ClosedLidSetupControlling {
     var refreshResult: ClosedLidSetupState = .ready
     var startResult: ClosedLidSetupState = .ready
+    private(set) var refreshCalls = 0
     private(set) var openSettingsCalls = 0
 
     func refreshStatus() async -> ClosedLidSetupState {
-        refreshResult
+        refreshCalls += 1
+        return refreshResult
     }
 
     func startSetup() async -> ClosedLidSetupState {
