@@ -111,7 +111,7 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(state, .approvalRequired)
     }
 
-    func testRefreshStatusMapsNotFoundToUnavailable() async {
+    func testRefreshStatusMapsNotFoundToNotRegistered() async {
         let daemon = MockDaemonClientForSetup()
         let service = MockDaemonService(status: .notFound)
 
@@ -123,10 +123,7 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         )
 
         let state = await controller.refreshStatus()
-        guard case .unavailable(let message) = state else {
-            return XCTFail("Expected unavailable")
-        }
-        XCTAssertTrue(message.contains("not found"))
+        XCTAssertEqual(state, .notRegistered)
     }
 
     func testStartSetupReturnsApprovalRequiredWithoutRegisterRetryLoop() async {
@@ -165,9 +162,10 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.unregisterCalls, 0)
     }
 
-    func testStartSetupReturnsNotFoundUnavailableWithoutRegisterAttempt() async {
+    func testStartSetupReturnsUnavailableWhenNotFoundPersistsAfterRegister() async {
         let daemon = MockDaemonClientForSetup()
         let service = MockDaemonService(status: .notFound)
+        service.statusAfterRegister = .notFound
 
         let controller = ClosedLidSetupController(
             daemonClient: daemon,
@@ -180,8 +178,25 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         guard case .unavailable(let message) = state else {
             return XCTFail("Expected unavailable")
         }
-        XCTAssertTrue(message.contains("not found"))
-        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertTrue(message.contains("registration did not persist"))
+        XCTAssertEqual(service.registerCalls, 1)
+        XCTAssertEqual(service.unregisterCalls, 0)
+    }
+
+    func testStartSetupTreatsNotFoundAsSetupRequiredAndRegisters() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .notFound)
+
+        let controller = ClosedLidSetupController(
+            daemonClient: daemon,
+            daemonService: service,
+            appBundleURLProvider: { URL(fileURLWithPath: "/Applications/AwakeBar.app") },
+            openSettings: {}
+        )
+
+        let state = await controller.startSetup()
+        XCTAssertEqual(state, .ready)
+        XCTAssertEqual(service.registerCalls, 1)
         XCTAssertEqual(service.unregisterCalls, 0)
     }
 

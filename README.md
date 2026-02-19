@@ -75,6 +75,7 @@ Hover the `Full Awake` toggle to view quick inline help text.
 4. Return to AwakeBar and toggle `Full Awake` ON again.
 
 If setup still fails and the toggle returns to OFF, quit AwakeBar, reinstall it to `/Applications`, restart your Mac, then retry. If it still fails, reset Background Items with `sfltool resetbtm` and reboot.
+On first run, macOS may report the helper as "not found" until Background Items registration exists; AwakeBar now treats that state as setup-required and retries registration automatically.
 
 Architecture details:
 

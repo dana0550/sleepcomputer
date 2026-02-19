@@ -60,7 +60,9 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         case .requiresApproval:
             return .approvalRequired
         case .notFound:
-            return .unavailable("Privileged helper was not found in the app bundle.")
+            // On newer macOS builds, `notFound` is returned when no BTM record exists yet.
+            // Treat it as setup-required so first-time registration can proceed.
+            return .notRegistered
         case .enabled:
             do {
                 try await daemonClient.ping()
@@ -82,14 +84,12 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         switch currentStatus {
         case .requiresApproval:
             return .approvalRequired
-        case .notFound:
-            return .unavailable("Privileged helper was not found in the app bundle.")
         case .enabled:
             if await waitForHelperReachable(maxAttempts: 3) {
                 return .ready
             }
             return .unavailable(helperUnavailableMessage(error: nil))
-        case .notRegistered:
+        case .notRegistered, .notFound:
             break
         @unknown default:
             return .unavailable("Unknown privileged helper status.")
@@ -104,9 +104,7 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         switch daemonService.status {
         case .requiresApproval:
             return .approvalRequired
-        case .notFound:
-            return .unavailable("Privileged helper was not found in the app bundle.")
-        case .notRegistered:
+        case .notRegistered, .notFound:
             return .unavailable("Privileged helper registration did not persist.")
         default:
             break

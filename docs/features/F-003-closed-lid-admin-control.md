@@ -11,9 +11,10 @@ children:
   - F-003.03
   - F-003.04
   - F-003.05
+  - F-003.06
 aliases:
   - Closed-Lid Admin Control
-version: 2.3.0
+version: 2.4.0
 last_reviewed: 2026-02-19
 tags:
   - power
@@ -101,6 +102,7 @@ Provide closed-lid keep-awake control using a privileged LaunchDaemon + XPC help
 - [F-003.03](./F-003.03-legacy-privilege-cleanup.md)
 - [F-003.04](./F-003.04-helper-packaging-launchd.md)
 - [F-003.05](./F-003.05-helper-signing-identity-launch-constraints.md)
+- [F-003.06](./F-003.06-smappservice-notfound-registration-recovery.md)
 
 ## References
 
@@ -111,6 +113,7 @@ Provide closed-lid keep-awake control using a privileged LaunchDaemon + XPC help
 - [F-003.03](./F-003.03-legacy-privilege-cleanup.md)
 - [F-003.04](./F-003.04-helper-packaging-launchd.md)
 - [F-003.05](./F-003.05-helper-signing-identity-launch-constraints.md)
+- [F-003.06](./F-003.06-smappservice-notfound-registration-recovery.md)
 - [F-004](./F-004-state-persistence-login.md)
 - [F-004.03](./F-004.03-closed-lid-override-session-recovery.md)
 - [ADR-0001](../DECISIONS/ADR-0001-privileged-daemon-cutover.md)
@@ -161,3 +164,4 @@ Provide closed-lid keep-awake control using a privileged LaunchDaemon + XPC help
 - 2026-02-18: Split implementation details into child specs for setup, transport, cleanup, and packaging.
 - 2026-02-19: Linked closed-lid baseline restore recovery behavior from F-004.03 and updated transport hardening references.
 - 2026-02-19: Added child spec F-003.05 for helper signing identity stability and launch-constraint compatibility.
+- 2026-02-19: Added child spec F-003.06 for first-run `SMAppService` notFound registration recovery.
