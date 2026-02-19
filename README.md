@@ -23,7 +23,7 @@ AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 It provides a single primary control:
 
 - `Full Awake` (ON): keeps your Mac awake with the lid open and with the lid closed.
-- `Off`: restores normal macOS sleep behavior.
+- `Off`: restores captured baseline sleep policy when available, otherwise normal macOS sleep behavior.
 
 ## Visual Identity
 
@@ -42,7 +42,7 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
-| `Off` | Restores normal macOS sleep behavior | No | Default energy-saving behavior |
+| `Off` | Restores captured pre-toggle `SleepDisabled` baseline when available, otherwise normal macOS sleep behavior | No | Default energy-saving behavior |
 | `Full Awake` | Enables open-lid assertions and closed-lid sleep disable (`pmset -a disablesleep 1`) | One-time helper setup + approval in System Settings (if not already approved) | Long-running tasks that must not sleep |
 
 ## Menu Controls
@@ -51,6 +51,7 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 - `Full Awake`: one toggle for all awake behavior.
 - `Finish Setup...`: appears when helper approval/setup is required.
 - `Inline message`: explains setup blockers or helper errors in menu context.
+- `Pending restore notice`: appears when previous sleep baseline restore is queued for retry.
 - `Quit AwakeBar`: exits the app.
 - `State indicator`: status dot is gray when OFF and blue when ON.
 - `Toggle tint`: switch tint is blue when ON.
@@ -86,6 +87,7 @@ Architecture details:
 - Closed-lid control uses a scoped privileged helper with a fixed command surface.
 - Legacy `sudoers`/PAM artifacts from prior versions are backed up and cleaned once helper setup is healthy.
 - If helper state is unavailable, AwakeBar keeps Full Awake OFF and shows an inline reason.
+- On quit, AwakeBar attempts to restore the captured baseline sleep policy; if unavailable, it persists a bounded pending restore record and retries on relaunch/setup refresh.
 
 ## Requirements
 
@@ -127,6 +129,7 @@ APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configurati
 ## Signed/Notarized Release
 
 - CI validation workflow: `.github/workflows/ci-macos.yml` (PRs + branch pushes + manual runs).
+- Compatibility matrix in CI validates high-value restore/parser suites on `macos-14` and `macos-latest`.
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
 - Artifact smoke checks script: `Scripts/smoke-check-app.sh` (runs in PR CI and release flows).

@@ -84,11 +84,11 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
                     finish(.failure(error))
                     return
                 }
-                guard let value else {
-                    finish(.failure(PrivilegedDaemonClientError.invalidSleepDisabledResponse))
-                    return
+                do {
+                    finish(.success(try Self.parseSleepDisabledResponse(value)))
+                } catch {
+                    finish(.failure(error))
                 }
-                finish(.success(value.boolValue))
             }
         }
     }
@@ -125,6 +125,20 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
             skippedPaths: skipped,
             backupDirectory: backupDirectory
         )
+    }
+
+    static func parseSleepDisabledResponse(_ value: NSNumber?) throws -> Bool {
+        guard let value else {
+            throw PrivilegedDaemonClientError.invalidSleepDisabledResponse
+        }
+        let parsed = value.int64Value
+        guard Double(parsed) == value.doubleValue else {
+            throw PrivilegedDaemonClientError.invalidSleepDisabledResponse
+        }
+        guard parsed == 0 || parsed == 1 else {
+            throw PrivilegedDaemonClientError.invalidSleepDisabledResponse
+        }
+        return parsed == 1
     }
 
     private static func makeConnection() -> NSXPCConnection {

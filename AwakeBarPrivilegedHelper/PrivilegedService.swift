@@ -75,8 +75,16 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
             guard trimmed.hasPrefix(key) else {
                 continue
             }
+            let suffixStart = trimmed.index(trimmed.startIndex, offsetBy: key.count)
+            let suffix = trimmed[suffixStart...]
+            if let firstSuffixChar = suffix.first,
+               !firstSuffixChar.isWhitespace,
+               firstSuffixChar != ":",
+               firstSuffixChar != "=" {
+                continue
+            }
 
-            var remainder = String(trimmed.dropFirst(key.count))
+            var remainder = String(suffix)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             if remainder.hasPrefix(":") || remainder.hasPrefix("=") {
                 remainder.removeFirst()

@@ -2,11 +2,14 @@ import Foundation
 
 enum ClosedLidControlError: Error, LocalizedError {
     case setupRequired(ClosedLidSetupState)
+    case invalidRestoreSnapshot(String)
 
     var errorDescription: String? {
         switch self {
         case .setupRequired(let state):
             return state.detail
+        case .invalidRestoreSnapshot(let detail):
+            return detail
         }
     }
 }
@@ -63,7 +66,7 @@ final class ClosedLidPmsetController: ClosedLidSleepControlling {
             throw ClosedLidControlError.setupRequired(setupState)
         }
         guard let sleepDisabled = snapshot[.sleepDisabled] else {
-            return
+            throw ClosedLidControlError.invalidRestoreSnapshot("SleepDisabled baseline is missing.")
         }
 
         try await daemonClient.setSleepDisabled(sleepDisabled)

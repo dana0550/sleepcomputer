@@ -350,6 +350,45 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertNotNil(controller.pendingRestoreMessage)
     }
 
+    func testRefreshSetupStateRetriesPendingRestoreAndClearsSessionOnSuccess() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        store.saveOverrideSession(
+            ClosedLidOverrideSession(
+                snapshot: ClosedLidOverrideSnapshot(sleepDisabled: false),
+                pendingRestore: true,
+                lastRestoreError: "retry needed"
+            )
+        )
+
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        controller.refreshSetupState()
+        await waitForCondition { closedMock.restoreCalls.count == 1 }
+
+        XCTAssertNil(store.loadOverrideSession())
+        XCTAssertNil(controller.pendingRestoreMessage)
+    }
+
     func testFullAwakeFailureRollsBackBothStates() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()

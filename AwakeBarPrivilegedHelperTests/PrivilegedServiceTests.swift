@@ -87,6 +87,34 @@ final class PrivilegedServiceTests: XCTestCase {
             try PrivilegedService.parseSleepDisabled("SleepDisabled maybe")
         )
     }
+
+    func testParseSleepDisabledSupportsKnownFormattingVariantsAcrossMacOSReleases() throws {
+        let fixtures: [(String, Bool)] = [
+            // Typical alignment in modern pmset output.
+            ("System-wide power settings:\n SleepDisabled        1\n", true),
+            // Tab-separated legacy style.
+            ("SleepDisabled\t0\n", false),
+            // Delimiter variants seen in tool wrappers.
+            ("SleepDisabled: 1\n", true),
+            ("SleepDisabled = 0\n", false)
+        ]
+
+        for (output, expected) in fixtures {
+            XCTAssertEqual(try PrivilegedService.parseSleepDisabled(output), expected)
+        }
+    }
+
+    func testParseSleepDisabledDoesNotMatchLookalikeKeys() {
+        XCTAssertThrowsError(
+            try PrivilegedService.parseSleepDisabled("SleepDisabledLegacy 1\n")
+        )
+    }
+
+    func testParseSleepDisabledThrowsWhenValueMissing() {
+        XCTAssertThrowsError(
+            try PrivilegedService.parseSleepDisabled("SleepDisabled\n")
+        )
+    }
 }
 
 private final class MockRunner: HelperCommandRunning {
