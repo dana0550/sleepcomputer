@@ -21,6 +21,7 @@ final class MenuBarController: ObservableObject {
     private var errorClearTask: Task<Void, Never>?
     private var setupStatusPollTask: Task<Void, Never>?
     private var setupStatusPollToken = UUID()
+    private var pendingRestoreRetryTask: Task<Void, Never>?
 
     init(
         stateStore: AppStateStore = AppStateStore(),
@@ -67,6 +68,7 @@ final class MenuBarController: ObservableObject {
     deinit {
         errorClearTask?.cancel()
         setupStatusPollTask?.cancel()
+        pendingRestoreRetryTask?.cancel()
     }
 
     var mode: KeepAwakeMode {
@@ -169,16 +171,9 @@ final class MenuBarController: ObservableObject {
     }
 
     func refreshSetupState() {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
-            if self.overrideSession?.pendingRestore == true {
-                switch await self.restoreOverrideSession(markPendingOnFailure: true) {
-                case .success:
-                    break
-                case .failure(let error):
-                    self.setTransientError("Could not restore previous sleep settings: \(error.localizedDescription)")
-                }
-            }
+            await self.retryPendingRestoreIfNeeded()
             await self.refreshClosedLidRuntimeState(allowDuringTransition: false)
         }
     }
@@ -237,6 +232,8 @@ final class MenuBarController: ObservableObject {
         var capturedSessionThisAttempt = false
 
         do {
+            await awaitPendingRestoreRetryIfNeeded()
+
             if !state.closedLidSetupState.isReady {
                 let setupState = await closedLidSetupController.startSetup()
                 state.closedLidSetupState = setupState
@@ -525,19 +522,60 @@ final class MenuBarController: ObservableObject {
         session.lastRestoreError = nil
         overrideSession = session
         persistOverrideSession()
+        let inFlightSession = session
 
         do {
             try await closedLidController.restoreManagedOverrides(from: session.snapshot)
-            overrideSession = nil
-            persistOverrideSession()
+            if overrideSession == inFlightSession {
+                overrideSession = nil
+                persistOverrideSession()
+            }
             return .success(())
         } catch {
             session.pendingRestore = markPendingOnFailure
             session.lastRestoreError = error.localizedDescription
             session.lastRestoreAttemptAt = Date()
-            overrideSession = session
-            persistOverrideSession()
+            if overrideSession == inFlightSession {
+                overrideSession = session
+                persistOverrideSession()
+            }
             return .failure(error)
+        }
+    }
+
+    private func retryPendingRestoreIfNeeded() async {
+        guard !isApplyingFullAwakeChange else {
+            return
+        }
+        guard overrideSession?.pendingRestore == true else {
+            return
+        }
+        if let pendingRestoreRetryTask {
+            await pendingRestoreRetryTask.value
+            return
+        }
+
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                self.pendingRestoreRetryTask = nil
+            }
+
+            switch await self.restoreOverrideSession(markPendingOnFailure: true) {
+            case .success:
+                break
+            case .failure(let error):
+                self.setTransientError("Could not restore previous sleep settings: \(error.localizedDescription)")
+            }
+        }
+
+        pendingRestoreRetryTask = task
+        await task.value
+    }
+
+    private func awaitPendingRestoreRetryIfNeeded() async {
+        if let pendingRestoreRetryTask {
+            await pendingRestoreRetryTask.value
         }
     }
 
