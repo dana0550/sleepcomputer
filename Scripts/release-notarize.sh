@@ -41,11 +41,27 @@ while IFS= read -r line; do
   [[ -n "$line" ]] && ORIGINAL_KEYCHAINS+=("$line")
 done < <(security list-keychains -d user)
 
+LOGIN_KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
+if [[ -f "$LOGIN_KEYCHAIN" ]]; then
+  has_login_keychain=0
+  for keychain in "${ORIGINAL_KEYCHAINS[@]}"; do
+    if [[ "$keychain" == "$LOGIN_KEYCHAIN" ]]; then
+      has_login_keychain=1
+      break
+    fi
+  done
+  if [[ $has_login_keychain -eq 0 ]]; then
+    ORIGINAL_KEYCHAINS+=("$LOGIN_KEYCHAIN")
+  fi
+fi
+
 cleanup() {
   rm -f "$CERT_PATH" "$NOTARY_KEY_PATH"
   security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
   if [[ ${#ORIGINAL_KEYCHAINS[@]} -gt 0 ]]; then
     security list-keychains -d user -s "${ORIGINAL_KEYCHAINS[@]}" >/dev/null 2>&1 || true
+  elif [[ -f "$LOGIN_KEYCHAIN" ]]; then
+    security list-keychains -d user -s "$LOGIN_KEYCHAIN" >/dev/null 2>&1 || true
   fi
 }
 
@@ -67,7 +83,11 @@ security import "$CERT_PATH" \
   -P "$DEVELOPER_ID_APP_CERT_PASSWORD" \
   -T /usr/bin/codesign \
   -T /usr/bin/security
-security list-keychains -d user -s "$KEYCHAIN_PATH"
+if [[ ${#ORIGINAL_KEYCHAINS[@]} -gt 0 ]]; then
+  security list-keychains -d user -s "$KEYCHAIN_PATH" "${ORIGINAL_KEYCHAINS[@]}"
+else
+  security list-keychains -d user -s "$KEYCHAIN_PATH"
+fi
 security set-key-partition-list \
   -S apple-tool:,apple:,codesign: \
   -s \

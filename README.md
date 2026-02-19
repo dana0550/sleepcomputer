@@ -110,7 +110,8 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
-- CI workflow also supports `workflow_dispatch` for preflight; publication remains tag-scoped.
+- CI workflow also supports `workflow_dispatch` once this workflow exists on `main`; publication remains tag-scoped.
+- Release archives now enforce Hardened Runtime for both `AwakeBar` and `AwakeBarPrivilegedHelper` (required for notarization acceptance).
 
 Required environment variables/secrets:
 
@@ -133,7 +134,7 @@ Secret hygiene:
 
 - Keep `.p12` and `.p8` source files out of the repository and out of tracked directories.
 - Store release credentials in a secure vault/password manager.
-- `Scripts/release-notarize.sh` uses a temporary keychain and now removes temporary local credential files/keychain on exit.
+- `Scripts/release-notarize.sh` uses a temporary keychain, preserves login keychain trust visibility during signing checks, and removes temporary local credential files/keychain on exit.
 
 ## Project Layout
 

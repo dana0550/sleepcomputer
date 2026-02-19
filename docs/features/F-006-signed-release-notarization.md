@@ -10,7 +10,7 @@ children:
   - F-006.02
 aliases:
   - Distribution Pipeline
-version: 1.1.0
+version: 1.2.0
 last_reviewed: 2026-02-19
 tags:
   - release
@@ -46,6 +46,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - R4: Release outputs must be publishable artifacts (`.zip` + `.sha256`).
 - R5: Release flows must reject wrong signing identity type before archive and keep secret material scoped to ephemeral keychain/files.
 - R6: Hosted release publication must remain tag-scoped; manual workflow runs may validate pipeline but must not publish non-tag releases.
+- R7: Release archives must enable Hardened Runtime for app and embedded helper binaries so notarization accepts artifacts.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
@@ -54,6 +55,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - [x] R4
 - [x] R5
 - [x] R6
+- [x] R7
 
 ## Acceptance Criteria
 
@@ -62,6 +64,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - AC3: Team-bound signing identity is propagated to app/helper builds.
 - AC4: Both local and CI flows fail early when Developer ID identity or notarization credentials are invalid.
 - AC5: CI release publication is guarded to `refs/tags/v*` only.
+- AC6: Local release notarization submissions are accepted by Apple without hardened-runtime validation errors.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [x] AC1
@@ -69,6 +72,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - [x] AC3
 - [x] AC4
 - [x] AC5
+- [x] AC6
 
 ## Traceability
 
@@ -84,12 +88,14 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 | R5 | code | Scripts/release-notarize.sh |
 | R5 | code | .github/workflows/release-macos.yml |
 | R6 | code | .github/workflows/release-macos.yml |
+| R7 | code | project.yml |
 | AC1 | code | Scripts/release-notarize.sh |
 | AC2 | code | .github/workflows/release-macos.yml |
 | AC3 | code | project.yml |
 | AC4 | code | Scripts/release-notarize.sh |
 | AC4 | code | .github/workflows/release-macos.yml |
 | AC5 | code | .github/workflows/release-macos.yml |
+| AC6 | manual | Local notarization run 2026-02-18 |
 
 ## Children
 
@@ -124,6 +130,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - [x] Requires explicit secrets for signing credentials
 - [x] Preserves team ID consistency for XPC code-sign checks
 - [x] Enforces cert-type preflight and ephemeral secret handling in release tooling
+- [x] Requires Hardened Runtime on release binaries for notarization compliance
 
 ## Budget
 
@@ -147,3 +154,4 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - 2026-02-18: Initial spec created from local/CI release pipeline implementation.
 - 2026-02-19: Added release credential-preflight and secret-material handling requirements.
 - 2026-02-19: Added tag-only publication guard requirement for manual workflow runs.
+- 2026-02-19: Added hardened-runtime notarization acceptance requirement with local execution evidence.
