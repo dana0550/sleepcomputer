@@ -14,21 +14,6 @@ enum ClosedLidSetupState: Equatable {
         return false
     }
 
-    var title: String {
-        switch self {
-        case .notInApplications:
-            return "Move AwakeBar to /Applications"
-        case .notRegistered:
-            return "Enable Closed-Lid Control"
-        case .approvalRequired:
-            return "Approval Required"
-        case .ready:
-            return "Closed-Lid Control Ready"
-        case .unavailable:
-            return "Closed-Lid Control Unavailable"
-        }
-    }
-
     var detail: String {
         switch self {
         case .notInApplications:
