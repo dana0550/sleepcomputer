@@ -17,11 +17,9 @@ final class AppStateStore {
         AppState(
             openLidEnabled: userDefaults.bool(forKey: Keys.openLidEnabled),
             closedLidEnabledByApp: false,
-            externalClosedLidDetected: false,
             launchAtLoginEnabled: userDefaults.bool(forKey: Keys.launchAtLoginEnabled),
             closedLidSetupState: .notRegistered,
             legacyCleanupCompleted: userDefaults.bool(forKey: Keys.legacyCleanupCompleted),
-            legacyCleanupNotice: nil,
             transientErrorMessage: nil
         )
     }

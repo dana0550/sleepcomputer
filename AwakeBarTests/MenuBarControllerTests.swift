@@ -80,6 +80,44 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(setupMock.openSettingsCalls, 1)
     }
 
+    func testBootstrapClearsPersistedRestoreIntentWhenAutoRestoreFails() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        defaults.set(true, forKey: "awakebar.openLidEnabled")
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        setupMock.refreshResult = .approvalRequired
+        setupMock.startResult = .approvalRequired
+        closedMock.setupRequiredState = .approvalRequired
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.bootstrapIfNeeded()
+
+        XCTAssertFalse(store.load().openLidEnabled)
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertEqual(controller.closedLidSetupState, .approvalRequired)
+        XCTAssertEqual(setupMock.openSettingsCalls, 1)
+    }
+
     func testFullAwakeFailureRollsBackBothStates() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()

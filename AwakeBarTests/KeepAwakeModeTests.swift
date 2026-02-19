@@ -30,13 +30,6 @@ final class KeepAwakeModeTests: XCTestCase {
         XCTAssertEqual(KeepAwakeMode.from(state: state), .fullAwake)
     }
 
-    func testModeIsOffWhenOnlyExternalClosedLidAwakeIsDetected() {
-        var state = AppState()
-        state.externalClosedLidDetected = true
-
-        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
-    }
-
     func testStatusTextAndDetailAreHumanReadable() {
         XCTAssertEqual(KeepAwakeMode.off.statusText, "Off")
         XCTAssertEqual(KeepAwakeMode.off.statusDetailText, "Restores normal macOS sleep behavior.")

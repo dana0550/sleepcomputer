@@ -15,11 +15,9 @@ final class AppStateStoreTests: XCTestCase {
         let input = AppState(
             openLidEnabled: true,
             closedLidEnabledByApp: true,
-            externalClosedLidDetected: true,
             launchAtLoginEnabled: true,
             closedLidSetupState: .ready,
             legacyCleanupCompleted: true,
-            legacyCleanupNotice: "x",
             transientErrorMessage: "x"
         )
 
@@ -30,9 +28,7 @@ final class AppStateStoreTests: XCTestCase {
         XCTAssertTrue(loaded.launchAtLoginEnabled)
         XCTAssertTrue(loaded.legacyCleanupCompleted)
         XCTAssertFalse(loaded.closedLidEnabledByApp)
-        XCTAssertFalse(loaded.externalClosedLidDetected)
         XCTAssertEqual(loaded.closedLidSetupState, .notRegistered)
-        XCTAssertNil(loaded.legacyCleanupNotice)
         XCTAssertNil(loaded.transientErrorMessage)
     }
 }

@@ -9,8 +9,8 @@ children:
   - F-005.01
   - F-005.02
 aliases: []
-version: 1.1.0
-last_reviewed: 2026-02-18
+version: 1.2.0
+last_reviewed: 2026-02-19
 tags:
   - design
   - assets
@@ -41,7 +41,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 - R1: Source SVG files for off/full-awake states must exist in `Design/icons/` with stable names.
 - R2: Build script must regenerate `.imageset` SVG + `Contents.json` entries for `AwakeBarStatusOff` and `AwakeBarStatusClosed`.
 - R3: Generated `Contents.json` must set `template-rendering-intent` to `template`.
-- R4: `MenuIconCatalog` must provide deterministic OFF/ON asset mappings for current two-state mode and toggle semantics.
+- R4: `MenuIconCatalog` must provide deterministic OFF/ON asset mappings for the current two-state mode model.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
@@ -91,7 +91,6 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `MenuIconCatalog.statusBarAssetName(for:)`
-- `MenuIconCatalog.fullAwakeToggleAssetName(isOn:)`
 
 ## Impact
 
@@ -128,3 +127,4 @@ Define source SVG icon assets and deterministic conversion into Xcode asset entr
 - 2026-02-18: Added deterministic generation and visual handoff child specs.
 - 2026-02-18: Aligned icon mapping requirements with current two-state catalog API.
 - 2026-02-18: Removed legacy open icon from pipeline requirements and traceability.
+- 2026-02-19: Removed unused toggle-specific catalog API and aligned requirements/contracts to mode-based mapping only.

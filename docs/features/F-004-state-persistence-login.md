@@ -9,8 +9,8 @@ children:
   - F-004.01
   - F-004.02
 aliases: []
-version: 1.2.0
-last_reviewed: 2026-02-18
+version: 1.3.0
+last_reviewed: 2026-02-19
 tags:
   - persistence
   - login-item
@@ -39,7 +39,7 @@ Persist safe state and keep launch-at-login preference control available through
 ## Requirements
 
 - R1: Persist open-lid enabled state, launch-at-login preference, and legacy cleanup completion marker.
-- R2: Never persist `closedLidEnabledByApp` or `externalClosedLidDetected`.
+- R2: Never persist runtime closed-lid state (for example `closedLidEnabledByApp`) or transient UI/error fields.
 - R3: Bootstrap must reset closed-lid runtime state and refresh live setup/runtime status.
 - R4: Login toggle must drive `SMAppService.mainApp` registration state.
 
@@ -129,3 +129,4 @@ Persist safe state and keep launch-at-login preference control available through
 - 2026-02-18: Added migration marker persistence for daemon cutover cleanup idempotency.
 - 2026-02-18: Split persistence and login-item responsibilities into child specs.
 - 2026-02-18: Updated Full Awake terminology for persisted awake intent.
+- 2026-02-19: Removed unused transient state fields from persistence boundary and clarified R2 wording.

@@ -94,10 +94,10 @@ final class MenuBarController: ObservableObject {
         let shouldRestoreFullAwake = loaded.openLidEnabled
         loaded.openLidEnabled = false
         loaded.closedLidEnabledByApp = false
-        loaded.externalClosedLidDetected = false
         loaded.closedLidSetupState = .notRegistered
         loaded.transientErrorMessage = nil
         state = loaded
+        persistSafeState()
 
         do {
             try openLidController.setEnabled(false)
@@ -158,7 +158,6 @@ final class MenuBarController: ObservableObject {
 
         let previousOpen = state.openLidEnabled
         let previousByApp = state.closedLidEnabledByApp
-        let previousExternal = state.externalClosedLidDetected
 
         isApplyingFullAwakeChange = true
         pendingFullAwakeTarget = enabled
@@ -188,14 +187,12 @@ final class MenuBarController: ObservableObject {
                 do {
                     try await closedLidController.setEnabled(true)
                     state.closedLidEnabledByApp = true
-                    state.externalClosedLidDetected = true
                     persistSafeState()
                 } catch let ClosedLidControlError.setupRequired(setupState) {
                     state.closedLidSetupState = setupState
                     try? openLidController.setEnabled(previousOpen)
                     state.openLidEnabled = previousOpen
                     state.closedLidEnabledByApp = previousByApp
-                    state.externalClosedLidDetected = previousExternal
                     if case .approvalRequired = setupState {
                         closedLidSetupController.openSystemSettingsForApproval()
                     }
@@ -204,14 +201,12 @@ final class MenuBarController: ObservableObject {
                     try? openLidController.setEnabled(previousOpen)
                     state.openLidEnabled = previousOpen
                     state.closedLidEnabledByApp = previousByApp
-                    state.externalClosedLidDetected = previousExternal
                     setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
                 }
             } catch {
                 try? openLidController.setEnabled(previousOpen)
                 state.openLidEnabled = previousOpen
                 state.closedLidEnabledByApp = previousByApp
-                state.externalClosedLidDetected = previousExternal
                 setTransientError("Could not enable Full Awake: \(error.localizedDescription)")
             }
             return
@@ -232,12 +227,10 @@ final class MenuBarController: ObservableObject {
         do {
             try await closedLidController.setEnabled(false)
             state.closedLidEnabledByApp = false
-            state.externalClosedLidDetected = false
         } catch let ClosedLidControlError.setupRequired(setupState) {
             state.closedLidSetupState = setupState
         } catch {
             state.closedLidEnabledByApp = previousByApp
-            state.externalClosedLidDetected = previousExternal
             setTransientError("Could not disable closed-lid awake: \(error.localizedDescription)")
         }
 
@@ -279,7 +272,6 @@ final class MenuBarController: ObservableObject {
                 }
             }
 
-            state.externalClosedLidDetected = false
             state.closedLidEnabledByApp = false
 
             if wasOpenEnabled && !state.openLidEnabled {
@@ -290,12 +282,10 @@ final class MenuBarController: ObservableObject {
 
         do {
             let sleepDisabled = try await closedLidController.readSleepDisabled()
-            state.externalClosedLidDetected = sleepDisabled
             if !sleepDisabled {
                 state.closedLidEnabledByApp = false
             }
         } catch {
-            state.externalClosedLidDetected = false
             state.closedLidEnabledByApp = false
             setTransientError("Could not read current sleep policy: \(error.localizedDescription)")
         }
@@ -310,13 +300,8 @@ final class MenuBarController: ObservableObject {
         }
 
         do {
-            let report = try await closedLidController.cleanupLegacyArtifacts()
+            _ = try await closedLidController.cleanupLegacyArtifacts()
             state.legacyCleanupCompleted = true
-            if !report.skippedPaths.isEmpty {
-                state.legacyCleanupNotice = "Some legacy files were left untouched for safety."
-            } else {
-                state.legacyCleanupNotice = nil
-            }
             persistSafeState()
         } catch {
             setTransientError("Legacy cleanup failed: \(error.localizedDescription)")

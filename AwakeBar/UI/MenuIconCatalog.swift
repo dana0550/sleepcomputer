@@ -12,8 +12,4 @@ enum MenuIconCatalog {
             return fullAwakeAssetName
         }
     }
-
-    static func fullAwakeToggleAssetName(isOn: Bool) -> String {
-        isOn ? fullAwakeAssetName : offAssetName
-    }
 }
