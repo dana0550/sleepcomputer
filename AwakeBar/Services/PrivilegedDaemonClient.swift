@@ -32,7 +32,7 @@ private final class SendableFinishBox<Value>: @unchecked Sendable {
 }
 
 protocol PrivilegedDaemonControlling: Sendable {
-    func ping() async throws -> Bool
+    func ping() async throws
     func setSleepDisabled(_ disabled: Bool) async throws
     func readSleepDisabled() async throws -> Bool
     func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport
@@ -50,11 +50,11 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
         self.connectionFactory = connectionFactory ?? Self.makeConnection
     }
 
-    func ping() async throws -> Bool {
-        try await performRequest { proxy, finish in
+    func ping() async throws {
+        let _: Void = try await performRequest { proxy, finish in
             proxy.ping { isAlive, message in
                 if isAlive {
-                    finish(.success(true))
+                    finish(.success(()))
                 } else {
                     finish(.failure(NSError(domain: "AwakeBarDaemon", code: 1, userInfo: [NSLocalizedDescriptionKey: message ?? "Privileged helper ping failed."])))
                 }

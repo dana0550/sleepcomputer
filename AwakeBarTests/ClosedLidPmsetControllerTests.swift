@@ -57,8 +57,7 @@ private final class MockDaemonClient: PrivilegedDaemonControlling {
     private(set) var setCalls: [Bool] = []
     private(set) var readCalls = 0
 
-    func ping() async throws -> Bool {
-        true
+    func ping() async throws {
     }
 
     func setSleepDisabled(_ disabled: Bool) async throws {

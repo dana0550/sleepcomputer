@@ -205,15 +205,23 @@ private final class MockDaemonClientForSetup: PrivilegedDaemonControlling {
     var shouldThrowPing = false
     var pingSequence: [Bool] = []
 
-    func ping() async throws -> Bool {
+    func ping() async throws {
+        struct PingError: Error {}
+
         if shouldThrowPing {
-            struct PingError: Error {}
             throw PingError()
         }
         if !pingSequence.isEmpty {
-            return pingSequence.removeFirst()
+            let next = pingSequence.removeFirst()
+            if next {
+                return
+            }
+            throw PingError()
         }
-        return pingValue
+        if pingValue {
+            return
+        }
+        throw PingError()
     }
 
     func setSleepDisabled(_ disabled: Bool) async throws {}

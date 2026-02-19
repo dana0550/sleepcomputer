@@ -60,10 +60,8 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             return .unavailable("Privileged helper was not found in the app bundle.")
         case .enabled:
             do {
-                if try await daemonClient.ping() {
-                    return .ready
-                }
-                return .unavailable("Privileged helper did not respond to ping.")
+                try await daemonClient.ping()
+                return .ready
             } catch {
                 return .unavailable("Privileged helper is registered but unavailable: \(error.localizedDescription)")
             }
@@ -133,7 +131,7 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
     }
 
     private func isHelperReachable() async -> Bool {
-        (try? await daemonClient.ping()) == true
+        (try? await daemonClient.ping()) != nil
     }
 
     private func waitForHelperReachable(maxAttempts: Int) async -> Bool {
