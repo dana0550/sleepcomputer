@@ -126,8 +126,15 @@ final class MenuBarController: ObservableObject {
     }
 
     func requestFullAwakeChange(_ enabled: Bool) {
-        Task { [weak self] in
-            await self?.setFullAwakeEnabled(enabled)
+        guard beginFullAwakeTransition(to: enabled) else {
+            return
+        }
+
+        Task { @MainActor [self] in
+            defer {
+                endFullAwakeTransition()
+            }
+            await applyFullAwakeChange(enabled)
         }
     }
 
@@ -153,19 +160,18 @@ final class MenuBarController: ObservableObject {
     }
 
     func setFullAwakeEnabled(_ enabled: Bool) async {
-        guard !isApplyingFullAwakeChange else {
+        guard beginFullAwakeTransition(to: enabled) else {
             return
         }
+        defer {
+            endFullAwakeTransition()
+        }
+        await applyFullAwakeChange(enabled)
+    }
 
+    private func applyFullAwakeChange(_ enabled: Bool) async {
         let previousOpen = state.openLidEnabled
         let previousByApp = state.closedLidEnabledByApp
-
-        isApplyingFullAwakeChange = true
-        pendingFullAwakeTarget = enabled
-        defer {
-            isApplyingFullAwakeChange = false
-            pendingFullAwakeTarget = nil
-        }
 
         if enabled {
             do {
@@ -237,6 +243,20 @@ final class MenuBarController: ObservableObject {
 
         await refreshClosedLidRuntimeState()
         persistSafeState()
+    }
+
+    private func beginFullAwakeTransition(to enabled: Bool) -> Bool {
+        guard !isApplyingFullAwakeChange else {
+            return false
+        }
+        isApplyingFullAwakeChange = true
+        pendingFullAwakeTarget = enabled
+        return true
+    }
+
+    private func endFullAwakeTransition() {
+        isApplyingFullAwakeChange = false
+        pendingFullAwakeTarget = nil
     }
 
     func setLaunchAtLoginEnabled(_ enabled: Bool) {

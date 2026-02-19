@@ -82,6 +82,36 @@ final class MenuBarControllerTests: XCTestCase {
         await task.value
     }
 
+    func testRequestFullAwakeChangeSetsPendingStateSynchronously() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.suspendNextEnable = true
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        controller.requestFullAwakeChange(true)
+
+        XCTAssertTrue(controller.isApplyingFullAwakeChange)
+        XCTAssertTrue(controller.fullAwakeSwitchIsOn)
+        XCTAssertEqual(controller.menuIconName, "AwakeBarStatusClosed")
+
+        await waitForCondition { closedMock.isWaitingToCompleteEnable }
+        closedMock.resumePendingEnableIfNeeded()
+        await waitForCondition { !controller.isApplyingFullAwakeChange }
+        XCTAssertTrue(controller.isFullAwakeEnabled)
+    }
+
     func testFullAwakeSetupRequiredDoesNotEnableAndOpensSettings() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
