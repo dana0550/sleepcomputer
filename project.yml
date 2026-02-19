@@ -21,6 +21,7 @@ targets:
       - target: AwakeBarPrivilegedHelper
         embed: false
         link: false
+      - sdk: AppIntents.framework
     postBuildScripts:
       - name: Embed Privileged Helper
         basedOnDependencyAnalysis: false
@@ -79,6 +80,7 @@ targets:
       - path: AwakeBarTests
     dependencies:
       - target: AwakeBar
+      - sdk: AppIntents.framework
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

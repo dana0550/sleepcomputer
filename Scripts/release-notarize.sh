@@ -112,6 +112,7 @@ xcodebuild \
   -project AwakeBar.xcodeproj \
   -scheme AwakeBar \
   -configuration Release \
+  -destination 'generic/platform=macOS' \
   -archivePath "$ARCHIVE_PATH" \
   archive \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \

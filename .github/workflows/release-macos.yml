@@ -89,6 +89,7 @@ jobs:
             -project "$PROJECT_PATH" \
             -scheme "$SCHEME" \
             -configuration "$CONFIGURATION" \
+            -destination "generic/platform=macOS" \
             -archivePath "$ARCHIVE_PATH" \
             archive \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
