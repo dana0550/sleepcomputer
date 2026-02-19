@@ -10,11 +10,15 @@ struct AwakeBarApp: App {
         } label: {
             Image(controller.menuIconName)
                 .renderingMode(.template)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 19, height: 19)
+                .accessibilityLabel(controller.fullAwakeSwitchIsOn ? "Awake On" : "Awake Off")
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
 
         Settings {
-            EmptyView()
+            SettingsContentView(controller: controller)
         }
     }
 }

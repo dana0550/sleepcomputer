@@ -5,10 +5,12 @@ name: Iconography and Asset Pipeline
 status: active
 owner: dshakiba
 parent: null
-children: []
+children:
+  - F-005.01
+  - F-005.02
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.2.0
+last_reviewed: 2026-02-19
 tags:
   - design
   - assets
@@ -21,83 +23,99 @@ dependencies:
 
 ## Summary
 
-Define source SVG icon assets and deterministic conversion into Xcode asset PDFs.
+Define source SVG icon assets and deterministic conversion into Xcode asset entries for OFF/Full Awake state visuals.
 
 ## Goals
 
-- Maintain editable vector sources in-repo.
-- Produce template-rendered menu icons for native contrast.
+- Keep editable vector sources in-repo.
+- Keep generated app assets deterministic and template-rendered.
+- Keep design handoff rules explicit for small-size legibility.
 
 ## Non-Goals
 
-- Multi-theme icon sets in v1.
+- Runtime icon downloads.
+- Multi-theme icon packs in v1.
 
 ## Requirements
 
-- R1: Provide SVG source files for off/open/closed menu states.
-- R2: Provide build script that converts SVG files to PDF assets.
-- R3: Asset catalog entries use template rendering intent.
+- R1: Source SVG files for off/full-awake states must exist in `Design/icons/` with stable names.
+- R2: Build script must regenerate `.imageset` SVG + `Contents.json` entries for `AwakeBarStatusOff` and `AwakeBarStatusClosed`.
+- R3: Generated `Contents.json` must set `template-rendering-intent` to `template`.
+- R4: `MenuIconCatalog` must provide deterministic OFF/ON asset mappings for the current two-state mode model.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
 
 ## Acceptance Criteria
 
-- AC1: Running the icon build script updates PDF assets deterministically.
-- AC2: Menu icon color adapts to system menu bar appearance.
+- AC1: Running `./Scripts/build-icons.sh` updates icon assets deterministically.
+- AC2: OFF/Full Awake states map to distinct menu icon assets.
+- AC3: Generated image sets preserve template tint behavior via asset metadata.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [ ] AC1
-- [ ] AC2
+- [x] AC2
+- [x] AC3
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | Repository file presence |
-| R2 | test | `Scripts/build-icons.sh` |
-| R3 | test | Asset `Contents.json` checks |
-| AC1 | manual | Script execution output |
-| AC2 | manual | Appearance validation |
+| R1 | code | Design/icons/awakebar-off.svg |
+| R1 | code | Design/icons/awakebar-closed.svg |
+| R2 | code | Scripts/build-icons.sh |
+| R3 | code | Scripts/build-icons.sh |
+| R4 | code | AwakeBar/UI/MenuIconCatalog.swift |
+| AC1 | manual | `./Scripts/build-icons.sh` execution |
+| AC2 | test | AwakeBarTests/MenuIconCatalogTests.swift |
+| AC3 | code | AwakeBar/Assets.xcassets/AwakeBarStatusOff.imageset/Contents.json |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-005.01](./F-005.01-svg-to-asset-regeneration.md)
+- [F-005.02](./F-005.02-icon-visual-spec-handoff.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-002]
+- [F-002](./F-002-menu-bar-experience.md)
+- [F-005.01](./F-005.01-svg-to-asset-regeneration.md)
+- [F-005.02](./F-005.02-icon-visual-spec-handoff.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
-- N/A
+- `MenuIconCatalog.statusBarAssetName(for:)`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- Menu icon readability and status affordance.
+- Controls icon readability and state affordance in reusable state assets.
+- Couples design sources to generated Xcode assets.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] No privileged operations
+- [x] No privileged operations in icon pipeline
+- [x] No network asset fetches
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] Script runtime under 1s for three icons
+- [x] Script runtime bounded to two icon conversions
+- [x] Asset lookup is constant-time by name
 
 ## Table of Contents
 
 <!-- AUTOGEN:TOC -->
 - Summary
 - Goals
+- Non-Goals
 - Requirements
 - Acceptance Criteria
 
@@ -106,3 +124,7 @@ Define source SVG icon assets and deterministic conversion into Xcode asset PDFs
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-18: Added deterministic generation and visual handoff child specs.
+- 2026-02-18: Aligned icon mapping requirements with current two-state catalog API.
+- 2026-02-18: Removed legacy open icon from pipeline requirements and traceability.
+- 2026-02-19: Removed unused toggle-specific catalog API and aligned requirements/contracts to mode-based mapping only.

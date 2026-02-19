@@ -2,47 +2,31 @@ import XCTest
 @testable import AwakeBar
 
 final class KeepAwakeModeTests: XCTestCase {
-    func testModePrefersClosedLid() {
+    func testModeIsOffWhenNoAwakeMechanismIsActive() {
+        let state = AppState()
+
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
+    }
+
+    func testModeIsOffWhenOnlyOpenLidAwakeIsEnabled() {
         var state = AppState()
         state.openLidEnabled = true
-        state.externalClosedLidDetected = true
+
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
+    }
+
+    func testModeIsOffWhenOnlyClosedLidAwakeIsEnabledByApp() {
+        var state = AppState()
         state.closedLidEnabledByApp = true
 
-        XCTAssertEqual(KeepAwakeMode.from(state: state), .closedLid)
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .off)
     }
 
-    func testModeUsesExternalWhenDetected() {
+    func testModeIsFullAwakeWhenOpenAndClosedLidAwakeAreEnabled() {
         var state = AppState()
         state.openLidEnabled = true
-        state.externalClosedLidDetected = true
+        state.closedLidEnabledByApp = true
 
-        XCTAssertEqual(KeepAwakeMode.from(state: state), .externalClosedLid)
-    }
-
-    func testModeUsesOpenLid() {
-        var state = AppState()
-        state.openLidEnabled = true
-
-        XCTAssertEqual(KeepAwakeMode.from(state: state), .openLid)
-    }
-
-    func testStatusDetailTextIsHumanReadable() {
-        XCTAssertEqual(KeepAwakeMode.off.statusDetailText, "Uses your normal macOS sleep settings.")
-        XCTAssertEqual(KeepAwakeMode.openLid.statusDetailText, "Keeps your Mac and display awake while the lid is open.")
-        XCTAssertEqual(
-            KeepAwakeMode.closedLid.statusDetailText,
-            "Disables system sleep, including with lid closed, until you turn it off."
-        )
-        XCTAssertEqual(
-            KeepAwakeMode.externalClosedLid.statusDetailText,
-            "System sleep was disabled outside AwakeBar. Turn it off here to restore defaults."
-        )
-    }
-
-    func testIconAssetNameMapsEachMode() {
-        XCTAssertEqual(KeepAwakeMode.off.iconAssetName, "AwakeBarStatusOff")
-        XCTAssertEqual(KeepAwakeMode.openLid.iconAssetName, "AwakeBarStatusOpen")
-        XCTAssertEqual(KeepAwakeMode.closedLid.iconAssetName, "AwakeBarStatusClosed")
-        XCTAssertEqual(KeepAwakeMode.externalClosedLid.iconAssetName, "AwakeBarStatusClosed")
+        XCTAssertEqual(KeepAwakeMode.from(state: state), .fullAwake)
     }
 }

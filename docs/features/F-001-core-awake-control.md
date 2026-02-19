@@ -5,94 +5,111 @@ name: Core Awake Control
 status: active
 owner: dshakiba
 parent: null
-children: []
+children:
+  - F-001.01
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.1.0
+last_reviewed: 2026-02-18
 tags:
   - power
   - sleep
 risk_level: medium
 dependencies:
   - F-002
+  - F-004
 ---
 
 # [F-001] Core Awake Control
 
 ## Summary
 
-Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
+Provide the open-lid assertion layer used by the Full Awake control path.
 
 ## Goals
 
-- Keep system and display awake while Full Caffeine is enabled.
-- Provide deterministic toggle behavior from menu bar.
+- Keep system and display awake while Full Awake is enabled.
+- Provide deterministic toggle behavior from the menu bar.
+- Fail safely when assertion creation or release fails.
 
 ## Non-Goals
 
 - Changing system sleep policy globally.
+- Persisting closed-lid state across launches.
 
 ## Requirements
 
-- R1: Enabling Full Caffeine creates both NoIdleSleep and NoDisplaySleep assertions.
-- R2: Disabling Full Caffeine releases all created assertions.
-- R3: Assertion failures are surfaced to users as transient errors.
+- R1: Enabling the Full Awake path must create both NoIdleSleep and NoDisplaySleep assertions.
+- R2: Disabling the Full Awake path must release all created assertions.
+- R3: Partial assertion-creation failures must roll back any assertion already created.
+- R4: Open-lid failures must surface as transient errors and must not leave Full Awake in a stale enabled state.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
 
 ## Acceptance Criteria
 
-- AC1: `pmset -g assertions` shows AwakeBar sleep-prevention assertions when enabled.
-- AC2: Assertions are absent after disabling Full Caffeine.
+- AC1: `pmset -g assertions` shows AwakeBar sleep-prevention assertions when Full Awake is enabled.
+- AC2: Assertions are absent after disabling Full Awake.
+- AC3: Failed assertion operations return the app to a safe, non-stuck state.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [ ] AC1
 - [ ] AC2
+- [x] AC3
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R2 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R3 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| R1 | code | AwakeBar/Services/OpenLidAssertionController.swift |
+| R2 | code | AwakeBar/Services/OpenLidAssertionController.swift |
+| R3 | code | AwakeBar/Services/OpenLidAssertionController.swift |
+| R4 | code | AwakeBar/App/MenuBarController.swift |
+| R4 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC1 | manual | `pmset -g assertions` validation |
 | AC2 | manual | `pmset -g assertions` validation |
+| AC3 | test | AwakeBarTests/MenuBarControllerTests.swift |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-001.01](./F-001.01-open-lid-assertion-lifecycle.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-002]
+- [F-001.01](./F-001.01-open-lid-assertion-lifecycle.md)
+- [F-002](./F-002-menu-bar-experience.md)
+- [F-004](./F-004-state-persistence-login.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `OpenLidSleepControlling.setEnabled(_:)`
+- `OpenLidSleepControlling.isEnabled`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
 - Affects menu status and icon state.
+- Drives open-lid safety behavior on bootstrap and manual toggles.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
 - [x] No credential storage
 - [x] No network calls
+- [x] No shell command execution
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
 - [x] Idle CPU budget near zero when disabled
+- [x] Toggle path is synchronous and bounded
 
 ## Table of Contents
 
@@ -108,3 +125,5 @@ Provide the primary open-lid keep-awake mode exposed as Full Caffeine.
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-18: Expanded requirement coverage and linked child lifecycle spec.
+- 2026-02-18: Updated terminology and behavior mapping to Full Awake single-toggle model.

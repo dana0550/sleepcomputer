@@ -3,330 +3,135 @@ import SwiftUI
 
 struct MenuContentView: View {
     @ObservedObject var controller: MenuBarController
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            headerCard
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(controller.fullAwakeSwitchIsOn ? Color.blue : Color.secondary.opacity(0.25))
+                    .frame(width: 10, height: 10)
 
-            if let message = controller.state.transientErrorMessage {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.red)
+                Text(statusText)
+                    .font(.system(size: 12, weight: .semibold))
+
+                Spacer(minLength: 6)
+
+                if controller.isApplyingFullAwakeChange {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
+
+            Toggle(isOn: fullAwakeBinding) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Full Awake")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Keeps your Mac awake with the lid open and closed.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .toggleStyle(.switch)
+            .tint(.blue)
+            .disabled(controller.isApplyingFullAwakeChange)
+            .help("ON keeps your Mac awake with the lid open and closed. OFF restores normal sleep settings.")
+
+            if showsSetupAction {
+                Button("Finish Setup…") {
+                    controller.openLoginItemsSettingsForApproval()
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.blue)
+            }
+
+            if let message = stateMessage {
+                Text(message)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Divider()
-
-            VStack(spacing: 8) {
-                menuButton(
-                    title: "Keep Awake (Lid Open)",
-                    icon: .asset(openLidMenuIconName),
-                    state: controller.isOpenLidEnabled ? .on : .off,
-                    isSelected: controller.isOpenLidEnabled,
-                    helpText: "Keeps your Mac and display awake while the lid is open."
-                ) {
-                    controller.setOpenLidEnabled(!controller.isOpenLidEnabled)
-                }
-
-                menuButton(
-                    title: "Keep Awake (Lid Closed)",
-                    icon: .asset(closedLidMenuIconName),
-                    state: closedLidRowState,
-                    isSelected: closedLidRowState.isSelected,
-                    isBusy: controller.isApplyingClosedLidChange,
-                    disabled: controller.isApplyingClosedLidChange,
-                    helpText: "Keeps your Mac running with the lid closed. One-time setup enables passwordless toggles; if needed, macOS falls back to Touch ID/password."
-                ) {
-                    controller.requestClosedLidChange(!controller.isClosedLidToggleOn)
-                }
-
-                menuButton(
-                    title: "Start at Login",
-                    icon: .system("arrow.triangle.2.circlepath"),
-                    state: controller.launchAtLoginEnabled ? .on : .off,
-                    isSelected: controller.launchAtLoginEnabled,
-                    helpText: "Launches AwakeBar automatically after you sign in."
-                ) {
-                    controller.setLaunchAtLoginEnabled(!controller.launchAtLoginEnabled)
-                }
+            Button("Settings…") {
+                openSettings()
             }
+            .buttonStyle(.plain)
+            .font(.system(size: 12))
+            .foregroundStyle(.secondary)
 
             Divider()
 
-            VStack(spacing: 8) {
-                menuButton(
-                    title: "Turn Everything Off",
-                    icon: .system("power"),
-                    state: nil,
-                    isSelected: false,
-                    tint: .red,
-                    disabled: !controller.isOpenLidEnabled && !controller.isClosedLidToggleOn,
-                    helpText: "Turns off both Keep Awake modes."
-                ) {
-                    Task {
-                        await controller.turnEverythingOff()
-                    }
-                }
-
-                menuButton(
-                    title: "Quit AwakeBar",
-                    icon: .system("xmark"),
-                    state: nil,
-                    isSelected: false,
-                    tint: .secondary,
-                    helpText: "Closes the app."
-                ) {
-                    NSApplication.shared.terminate(nil)
-                }
+            Button("Quit AwakeBar") {
+                NSApplication.shared.terminate(nil)
             }
-
-            Text("Hover any button for details.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
+            .font(.system(size: 13))
         }
-        .padding(12)
-        .frame(minWidth: 338)
-    }
-
-    private var headerCard: some View {
-        HStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(statusColor.opacity(0.2))
-                    .frame(width: 24, height: 24)
-
-                Image(systemName: statusSymbol)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(statusColor)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("AwakeBar")
-                    .font(.system(size: 13, weight: .semibold))
-
-                Text(modeSummaryText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .help(controller.statusDetailText)
-
-            Spacer(minLength: 8)
-
-            StateBadge(state: modeRowState)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(width: 238)
+        .onAppear {
+            controller.refreshSetupState()
         }
     }
 
-    private func menuButton(
-        title: String,
-        icon: ActionIcon,
-        state: RowState?,
-        isSelected: Bool,
-        tint: Color = .accentColor,
-        isBusy: Bool = false,
-        disabled: Bool = false,
-        helpText: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            ActionRow(
-                title: title,
-                icon: icon,
-                state: state,
-                isSelected: isSelected,
-                tint: tint,
-                isBusy: isBusy
-            )
-        }
-        .buttonStyle(.plain)
-        .disabled(disabled)
-        .help(helpText)
-    }
-
-    private var openLidMenuIconName: String {
-        MenuIconCatalog.dropdownPair(for: .openLid).assetName(for: controller.isOpenLidEnabled)
-    }
-
-    private var closedLidMenuIconName: String {
-        MenuIconCatalog.dropdownPair(for: .closedLid).assetName(for: closedLidRowState.isSelected)
-    }
-
-    private var closedLidRowState: RowState {
-        if controller.state.closedLidEnabledByApp {
-            return .on
-        }
-        if controller.state.externalClosedLidDetected {
-            return .external
-        }
-        return .off
-    }
-
-    private var modeSummaryText: String {
-        switch controller.mode {
-        case .off:
-            return "Normal Sleep"
-        case .openLid:
-            return "Stay Awake (Lid Open)"
-        case .closedLid:
-            return "Stay Awake (Lid Closed)"
-        case .externalClosedLid:
-            return "Stay Awake (External)"
-        }
-    }
-
-    private var modeRowState: RowState {
-        switch controller.mode {
-        case .off:
-            return .off
-        case .openLid, .closedLid:
-            return .on
-        case .externalClosedLid:
-            return .external
-        }
-    }
-
-    private var statusColor: Color {
-        switch controller.mode {
-        case .off:
-            return .secondary
-        case .openLid:
-            return .green
-        case .closedLid:
-            return .orange
-        case .externalClosedLid:
-            return .yellow
-        }
-    }
-
-    private var statusSymbol: String {
-        switch controller.mode {
-        case .off:
-            return "moon.zzz"
-        case .openLid:
-            return "bolt.fill"
-        case .closedLid:
-            return "lock.fill"
-        case .externalClosedLid:
-            return "exclamationmark.shield"
-        }
-    }
-}
-
-private struct ActionRow: View {
-    let title: String
-    let icon: ActionIcon
-    let state: RowState?
-    let isSelected: Bool
-    let tint: Color
-    let isBusy: Bool
-
-    var body: some View {
-        HStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(isSelected ? .blue : Color.primary.opacity(0.08))
-                    .frame(width: 22, height: 22)
-
-                icon.image(isSelected: isSelected, tint: tint)
-            }
-
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
-
-            Spacer(minLength: 8)
-
-            if isBusy {
-                ProgressView()
-                    .controlSize(.small)
-            }
-
-            if let state {
-                StateBadge(state: state)
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? .blue.opacity(0.11) : Color.primary.opacity(0.05))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isSelected ? .blue.opacity(0.35) : .clear, lineWidth: 1)
-        )
-    }
-}
-
-private enum ActionIcon: Equatable {
-    case system(String)
-    case asset(String)
-
-    @ViewBuilder
-    func image(isSelected: Bool, tint: Color) -> some View {
-        switch self {
-        case .system(let iconName):
-            Image(systemName: iconName)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : tint)
-        case .asset(let assetName):
-            Image(assetName)
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 12, height: 12)
-                .foregroundStyle(isSelected ? .white : tint)
-        }
-    }
-}
-
-private struct StateBadge: View {
-    let state: RowState
-
-    var body: some View {
-        Text(state.title)
-            .font(.system(size: 10, weight: .semibold))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(state.color.opacity(0.18))
-            )
-            .foregroundStyle(state.color)
-    }
-}
-
-private enum RowState {
-    case on
-    case off
-    case external
-
-    var title: String {
-        switch self {
-        case .on:
-            return "ON"
-        case .off:
-            return "OFF"
-        case .external:
-            return "EXT"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .on:
-            return .green
-        case .off:
-            return .secondary
-        case .external:
-            return .orange
-        }
-    }
-
-    var isSelected: Bool {
-        switch self {
-        case .on, .external:
-            return true
-        case .off:
+    private var showsSetupAction: Bool {
+        guard !controller.isFullAwakeEnabled else {
             return false
         }
+        if case .approvalRequired = controller.closedLidSetupState {
+            return true
+        }
+        return false
+    }
+
+    private var stateMessage: String? {
+        if let blocked = controller.fullAwakeBlockedMessage, !controller.isFullAwakeEnabled {
+            return blocked
+        }
+        return controller.state.transientErrorMessage
+    }
+
+    private var fullAwakeBinding: Binding<Bool> {
+        Binding(
+            get: { controller.fullAwakeSwitchIsOn },
+            set: { isOn in
+                controller.requestFullAwakeChange(isOn)
+            }
+        )
+    }
+
+    private var statusText: String {
+        if controller.isApplyingFullAwakeChange {
+            return controller.fullAwakeSwitchIsOn ? "Turning ON…" : "Turning OFF…"
+        }
+        return controller.isFullAwakeEnabled ? "Awake is ON" : "Awake is OFF"
+    }
+}
+
+struct SettingsContentView: View {
+    @ObservedObject var controller: MenuBarController
+
+    var body: some View {
+        Form {
+            Toggle("Launch at Login", isOn: launchAtLoginBinding)
+            Text("Automatically start AwakeBar after you sign in.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(width: 320)
+    }
+
+    private var launchAtLoginBinding: Binding<Bool> {
+        Binding(
+            get: { controller.launchAtLoginEnabled },
+            set: { isOn in
+                controller.setLaunchAtLoginEnabled(isOn)
+            }
+        )
     }
 }

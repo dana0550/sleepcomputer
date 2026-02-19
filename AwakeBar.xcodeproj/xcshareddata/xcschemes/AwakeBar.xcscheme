@@ -50,6 +50,17 @@
                ReferencedContainer = "container:AwakeBar.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F3D2EA118A537B526058D502"
+               BuildableName = "AwakeBarPrivilegedHelperTests.xctest"
+               BlueprintName = "AwakeBarPrivilegedHelperTests"
+               ReferencedContainer = "container:AwakeBar.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

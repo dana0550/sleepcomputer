@@ -1,119 +1,150 @@
 ---
 doc_type: feature_spec
 id: F-003
-name: Closed-Lid Admin Control
+name: Closed-Lid Daemon Control
 status: active
 owner: dshakiba
 parent: null
-children: []
-aliases: []
-version: 1.2.1
+children:
+  - F-003.01
+  - F-003.02
+  - F-003.03
+  - F-003.04
+aliases:
+  - Closed-Lid Admin Control
+version: 2.1.0
 last_reviewed: 2026-02-18
 tags:
   - power
   - admin
+  - daemon
 risk_level: high
 dependencies:
   - F-002
+  - F-004
 ---
 
-# [F-003] Closed-Lid Admin Control
+# [F-003] Closed-Lid Daemon Control
 
 ## Summary
 
-Provide an admin-authenticated toggle that enables/disables global sleep disable through `pmset`.
+Provide closed-lid keep-awake control using a privileged LaunchDaemon + XPC helper with guided setup and no runtime `sudo`/AppleScript fallback.
 
 ## Goals
 
-- Offer in-app control for `disablesleep` without storing credentials.
-- Detect externally enabled sleep disable on startup.
+- Remove repeated password prompts during normal closed-lid toggles.
+- Keep a narrow privileged command surface.
+- Preserve explicit user control and clear setup state in the menu UI.
 
 ## Non-Goals
 
-- Custom privilege helper daemons in v1.
+- Promising permanent Touch ID or PAM behavior across macOS variants.
+- Supporting legacy runtime paths (`sudo`, AppleScript, ad-hoc PAM edits) after cutover.
 
 ## Requirements
 
-- R1: First privileged closed-lid action performs one-time administrator setup for passwordless `pmset` toggles.
-- R2: After successful setup, enable/disable toggles run without repeated password prompts.
-- R3: One-time setup attempts to enable Touch ID fallback for `sudo` by configuring `pam_tid.so` in `/etc/pam.d/sudo_local` when writable.
-- R4: Touch ID fallback setup failures do not block passwordless `pmset` sudoers setup.
-- R5: If one-time setup is unavailable or canceled, app falls back to native administrator prompt for the current action.
-- R6: Startup probe reports existing `SleepDisabled=1` as external mode state.
-- R7: Errors/cancellation preserve prior toggle state.
+- R1: Closed-lid runtime operations must use daemon-backed XPC only.
+- R2: Closed-lid toggle attempts must fail safe when setup is not `ready`.
+- R3: App/helper connection paths must enforce code-signing requirements.
+- R4: Startup must detect external `SleepDisabled=1` state without auto-enabling closed-lid by-app state.
+- R5: Legacy privilege artifacts must be cleaned once after helper readiness and persisted as complete.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
-- [ ] R4
-- [ ] R5
-- [ ] R6
-- [ ] R7
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
+- [x] R5
 
 ## Acceptance Criteria
 
-- AC1: `pmset -g` shows `SleepDisabled 1` after successful enable.
-- AC2: `pmset -g` shows `SleepDisabled 0` after successful disable.
+- AC1: First-run closed-lid flow transitions through setup states to `ready` after registration/approval.
+- AC2: Once helper is ready, closed-lid toggles run without repeated auth prompts from app runtime.
+- AC3: Untrusted or invalid XPC callers are rejected by helper connection policy.
+- AC4: Legacy cleanup is backup-first and does not delete unmanaged PAM content.
+- AC5: Runtime code contains no AppleScript/`sudo` closed-lid execution path.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
-- [ ] AC1
+- [x] AC1
 - [ ] AC2
+- [x] AC3
+- [x] AC4
+- [x] AC5
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R2 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R3 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R4 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R5 | code | AwakeBar/Services/PrivilegedCommandRunner.swift |
-| R6 | test | AwakeBarTests/ClosedLidPmsetControllerTests.swift |
-| R7 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| AC1 | manual | `pmset -g` verification |
-| AC2 | manual | `pmset -g` verification |
+| R1 | code | AwakeBar/Services/ClosedLidPmsetController.swift |
+| R1 | code | AwakeBar/Services/PrivilegedDaemonClient.swift |
+| R2 | code | AwakeBar/Services/ClosedLidPmsetController.swift |
+| R2 | code | AwakeBar/UI/MenuContentView.swift |
+| R3 | code | AwakeBar/Services/PrivilegedDaemonClient.swift |
+| R3 | code | AwakeBarPrivilegedHelper/main.swift |
+| R3 | code | AwakeBarPrivilegedHelper/PrivilegedService.swift |
+| R4 | code | AwakeBar/App/MenuBarController.swift |
+| R5 | code | AwakeBar/App/MenuBarController.swift |
+| R5 | code | AwakeBarPrivilegedHelper/LegacyCleanupManager.swift |
+| AC1 | test | AwakeBarTests/ClosedLidSetupControllerTests.swift |
+| AC2 | manual | Closed-lid toggle validation after setup |
+| AC3 | code | AwakeBarPrivilegedHelper/PrivilegedService.swift |
+| AC4 | test | AwakeBarPrivilegedHelperTests/LegacyCleanupPolicyTests.swift |
+| AC5 | code | AwakeBar/Services/ClosedLidPmsetController.swift |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-003.01](./F-003.01-setup-readiness-flow.md)
+- [F-003.02](./F-003.02-privileged-xpc-transport.md)
+- [F-003.03](./F-003.03-legacy-privilege-cleanup.md)
+- [F-003.04](./F-003.04-helper-packaging-launchd.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-002]
+- [F-002](./F-002-menu-bar-experience.md)
+- [F-003.01](./F-003.01-setup-readiness-flow.md)
+- [F-003.02](./F-003.02-privileged-xpc-transport.md)
+- [F-003.03](./F-003.03-legacy-privilege-cleanup.md)
+- [F-003.04](./F-003.04-helper-packaging-launchd.md)
+- [F-004](./F-004-state-persistence-login.md)
+- [ADR-0001](../DECISIONS/ADR-0001-privileged-daemon-cutover.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `ClosedLidSleepControlling.setEnabled(_:)`
 - `ClosedLidSleepControlling.readSleepDisabled()`
+- `ClosedLidSleepControlling.cleanupLegacyArtifacts()`
+- `AwakeBarPrivilegedServiceXPC`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- System-wide sleep behavior may be changed outside app session.
+- Closed-lid control depends on helper packaging, registration, approval lifecycle, and XPC security posture.
+- Startup flow includes external-state detection and one-time cleanup coordination.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] Uses one-time native admin prompt for passwordless setup
-- [x] Attempts Touch ID fallback for sudo prompts where writable
-- [x] Falls back to native admin prompt if setup unavailable
-- [x] Does not persist credentials
+- [x] No credential storage in app/runtime paths
+- [x] Narrow helper command surface (`pmset` + cleanup)
+- [x] Bidirectional code-signing requirement checks
+- [x] Backup-first cleanup with guarded PAM modifications
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] No polling loop; probe only at startup or state changes
+- [x] No continuous polling; setup checks and probes are event-driven
+- [x] Cleanup runs once after readiness and is marked complete
 
 ## Table of Contents
 
 <!-- AUTOGEN:TOC -->
 - Summary
 - Goals
+- Non-Goals
 - Requirements
 - Acceptance Criteria
 
@@ -122,5 +153,5 @@ Provide an admin-authenticated toggle that enables/disables global sleep disable
 ## Changelog
 
 - 2026-02-17: Initial spec created.
-- 2026-02-17: Added one-time passwordless setup with prompt fallback behavior.
-- 2026-02-18: Added best-effort Touch ID sudo fallback setup during privileged initialization.
+- 2026-02-18: Hard cutover to LaunchDaemon + XPC helper with setup-gated runtime.
+- 2026-02-18: Split implementation details into child specs for setup, transport, cleanup, and packaging.

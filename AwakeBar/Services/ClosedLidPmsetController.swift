@@ -1,52 +1,58 @@
 import Foundation
 
-enum ClosedLidPmsetError: Error, LocalizedError {
-    case invalidPmsetOutput
+enum ClosedLidControlError: Error, LocalizedError {
+    case setupRequired(ClosedLidSetupState)
 
     var errorDescription: String? {
         switch self {
-        case .invalidPmsetOutput:
-            return "Could not parse pmset output for SleepDisabled value."
+        case .setupRequired(let state):
+            return state.detail
         }
     }
 }
 
 @MainActor
 final class ClosedLidPmsetController: ClosedLidSleepControlling {
-    private let privilegedRunner: PrivilegedCommandRunning
-    private let shellRunner: ShellCommandRunning
+    private let daemonClient: PrivilegedDaemonControlling
+    private let setupController: ClosedLidSetupControlling
+
+    // Exposed for composition so higher-level wiring can share setup + daemon defaults.
+    var setupStateController: ClosedLidSetupControlling {
+        setupController
+    }
 
     init(
-        privilegedRunner: PrivilegedCommandRunning = AdaptivePrivilegedCommandRunner(),
-        shellRunner: ShellCommandRunning = ProcessShellCommandRunner()
+        daemonClient: PrivilegedDaemonControlling = PrivilegedDaemonClient(),
+        setupController: ClosedLidSetupControlling? = nil
     ) {
-        self.privilegedRunner = privilegedRunner
-        self.shellRunner = shellRunner
+        self.daemonClient = daemonClient
+        self.setupController = setupController ?? ClosedLidSetupController(daemonClient: daemonClient)
     }
 
     func setEnabled(_ enabled: Bool) async throws {
-        let value = enabled ? "1" : "0"
-        try await privilegedRunner.runPrivileged(command: "/usr/bin/pmset -a disablesleep \(value)")
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+
+        try await daemonClient.setSleepDisabled(enabled)
     }
 
     func readSleepDisabled() async throws -> Bool {
-        let output = try shellRunner.run("/usr/bin/pmset", arguments: ["-g"])
-        return Self.parseSleepDisabled(output)
-    }
-
-    static func parseSleepDisabled(_ output: String) -> Bool {
-        for line in output.split(whereSeparator: \.isNewline) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.hasPrefix("SleepDisabled") else {
-                continue
-            }
-
-            let parts = trimmed.split { $0 == " " || $0 == "\t" }
-            if let value = parts.last {
-                return value == "1"
-            }
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
         }
 
-        return false
+        return try await daemonClient.readSleepDisabled()
+    }
+
+    func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport {
+        let setupState = await setupController.refreshStatus()
+        guard setupState.isReady else {
+            throw ClosedLidControlError.setupRequired(setupState)
+        }
+
+        return try await daemonClient.cleanupLegacyArtifacts()
     }
 }

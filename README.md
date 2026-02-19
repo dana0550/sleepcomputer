@@ -20,44 +20,72 @@
 
 AwakeBar is a menu bar utility for controlling when your Mac sleeps.
 
-It provides two modes:
+It provides a single primary control:
 
-- `Keep Awake (Lid Open)`: keeps your Mac and display awake while the lid stays open.
-- `Keep Awake (Lid Closed)`: disables system sleep so your Mac can keep running with the lid closed.
+- `Full Awake` (ON): keeps your Mac awake with the lid open and with the lid closed.
+- `Off`: restores normal macOS sleep behavior.
 
 ## Visual Identity
 
-Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app icon set).
+Runtime status icons are a strict two-state set:
 
-| App Icon | Normal Sleep | Stay Awake (Lid Open) | Stay Awake (Lid Closed) |
-|---|---|---|---|
-| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | <img src="Design/icons/awakebar-off.svg" width="22" alt="Off icon" /> | <img src="Design/icons/awakebar-open.svg" width="22" alt="Open icon" /> | <img src="Design/icons/awakebar-closed.svg" width="22" alt="Closed icon" /> |
+- `AwakeBarStatusOff` (`Design/icons/awakebar-off.svg`): eye with slash (OFF)
+- `AwakeBarStatusClosed` (`Design/icons/awakebar-closed.svg`): eye with lock (Full Awake ON)
+
+Menu bar icons are template-rendered (monochrome) so macOS applies native menu bar tinting automatically.
+
+| App Icon | OFF State | ON State |
+|---|---|---|
+| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="AwakeBar app icon" /> | <img src="Design/icons/awakebar-off.svg" width="20" alt="OFF icon: eye with slash" /> `AwakeBarStatusOff` | <img src="Design/icons/awakebar-closed.svg" width="20" alt="ON icon: eye with lock" /> `AwakeBarStatusClosed` |
 
 ## What Each Mode Does
 
 | Mode | Behavior | Admin Prompt | Best For |
 |---|---|---|---|
-| `Keep Awake (Lid Open)` | Prevents idle system sleep + display sleep while the Mac is open | No | Builds, long tasks, remote sessions while working |
-| `Keep Awake (Lid Closed)` | Runs `pmset -a disablesleep 1` (and `0` when disabled) | One-time setup, then passwordless (if needed, macOS fallback prompt supports Touch ID/password) | Closed-lid operation when you understand thermal/power impact |
+| `Off` | Restores normal macOS sleep behavior | No | Default energy-saving behavior |
+| `Full Awake` | Enables open-lid assertions and closed-lid sleep disable (`pmset -a disablesleep 1`) | One-time helper setup + approval in System Settings (if not already approved) | Long-running tasks that must not sleep |
 
 ## Menu Controls
 
-- `Status`: shows `Normal Sleep`, `Stay Awake (Lid Open)`, `Stay Awake (Lid Closed)`, or `Stay Awake (External)`.
-- `Keep Awake (Lid Open)`: button to toggle non-privileged keep-awake.
-- `Keep Awake (Lid Closed)`: button to toggle privileged closed-lid keep-awake.
-- `Start at Login`: button to toggle login item registration.
-- `Turn Everything Off`: disables all active modes.
+- `Status`: shows `Awake is OFF`, `Awake is ON`, or transitional `Turning ON/OFF...`.
+- `Full Awake`: one toggle for all awake behavior.
+- `Finish Setup...`: appears when helper approval/setup is required.
+- `Inline message`: explains setup blockers or helper errors in menu context.
 - `Quit AwakeBar`: exits the app.
+- `State indicator`: status dot is gray when OFF and blue when ON.
+- `Toggle tint`: switch tint is blue when ON.
 
-Hover any control to view quick inline help text.
+`Awake is ON` means both conditions are active:
+
+- Open-lid awake assertion is enabled.
+- Closed-lid helper policy is enabled.
+
+If setup/helper readiness is missing, the app keeps Full Awake OFF and shows an inline reason.
+
+Hover the `Full Awake` toggle to view quick inline help text.
+
+## Closed-Lid Setup
+
+`Full Awake` requires privileged helper registration for the closed-lid portion.
+
+1. Install `AwakeBar.app` in `/Applications`.
+2. Open AwakeBar and turn `Full Awake` ON.
+3. If prompted, click `Finish Setup...`, then approve the helper in `Login Items`.
+4. Return to AwakeBar and toggle `Full Awake` ON again.
+
+Architecture details:
+
+- Helper registration uses `SMAppService.daemon(plistName:)`.
+- Runtime control uses XPC (`com.dshakiba.AwakeBar.PrivilegedHelper.v2`) with code-signing requirements in both directions.
+- Runtime does not use `sudo`, AppleScript, or Touch ID/PAM mutation fallbacks.
 
 ## Safety
 
-- `Keep Awake (Lid Closed)` can increase thermals and battery drain.
+- `Full Awake` can increase thermals and battery drain, especially when the lid is closed.
 - AwakeBar does not save or cache admin credentials.
-- Closed-lid passwordless mode uses a scoped `sudoers` rule limited to `pmset -a disablesleep 0/1`.
-- AwakeBar attempts to enable Touch ID fallback for `sudo` by configuring `pam_tid.so` in `/etc/pam.d/sudo_local` when macOS allows it.
-- If sleep disable was turned on outside AwakeBar, startup displays `Stay Awake (External)`.
+- Closed-lid control uses a scoped privileged helper with a fixed command surface.
+- Legacy `sudoers`/PAM artifacts from prior versions are backed up and cleaned once helper setup is healthy.
+- If helper state is unavailable, AwakeBar keeps Full Awake OFF and shows an inline reason.
 
 ## Requirements
 
@@ -89,7 +117,44 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 
 # Run tests
 xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=macOS' test
+
+# Build Release bundle and run artifact smoke checks
+xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -destination 'generic/platform=macOS' build
+APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configuration Release -showBuildSettings | awk '/TARGET_BUILD_DIR =/{dir=$3} /FULL_PRODUCT_NAME =/{name=$3} END{print dir\"/\"name}')"
+./Scripts/smoke-check-app.sh "$APP_PATH"
 ```
+
+## Signed/Notarized Release
+
+- CI validation workflow: `.github/workflows/ci-macos.yml` (PRs + branch pushes + manual runs).
+- CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
+- Local parity script: `Scripts/release-notarize.sh`.
+- Artifact smoke checks script: `Scripts/smoke-check-app.sh` (runs in PR CI and release flows).
+- CI workflow also supports `workflow_dispatch` once this workflow exists on `main`; publication remains tag-scoped.
+- Release archives now enforce Hardened Runtime for both `AwakeBar` and `AwakeBarPrivilegedHelper` (required for notarization acceptance).
+
+Required environment variables/secrets:
+
+- `APPLE_TEAM_ID`
+- `ASC_KEY_ID`
+- `ASC_ISSUER_ID`
+- `ASC_API_KEY_P8_BASE64`
+- `DEVELOPER_ID_APP_CERT_P12_BASE64`
+- `DEVELOPER_ID_APP_CERT_PASSWORD`
+- `KEYCHAIN_PASSWORD`
+
+Release signing certificate requirements:
+
+- `DEVELOPER_ID_APP_CERT_P12_BASE64` must contain a `Developer ID Application` identity for your `APPLE_TEAM_ID`.
+- Exporting an `Apple Development` certificate as `.p12` will fail release signing.
+
+Release scripts set `AWAKEBAR_TEAM_ID` from `APPLE_TEAM_ID` so XPC code-sign checks bind both bundle ID and team ID in production builds.
+
+Secret hygiene:
+
+- Keep `.p12` and `.p8` source files out of the repository and out of tracked directories.
+- Store release credentials in a secure vault/password manager.
+- `Scripts/release-notarize.sh` uses a temporary keychain, preserves login keychain trust visibility during signing checks, and removes temporary local credential files/keychain on exit.
 
 ## Project Layout
 
@@ -97,9 +162,12 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 AwakeBar/
   App/          # app entry + menu controller
   Domain/       # state + mode mapping
-  Services/     # pmset, assertions, login, auth runner
+  Services/     # setup controller, helper client, assertions, login
   State/        # persistence
   UI/           # menu UI
+AwakeBarPrivilegedHelper/      # privileged daemon executable
+AwakeBarPrivilegedHelperTests/ # helper tests
+AwakeBarShared/                # shared XPC protocol/constants
 AwakeBarTests/  # tests with mocks
 Design/icons/   # menu icon source SVGs
 docs/           # product spec system (FEATURES.md SSOT)
@@ -112,6 +180,12 @@ Use these files for icon delivery requirements:
 - `Design/ICON_ASSET_SPECS.csv`
 - `Design/ICON_MANIFEST.json`
 - `Design/MENU_COPY.csv`
+- `Design/MENU_ICON_AND_STATE_VISUAL_SPEC.md`
+
+Required menu source SVGs (two-state model):
+
+- `Design/icons/awakebar-off.svg`
+- `Design/icons/awakebar-closed.svg`
 
 After new SVG icon drop-ins:
 

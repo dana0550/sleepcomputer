@@ -7,28 +7,57 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00A5536E9D3AB15A0010260A /* PrivilegedDaemonClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF2B376A4370DC737445EEF /* PrivilegedDaemonClientTests.swift */; };
+		01420E5BC752049E21CA3196 /* LegacyCleanupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1AAF36CC83CCC4B322E38C /* LegacyCleanupManager.swift */; };
+		06D29963CDF3550BFA912887 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A091B65D92FAF5BE47D92C0 /* AppIntents.framework */; };
 		07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */; };
 		119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */; };
 		126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */; };
+		1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */; };
+		2432E05DBFC7434A7412314D /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
+		319BDD8FD78E4105A0C15942 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
 		35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */; };
-		42D0573E565E8F34D56475DB /* PrivilegedCommandRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */; };
+		37698417F22973EABC52ADA8 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
 		4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */; };
+		50570258AD3B21C05A0F3E03 /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
+		5595F0AF797848B678245641 /* LegacyCleanupPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A65CD3E8953A0E7E493844A9 /* LegacyCleanupPolicyTests.swift */; };
 		5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */; };
 		67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E534796D72E7DC597B4ADE4B /* LoginItemController.swift */; };
+		67AD90016FFF9A47328B8E18 /* ClosedLidSetupControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */; };
 		6EEBCC3AB907BD2B4E1961A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F116C3DF15E45AAAAEB1DB3 /* Assets.xcassets */; };
 		758F845CF8EF31F7E9AA73C7 /* KeepAwakeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE984A229007F093175C83 /* KeepAwakeMode.swift */; };
+		775D0C0FB4F38D567903496E /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
+		7A71674459552AC90680365D /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
 		7DA31356ADFEEA6DFC253BE7 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CE46AD516F2BA51CA081BB3 /* AppState.swift */; };
+		891029AD07876CF3CB19B7D6 /* PrivilegedServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD62C561B08E48E48BDBDBE1 /* PrivilegedServiceTests.swift */; };
+		8CF978BE336380E6351C5DC4 /* LegacyCleanupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1AAF36CC83CCC4B322E38C /* LegacyCleanupManager.swift */; };
+		9B3B1AD9500A397C879A9C72 /* ClosedLidSetupController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161235132EC045ACE6641F1C /* ClosedLidSetupController.swift */; };
 		9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */; };
-		A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */; };
+		A20E2F5FA27E30D2E5EDD19A /* PrivilegedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */; };
 		A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E74433634A0685516D19AF8 /* Protocols.swift */; };
+		A72EF3F820821236D837A3A2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F1BA1ACED0A24645674D17 /* main.swift */; };
 		B7137AD826FB5C9B066CDB69 /* MenuIconCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09996340B6B4EC228208612 /* MenuIconCatalog.swift */; };
+		B7B456F69C157266359B7478 /* HelperCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349387AAB601B5E5959B3C1A /* HelperCommandRunner.swift */; };
 		BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */; };
 		BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */; };
 		C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */; };
+		C2C7B574709887D14AECE9C5 /* ClosedLidSetupState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC895E08B58D01FAD193FF5 /* ClosedLidSetupState.swift */; };
+		CDAD86509F2B70CE93645A73 /* HelperCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349387AAB601B5E5959B3C1A /* HelperCommandRunner.swift */; };
 		CEB85C9EDE283ED298C2F619 /* MenuContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14474E440CBEBFF91DDB212A /* MenuContentView.swift */; };
+		D41F4F9AE89C94F889C1BBC0 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A091B65D92FAF5BE47D92C0 /* AppIntents.framework */; };
+		F203A6F9314547DEE794426E /* com.dshakiba.AwakeBar.PrivilegedHelper.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3949F8715294AA32D59737C9 /* com.dshakiba.AwakeBar.PrivilegedHelper.plist */; };
+		FAEA89C36E73C7BB5EEADCE0 /* PrivilegedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */; };
+		FF42BC1F5A431E6E5709FA0B /* PrivilegedDaemonClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE32D2B6F5B8638BE4C540B2 /* PrivilegedDaemonClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0D5D6649ED20DD8F5C9AA61B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EDCD9677D0C6E60E8ACAA4E8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E3C43D6B2436D122179C70A6;
+			remoteInfo = AwakeBarPrivilegedHelper;
+		};
 		DE00E68FF6506EB53A5568C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EDCD9677D0C6E60E8ACAA4E8 /* Project object */;
@@ -39,40 +68,94 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0FC895E08B58D01FAD193FF5 /* ClosedLidSetupState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidSetupState.swift; sourceTree = "<group>"; };
 		13524A21A015BEE7E9573AFB /* AwakeBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeBarApp.swift; sourceTree = "<group>"; };
 		14474E440CBEBFF91DDB212A /* MenuContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuContentView.swift; sourceTree = "<group>"; };
+		161235132EC045ACE6641F1C /* ClosedLidSetupController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidSetupController.swift; sourceTree = "<group>"; };
+		1A091B65D92FAF5BE47D92C0 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		1CE46AD516F2BA51CA081BB3 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		1CF2B376A4370DC737445EEF /* PrivilegedDaemonClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedDaemonClientTests.swift; sourceTree = "<group>"; };
 		1E74433634A0685516D19AF8 /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		1F116C3DF15E45AAAAEB1DB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidPmsetControllerTests.swift; sourceTree = "<group>"; };
+		3382C9703E91E80BF6FCBF47 /* AwakeBarPrivilegedHelperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AwakeBarPrivilegedHelperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		349387AAB601B5E5959B3C1A /* HelperCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperCommandRunner.swift; sourceTree = "<group>"; };
+		35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedServiceConstants.swift; sourceTree = "<group>"; };
 		368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarControllerTests.swift; sourceTree = "<group>"; };
+		3949F8715294AA32D59737C9 /* com.dshakiba.AwakeBar.PrivilegedHelper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = com.dshakiba.AwakeBar.PrivilegedHelper.plist; sourceTree = "<group>"; };
 		443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLidAssertionController.swift; sourceTree = "<group>"; };
-		5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedCommandRunnerTests.swift; sourceTree = "<group>"; };
+		58F1BA1ACED0A24645674D17 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidSetupControllerTests.swift; sourceTree = "<group>"; };
 		6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalogTests.swift; sourceTree = "<group>"; };
 		7BE7136CC16EA1FC30BE6850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7C1AAF36CC83CCC4B322E38C /* LegacyCleanupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCleanupManager.swift; sourceTree = "<group>"; };
+		8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeBarPrivilegedServiceXPC.swift; sourceTree = "<group>"; };
+		8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedService.swift; sourceTree = "<group>"; };
 		98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStoreTests.swift; sourceTree = "<group>"; };
 		9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeModeTests.swift; sourceTree = "<group>"; };
 		9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AwakeBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedCommandRunner.swift; sourceTree = "<group>"; };
+		A637358862B9D4ED743DB5B7 /* AwakeBarPrivilegedHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = AwakeBarPrivilegedHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		A65CD3E8953A0E7E493844A9 /* LegacyCleanupPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCleanupPolicyTests.swift; sourceTree = "<group>"; };
+		AE32D2B6F5B8638BE4C540B2 /* PrivilegedDaemonClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedDaemonClient.swift; sourceTree = "<group>"; };
 		C09996340B6B4EC228208612 /* MenuIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalog.swift; sourceTree = "<group>"; };
+		C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedServiceContractTests.swift; sourceTree = "<group>"; };
 		CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStore.swift; sourceTree = "<group>"; };
 		DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		E534796D72E7DC597B4ADE4B /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
 		ED4A0D68A3278179B3733FEA /* AwakeBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AwakeBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidPmsetController.swift; sourceTree = "<group>"; };
 		FBDE984A229007F093175C83 /* KeepAwakeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeMode.swift; sourceTree = "<group>"; };
+		FD62C561B08E48E48BDBDBE1 /* PrivilegedServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		158A43AEE77665A1FF6A8AB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D41F4F9AE89C94F889C1BBC0 /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		96C6C2D7C94B59FCC2DD62A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06D29963CDF3550BFA912887 /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		0B969D4EC1D4587D04009111 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1A091B65D92FAF5BE47D92C0 /* AppIntents.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		13FB758236BF9A6EAB3D10C2 /* AwakeBarPrivilegedHelperTests */ = {
+			isa = PBXGroup;
+			children = (
+				A65CD3E8953A0E7E493844A9 /* LegacyCleanupPolicyTests.swift */,
+				FD62C561B08E48E48BDBDBE1 /* PrivilegedServiceTests.swift */,
+			);
+			path = AwakeBarPrivilegedHelperTests;
+			sourceTree = "<group>";
+		};
 		1F446CDAD0578D70C026E364 /* AwakeBarTests */ = {
 			isa = PBXGroup;
 			children = (
 				98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */,
 				2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */,
+				697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */,
 				9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */,
 				368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */,
 				6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */,
-				5ECDD52E7D91B1B06F8ECF43 /* PrivilegedCommandRunnerTests.swift */,
+				1CF2B376A4370DC737445EEF /* PrivilegedDaemonClientTests.swift */,
+				C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */,
 			);
 			path = AwakeBarTests;
 			sourceTree = "<group>";
@@ -81,6 +164,7 @@
 			isa = PBXGroup;
 			children = (
 				1CE46AD516F2BA51CA081BB3 /* AppState.swift */,
+				0FC895E08B58D01FAD193FF5 /* ClosedLidSetupState.swift */,
 				FBDE984A229007F093175C83 /* KeepAwakeMode.swift */,
 			);
 			path = Domain;
@@ -99,18 +183,40 @@
 			isa = PBXGroup;
 			children = (
 				F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */,
+				161235132EC045ACE6641F1C /* ClosedLidSetupController.swift */,
 				E534796D72E7DC597B4ADE4B /* LoginItemController.swift */,
 				443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */,
-				BDC027FB6DC7B4204EB85596 /* PrivilegedCommandRunner.swift */,
+				AE32D2B6F5B8638BE4C540B2 /* PrivilegedDaemonClient.swift */,
 				1E74433634A0685516D19AF8 /* Protocols.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		708BFA3F6FF792BE3A5B6D48 /* AwakeBarPrivilegedHelper */ = {
+			isa = PBXGroup;
+			children = (
+				349387AAB601B5E5959B3C1A /* HelperCommandRunner.swift */,
+				7C1AAF36CC83CCC4B322E38C /* LegacyCleanupManager.swift */,
+				58F1BA1ACED0A24645674D17 /* main.swift */,
+				8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */,
+			);
+			path = AwakeBarPrivilegedHelper;
+			sourceTree = "<group>";
+		};
+		8DF4B73FC1B7F84C8CD169EB /* LaunchDaemons */ = {
+			isa = PBXGroup;
+			children = (
+				3949F8715294AA32D59737C9 /* com.dshakiba.AwakeBar.PrivilegedHelper.plist */,
+			);
+			path = LaunchDaemons;
 			sourceTree = "<group>";
 		};
 		96E92EBEE9BB39EA537173A0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				ED4A0D68A3278179B3733FEA /* AwakeBar.app */,
+				A637358862B9D4ED743DB5B7 /* AwakeBarPrivilegedHelper */,
+				3382C9703E91E80BF6FCBF47 /* AwakeBarPrivilegedHelperTests.xctest */,
 				9FB471F88020D0F77C29590C /* AwakeBarTests.xctest */,
 			);
 			name = Products;
@@ -123,11 +229,21 @@
 				7BE7136CC16EA1FC30BE6850 /* Info.plist */,
 				F57AB5705DE54AAC40F4E777 /* App */,
 				3E77BA83BF75C1D0B599FAB5 /* Domain */,
+				8DF4B73FC1B7F84C8CD169EB /* LaunchDaemons */,
 				60B8F47AE0A721BA1DB90FA0 /* Services */,
 				F36459755EFA9681D833EDA5 /* State */,
 				3FBD0B51096BB79076712337 /* UI */,
 			);
 			path = AwakeBar;
+			sourceTree = "<group>";
+		};
+		ECA118B93E9F0E8934C237EE /* AwakeBarShared */ = {
+			isa = PBXGroup;
+			children = (
+				8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */,
+				35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */,
+			);
+			path = AwakeBarShared;
 			sourceTree = "<group>";
 		};
 		F36459755EFA9681D833EDA5 /* State */ = {
@@ -151,7 +267,11 @@
 			isa = PBXGroup;
 			children = (
 				D4125B3E0242A1894386CC98 /* AwakeBar */,
+				708BFA3F6FF792BE3A5B6D48 /* AwakeBarPrivilegedHelper */,
+				13FB758236BF9A6EAB3D10C2 /* AwakeBarPrivilegedHelperTests */,
+				ECA118B93E9F0E8934C237EE /* AwakeBarShared */,
 				1F446CDAD0578D70C026E364 /* AwakeBarTests */,
+				0B969D4EC1D4587D04009111 /* Frameworks */,
 				96E92EBEE9BB39EA537173A0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -165,10 +285,13 @@
 			buildPhases = (
 				8A56613B68BD66AC9A6670D8 /* Sources */,
 				D305AB5C266BBB46BBF5F816 /* Resources */,
+				96C6C2D7C94B59FCC2DD62A6 /* Frameworks */,
+				9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F2A9612798A7EF345CDB7340 /* PBXTargetDependency */,
 			);
 			name = AwakeBar;
 			packageProductDependencies = (
@@ -177,11 +300,46 @@
 			productReference = ED4A0D68A3278179B3733FEA /* AwakeBar.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E3C43D6B2436D122179C70A6 /* AwakeBarPrivilegedHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E2F7BE6EDA2C371A4C3AB3BB /* Build configuration list for PBXNativeTarget "AwakeBarPrivilegedHelper" */;
+			buildPhases = (
+				6B0D367E7BA5E292124F7A2A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AwakeBarPrivilegedHelper;
+			packageProductDependencies = (
+			);
+			productName = AwakeBarPrivilegedHelper;
+			productReference = A637358862B9D4ED743DB5B7 /* AwakeBarPrivilegedHelper */;
+			productType = "com.apple.product-type.tool";
+		};
+		F3D2EA118A537B526058D502 /* AwakeBarPrivilegedHelperTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42B0BCED58006572DAE66E36 /* Build configuration list for PBXNativeTarget "AwakeBarPrivilegedHelperTests" */;
+			buildPhases = (
+				7D3D1F45297E0456F38058B2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AwakeBarPrivilegedHelperTests;
+			packageProductDependencies = (
+			);
+			productName = AwakeBarPrivilegedHelperTests;
+			productReference = 3382C9703E91E80BF6FCBF47 /* AwakeBarPrivilegedHelperTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F70509016C681D6029FAC0D4 /* AwakeBarTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CE5059BD91F040DEE12C977B /* Build configuration list for PBXNativeTarget "AwakeBarTests" */;
 			buildPhases = (
 				0A0382BBD5C45F59E16F0660 /* Sources */,
+				158A43AEE77665A1FF6A8AB5 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -207,6 +365,9 @@
 					C39467371F6DED0079AFDE56 = {
 						ProvisioningStyle = Automatic;
 					};
+					E3C43D6B2436D122179C70A6 = {
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = CBAB2B9C3F8546C38292D832 /* Build configuration list for PBXProject "AwakeBar" */;
@@ -224,6 +385,8 @@
 			projectRoot = "";
 			targets = (
 				C39467371F6DED0079AFDE56 /* AwakeBar */,
+				E3C43D6B2436D122179C70A6 /* AwakeBarPrivilegedHelper */,
+				F3D2EA118A537B526058D502 /* AwakeBarPrivilegedHelperTests */,
 				F70509016C681D6029FAC0D4 /* AwakeBarTests */,
 			);
 		};
@@ -235,10 +398,33 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EEBCC3AB907BD2B4E1961A2 /* Assets.xcassets in Resources */,
+				F203A6F9314547DEE794426E /* com.dshakiba.AwakeBar.PrivilegedHelper.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Privileged Helper";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/AwakeBarPrivilegedHelper\"\nHELPER_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/HelperTools\"\nHELPER_DST=\"${HELPER_DST_DIR}/AwakeBarPrivilegedHelper\"\nDAEMON_SRC=\"${SRCROOT}/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\nDAEMON_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons\"\nDAEMON_DST=\"${DAEMON_DST_DIR}/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\n\nmkdir -p \"${HELPER_DST_DIR}\" \"${DAEMON_DST_DIR}\"\n/usr/bin/install -m 755 \"${HELPER_SRC}\" \"${HELPER_DST}\"\n/usr/bin/install -m 644 \"${DAEMON_SRC}\" \"${DAEMON_DST}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0A0382BBD5C45F59E16F0660 /* Sources */ = {
@@ -247,10 +433,39 @@
 			files = (
 				5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */,
 				126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */,
+				67AD90016FFF9A47328B8E18 /* ClosedLidSetupControllerTests.swift in Sources */,
 				07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */,
 				35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */,
 				119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */,
-				42D0573E565E8F34D56475DB /* PrivilegedCommandRunnerTests.swift in Sources */,
+				00A5536E9D3AB15A0010260A /* PrivilegedDaemonClientTests.swift in Sources */,
+				1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B0D367E7BA5E292124F7A2A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A71674459552AC90680365D /* AwakeBarPrivilegedServiceXPC.swift in Sources */,
+				CDAD86509F2B70CE93645A73 /* HelperCommandRunner.swift in Sources */,
+				8CF978BE336380E6351C5DC4 /* LegacyCleanupManager.swift in Sources */,
+				A20E2F5FA27E30D2E5EDD19A /* PrivilegedService.swift in Sources */,
+				775D0C0FB4F38D567903496E /* PrivilegedServiceConstants.swift in Sources */,
+				A72EF3F820821236D837A3A2 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7D3D1F45297E0456F38058B2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				319BDD8FD78E4105A0C15942 /* AwakeBarPrivilegedServiceXPC.swift in Sources */,
+				B7B456F69C157266359B7478 /* HelperCommandRunner.swift in Sources */,
+				01420E5BC752049E21CA3196 /* LegacyCleanupManager.swift in Sources */,
+				5595F0AF797848B678245641 /* LegacyCleanupPolicyTests.swift in Sources */,
+				FAEA89C36E73C7BB5EEADCE0 /* PrivilegedService.swift in Sources */,
+				50570258AD3B21C05A0F3E03 /* PrivilegedServiceConstants.swift in Sources */,
+				891029AD07876CF3CB19B7D6 /* PrivilegedServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,14 +476,18 @@
 				7DA31356ADFEEA6DFC253BE7 /* AppState.swift in Sources */,
 				4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */,
 				BF9201167DFB7D1CB1CB9C79 /* AwakeBarApp.swift in Sources */,
+				37698417F22973EABC52ADA8 /* AwakeBarPrivilegedServiceXPC.swift in Sources */,
 				9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */,
+				9B3B1AD9500A397C879A9C72 /* ClosedLidSetupController.swift in Sources */,
+				C2C7B574709887D14AECE9C5 /* ClosedLidSetupState.swift in Sources */,
 				758F845CF8EF31F7E9AA73C7 /* KeepAwakeMode.swift in Sources */,
 				67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */,
 				BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */,
 				CEB85C9EDE283ED298C2F619 /* MenuContentView.swift in Sources */,
 				B7137AD826FB5C9B066CDB69 /* MenuIconCatalog.swift in Sources */,
 				C054349D13580276D66EF226 /* OpenLidAssertionController.swift in Sources */,
-				A0A966810F03CAFA5F270183 /* PrivilegedCommandRunner.swift in Sources */,
+				FF42BC1F5A431E6E5709FA0B /* PrivilegedDaemonClient.swift in Sources */,
+				2432E05DBFC7434A7412314D /* PrivilegedServiceConstants.swift in Sources */,
 				A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,6 +500,11 @@
 			target = C39467371F6DED0079AFDE56 /* AwakeBar */;
 			targetProxy = DE00E68FF6506EB53A5568C7 /* PBXContainerItemProxy */;
 		};
+		F2A9612798A7EF345CDB7340 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E3C43D6B2436D122179C70A6 /* AwakeBarPrivilegedHelper */;
+			targetProxy = 0D5D6649ED20DD8F5C9AA61B /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -288,6 +512,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				AWAKEBAR_TEAM_ID = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -365,10 +590,27 @@
 			};
 			name = Release;
 		};
+		27698389119415E8B6F28FBB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBarPrivilegedHelperTests;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 		618B5BACA7F392C67B3766C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				AWAKEBAR_TEAM_ID = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -421,6 +663,22 @@
 			};
 			name = Release;
 		};
+		6DAA3996BFFCD3A57BB713A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBarPrivilegedHelperTests;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		85445C33ABBB7A2D196008CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -428,8 +686,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AwakeBar/Info.plist;
+				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -459,6 +719,26 @@
 			};
 			name = Debug;
 		};
+		AF1DD7330954EF5F02E3E361 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
+				INFOPLIST_KEY_CFBundleDisplayName = AwakeBarPrivilegedHelper;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
+				PRODUCT_NAME = AwakeBarPrivilegedHelper;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		AFEC0F8B953BA579632D1068 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -468,6 +748,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AwakeBar/Info.plist;
+				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -479,9 +760,37 @@
 			};
 			name = Debug;
 		};
+		B668331FCF09E3088F67D586 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_AwakeBarTeamID = "$(AWAKEBAR_TEAM_ID)";
+				INFOPLIST_KEY_CFBundleDisplayName = AwakeBarPrivilegedHelper;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dshakiba.AwakeBar.PrivilegedHelper;
+				PRODUCT_NAME = AwakeBarPrivilegedHelper;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		42B0BCED58006572DAE66E36 /* Build configuration list for PBXNativeTarget "AwakeBarPrivilegedHelperTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27698389119415E8B6F28FBB /* Debug */,
+				6DAA3996BFFCD3A57BB713A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		5D77AF6841D9F03DB2695D86 /* Build configuration list for PBXNativeTarget "AwakeBar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -505,6 +814,15 @@
 			buildConfigurations = (
 				9DBE37A19A002DCB7DE802D4 /* Debug */,
 				22E51A1615E55618BCF43844 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E2F7BE6EDA2C371A4C3AB3BB /* Build configuration list for PBXNativeTarget "AwakeBarPrivilegedHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B668331FCF09E3088F67D586 /* Debug */,
+				AF1DD7330954EF5F02E3E361 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

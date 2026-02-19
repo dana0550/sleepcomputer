@@ -4,6 +4,7 @@ final class AppStateStore {
     private enum Keys {
         static let openLidEnabled = "awakebar.openLidEnabled"
         static let launchAtLoginEnabled = "awakebar.launchAtLoginEnabled"
+        static let legacyCleanupCompleted = "awakebar.legacyCleanupCompleted"
     }
 
     private let userDefaults: UserDefaults
@@ -16,14 +17,17 @@ final class AppStateStore {
         AppState(
             openLidEnabled: userDefaults.bool(forKey: Keys.openLidEnabled),
             closedLidEnabledByApp: false,
-            externalClosedLidDetected: false,
             launchAtLoginEnabled: userDefaults.bool(forKey: Keys.launchAtLoginEnabled),
+            closedLidSetupState: .notRegistered,
+            legacyCleanupCompleted: userDefaults.bool(forKey: Keys.legacyCleanupCompleted),
             transientErrorMessage: nil
         )
     }
 
     func save(_ state: AppState) {
-        userDefaults.set(state.openLidEnabled, forKey: Keys.openLidEnabled)
+        let shouldRestoreFullAwake = state.openLidEnabled && state.closedLidEnabledByApp
+        userDefaults.set(shouldRestoreFullAwake, forKey: Keys.openLidEnabled)
         userDefaults.set(state.launchAtLoginEnabled, forKey: Keys.launchAtLoginEnabled)
+        userDefaults.set(state.legacyCleanupCompleted, forKey: Keys.legacyCleanupCompleted)
     }
 }

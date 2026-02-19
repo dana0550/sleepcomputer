@@ -5,14 +5,15 @@ name: Menu Bar Experience
 status: active
 owner: dshakiba
 parent: null
-children: []
+children:
+  - F-002.01
 aliases: []
-version: 1.0.0
-last_reviewed: 2026-02-17
+version: 1.1.0
+last_reviewed: 2026-02-18
 tags:
   - ui
   - macos
-risk_level: low
+risk_level: medium
 dependencies:
   - F-001
   - F-003
@@ -24,88 +25,102 @@ dependencies:
 
 ## Summary
 
-Deliver a minimal, intuitive menu with clear mode status and direct controls.
+Deliver a minimal, menu bar-first control surface with one Full Awake toggle, clear ON/OFF status, and guided setup messaging.
 
 ## Goals
 
-- One-screen interaction model from menu bar.
-- Quick status visibility and one-click off path.
+- Keep the primary sleep control in one menu toggle.
+- Keep ON/OFF visibility explicit at a glance.
+- Surface setup and helper errors inline without extra windows.
 
 ## Non-Goals
 
-- Multi-window UI.
-- Preferences pane complexity in v1.
+- Multi-window preferences UI.
+- Background agent UI outside Menu Bar Extra.
 
 ## Requirements
 
-- R1: Menu includes status line, two mode toggles, login toggle, turn-off action, and quit.
-- R2: Menu icon reflects off, open-lid, or closed-lid status.
-- R3: Menu remains responsive during privileged toggles.
+- R1: Menu must expose a status header, a single `Full Awake` toggle, optional setup action, inline state/error messaging, and a quit action.
+- R2: `Full Awake` toggle must be disabled while an ON/OFF change is in-flight.
+- R3: When setup is not ready, toggle attempts must keep state OFF and render actionable setup guidance.
+- R4: ON/OFF states must be visually explicit with blue ON indicators in both menu bar glyph and menu status dot.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
-- [ ] R1
-- [ ] R2
-- [ ] R3
+- [x] R1
+- [x] R2
+- [x] R3
+- [x] R4
 
 ## Acceptance Criteria
 
-- AC1: All controls are visible and actionable from menu bar.
-- AC2: Status text and icon update immediately after successful actions.
+- AC1: Turning `Full Awake` OFF disables both open-lid and closed-lid awake paths.
+- AC2: Setup-required ON attempts surface non-ready/approval-required guidance and do not remain ON.
+- AC3: Menu stays compact with single-column controls and no secondary preferences window.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
-- [ ] AC1
-- [ ] AC2
+- [x] AC1
+- [x] AC2
+- [ ] AC3
 
 ## Traceability
 
 <!-- AUTOGEN:TRACEABILITY -->
 | Item | Type | Evidence |
 |---|---|---|
-| R1 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| R2 | test | AwakeBarTests/KeepAwakeModeTests.swift |
-| R3 | test | AwakeBarTests/MenuBarControllerTests.swift |
-| AC1 | manual | Menu walkthrough |
-| AC2 | manual | Toggle verification |
+| R1 | code | AwakeBar/UI/MenuContentView.swift |
+| R2 | code | AwakeBar/UI/MenuContentView.swift |
+| R3 | code | AwakeBar/UI/MenuContentView.swift |
+| R4 | code | AwakeBar/UI/MenuContentView.swift |
+| R4 | code | AwakeBar/App/AwakeBarApp.swift |
+| AC1 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC2 | test | AwakeBarTests/MenuBarControllerTests.swift |
+| AC3 | code | AwakeBar/UI/MenuContentView.swift |
 
 ## Children
 
 <!-- AUTOGEN:CHILDREN -->
-- None
+- [F-002.01](./F-002.01-mode-and-status-modeling.md)
 
 ## References
 
 <!-- AUTOGEN:REFERENCES -->
-- [F-001]
-- [F-003]
-- [F-004]
-- [F-005]
+- [F-001](./F-001-core-awake-control.md)
+- [F-002.01](./F-002.01-mode-and-status-modeling.md)
+- [F-003](./F-003-closed-lid-admin-control.md)
+- [F-004](./F-004-state-persistence-login.md)
+- [F-005](./F-005-iconography-asset-pipeline.md)
 
 ## API Contract
 
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `MenuBarController`
 - `MenuContentView`
+- `AwakeBarApp`
 
 ## Impact
 
 <!-- AUTOGEN:IMPACT_MAP -->
-- Primary user interaction path for all sleep controls.
+- Primary user interaction path for Full Awake ON/OFF control.
+- Governs UX safety affordances for privileged actions.
 
 ## Security
 
 <!-- AUTOGEN:SECURITY_CHECKLIST -->
-- [x] Uses native macOS UI primitives
+- [x] Uses native SwiftUI/AppKit primitives
+- [x] Privileged actions stay setup-gated in UI
 
 ## Budget
 
 <!-- AUTOGEN:BUDGET_CHECKLIST -->
-- [x] No background timers required for idle state
+- [x] No polling loops in UI layer
+- [x] Renders small bounded menu layout only
 
 ## Table of Contents
 
 <!-- AUTOGEN:TOC -->
 - Summary
 - Goals
+- Non-Goals
 - Requirements
 - Acceptance Criteria
 
@@ -114,3 +129,5 @@ Deliver a minimal, intuitive menu with clear mode status and direct controls.
 ## Changelog
 
 - 2026-02-17: Initial spec created.
+- 2026-02-18: Added setup/error UX requirements and child mode-modeling spec.
+- 2026-02-18: Simplified requirements to single-toggle Full Awake UX and explicit ON/OFF visuals.
