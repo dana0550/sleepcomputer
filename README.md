@@ -27,12 +27,16 @@ It provides a single primary control:
 
 ## Visual Identity
 
-Current icon pack: `HERMES Green` (20x20 menu SVGs + refreshed full-color app icon set).
-Runtime status icon set is intentionally two assets only: `awakebar-off.svg` and `awakebar-closed.svg` (lock = Full Awake ON).
+Runtime status icons are a strict two-state set:
 
-| App Icon | Menu Bar OFF | Menu Bar ON |
+- `AwakeBarStatusOff` (`Design/icons/awakebar-off.svg`): eye with slash (OFF)
+- `AwakeBarStatusClosed` (`Design/icons/awakebar-closed.svg`): eye with lock (Full Awake ON)
+
+Menu bar icons are template-rendered (monochrome) so macOS applies native menu bar tinting automatically.
+
+| App Icon | OFF State | ON State |
 |---|---|---|
-| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="App icon" /> | Gray ring indicator | Blue ring + blue center indicator |
+| <img src="AwakeBar/Assets.xcassets/AppIcon.appiconset/AppIcon-512.png" width="64" alt="AwakeBar app icon" /> | <img src="Design/icons/awakebar-off.svg" width="20" alt="OFF icon: eye with slash" /> `AwakeBarStatusOff` | <img src="Design/icons/awakebar-closed.svg" width="20" alt="ON icon: eye with lock" /> `AwakeBarStatusClosed` |
 
 ## What Each Mode Does
 
@@ -48,6 +52,15 @@ Runtime status icon set is intentionally two assets only: `awakebar-off.svg` and
 - `Finish Setup...`: appears when helper approval/setup is required.
 - `Inline message`: explains setup blockers or helper errors in menu context.
 - `Quit AwakeBar`: exits the app.
+- `State indicator`: status dot is gray when OFF and blue when ON.
+- `Toggle tint`: switch tint is blue when ON.
+
+`Awake is ON` means both conditions are active:
+
+- Open-lid awake assertion is enabled.
+- Closed-lid helper policy is enabled.
+
+If setup/helper readiness is missing, the app keeps Full Awake OFF and shows an inline reason.
 
 Hover the `Full Awake` toggle to view quick inline help text.
 
