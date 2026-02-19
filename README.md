@@ -110,6 +110,7 @@ xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -destination 'platform=m
 
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
+- CI workflow also supports `workflow_dispatch` for preflight; publication remains tag-scoped.
 
 Required environment variables/secrets:
 
@@ -121,7 +122,18 @@ Required environment variables/secrets:
 - `DEVELOPER_ID_APP_CERT_PASSWORD`
 - `KEYCHAIN_PASSWORD`
 
+Release signing certificate requirements:
+
+- `DEVELOPER_ID_APP_CERT_P12_BASE64` must contain a `Developer ID Application` identity for your `APPLE_TEAM_ID`.
+- Exporting an `Apple Development` certificate as `.p12` will fail release signing.
+
 Release scripts set `AWAKEBAR_TEAM_ID` from `APPLE_TEAM_ID` so XPC code-sign checks bind both bundle ID and team ID in production builds.
+
+Secret hygiene:
+
+- Keep `.p12` and `.p8` source files out of the repository and out of tracked directories.
+- Store release credentials in a secure vault/password manager.
+- `Scripts/release-notarize.sh` uses a temporary keychain and now removes temporary local credential files/keychain on exit.
 
 ## Project Layout
 

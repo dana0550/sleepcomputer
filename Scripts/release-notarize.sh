@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+umask 077
 
 required_env=(
   APPLE_TEAM_ID
@@ -32,8 +33,28 @@ APP_PATH="$BUILD_DIR/AwakeBar.app"
 ZIP_UNSIGNED="$BUILD_DIR/AwakeBar-unsigned.zip"
 ZIP_FINAL="$DIST_DIR/AwakeBar-${VERSION_LABEL}-macos.zip"
 
+ORIGINAL_KEYCHAINS=()
+while IFS= read -r line; do
+  line="${line#"${line%%[![:space:]]*}"}"
+  line="${line%\"}"
+  line="${line#\"}"
+  [[ -n "$line" ]] && ORIGINAL_KEYCHAINS+=("$line")
+done < <(security list-keychains -d user)
+
+cleanup() {
+  rm -f "$CERT_PATH" "$NOTARY_KEY_PATH"
+  security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
+  if [[ ${#ORIGINAL_KEYCHAINS[@]} -gt 0 ]]; then
+    security list-keychains -d user -s "${ORIGINAL_KEYCHAINS[@]}" >/dev/null 2>&1 || true
+  fi
+}
+
+trap cleanup EXIT INT TERM
+
 mkdir -p "$BUILD_DIR" "$DIST_DIR"
 rm -rf "$ARCHIVE_PATH" "$APP_PATH" "$ZIP_UNSIGNED"
+security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
+rm -f "$KEYCHAIN_PATH"
 
 echo "$DEVELOPER_ID_APP_CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
 echo "$ASC_API_KEY_P8_BASE64" | base64 --decode > "$NOTARY_KEY_PATH"
@@ -52,6 +73,18 @@ security set-key-partition-list \
   -s \
   -k "$KEYCHAIN_PASSWORD" \
   "$KEYCHAIN_PATH"
+
+if ! security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -Eq "Developer ID Application: .*\(${APPLE_TEAM_ID}\)"; then
+  echo "Missing required signing identity: Developer ID Application for team ${APPLE_TEAM_ID}." >&2
+  echo "Export a .p12 that contains Developer ID Application (not Apple Development)." >&2
+  exit 1
+fi
+
+xcrun notarytool history \
+  --key "$NOTARY_KEY_PATH" \
+  --key-id "$ASC_KEY_ID" \
+  --issuer "$ASC_ISSUER_ID" \
+  --output-format json >/dev/null
 
 xcodegen generate
 
