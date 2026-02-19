@@ -410,18 +410,21 @@
 /* Begin PBXShellScriptBuildPhase section */
 		9DE774A4B2E6F03D6E6426FD /* Embed Privileged Helper */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/AwakeBarPrivilegedHelper",
+				"$(SRCROOT)/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist",
 			);
 			name = "Embed Privileged Helper";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/HelperTools/AwakeBarPrivilegedHelper",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
