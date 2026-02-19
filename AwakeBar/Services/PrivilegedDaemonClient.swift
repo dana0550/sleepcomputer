@@ -10,6 +10,7 @@ enum PrivilegedDaemonClientError: Error, LocalizedError, Equatable {
     case invalidProxy
     case timeout
     case invalidCleanupPayload
+    case invalidSleepDisabledResponse
 
     var errorDescription: String? {
         switch self {
@@ -19,6 +20,8 @@ enum PrivilegedDaemonClientError: Error, LocalizedError, Equatable {
             return "Privileged helper did not respond in time."
         case .invalidCleanupPayload:
             return "Privileged helper returned an invalid cleanup result."
+        case .invalidSleepDisabledResponse:
+            return "Privileged helper returned an invalid sleep policy value."
         }
     }
 }
@@ -81,7 +84,11 @@ final class PrivilegedDaemonClient: PrivilegedDaemonControlling, @unchecked Send
                     finish(.failure(error))
                     return
                 }
-                finish(.success(value?.boolValue == true))
+                guard let value else {
+                    finish(.failure(PrivilegedDaemonClientError.invalidSleepDisabledResponse))
+                    return
+                }
+                finish(.success(value.boolValue))
             }
         }
     }

@@ -1,6 +1,23 @@
 import Foundation
 import Security
 
+enum SleepDisabledParseError: Error, LocalizedError {
+    case keyNotFound
+    case valueMissing
+    case invalidValue(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .keyNotFound:
+            return "SleepDisabled value was not found in pmset output."
+        case .valueMissing:
+            return "SleepDisabled value was missing in pmset output."
+        case .invalidValue(let value):
+            return "SleepDisabled value '\(value)' was not recognized."
+        }
+    }
+}
+
 final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
     private let runner: HelperCommandRunning
     private let cleanupManager: LegacyCleanupManager
@@ -30,7 +47,8 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
     func readSleepDisabled(_ reply: @escaping (NSNumber?, NSError?) -> Void) {
         do {
             let output = try runner.run("/usr/bin/pmset", arguments: ["-g"])
-            reply(NSNumber(value: Self.parseSleepDisabled(output)), nil)
+            let value = try Self.parseSleepDisabled(output)
+            reply(NSNumber(value: value), nil)
         } catch {
             reply(nil, error as NSError)
         }
@@ -50,18 +68,35 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
         }
     }
 
-    static func parseSleepDisabled(_ output: String) -> Bool {
+    static func parseSleepDisabled(_ output: String) throws -> Bool {
+        let key = "SleepDisabled"
         for line in output.split(whereSeparator: \.isNewline) {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.hasPrefix("SleepDisabled") else {
+            guard trimmed.hasPrefix(key) else {
                 continue
             }
-            let parts = trimmed.split { $0 == " " || $0 == "\t" }
-            if let value = parts.last {
-                return value == "1"
+
+            var remainder = String(trimmed.dropFirst(key.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if remainder.hasPrefix(":") || remainder.hasPrefix("=") {
+                remainder.removeFirst()
+                remainder = remainder.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+
+            guard let valueToken = remainder.split(whereSeparator: \.isWhitespace).first else {
+                throw SleepDisabledParseError.valueMissing
+            }
+
+            switch valueToken {
+            case "1":
+                return true
+            case "0":
+                return false
+            default:
+                throw SleepDisabledParseError.invalidValue(String(valueToken))
             }
         }
-        return false
+        throw SleepDisabledParseError.keyNotFound
     }
 }
 

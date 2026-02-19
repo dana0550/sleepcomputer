@@ -37,9 +37,27 @@ final class PrivilegedServiceTests: XCTestCase {
         XCTAssertEqual(runner.calls.count, 1)
     }
 
-    func testReadSleepDisabledParsesDisabledValueWhenMissing() {
+    func testReadSleepDisabledReturnsErrorWhenSleepDisabledIsMissing() {
         let runner = MockRunner()
         runner.nextOutput = "System-wide power settings:"
+        let service = PrivilegedService(runner: runner, cleanupManager: LegacyCleanupManager())
+        let expectation = expectation(description: "reply")
+
+        service.readSleepDisabled { value, error in
+            XCTAssertNil(value)
+            XCTAssertNotNil(error)
+            expectation.fulfill()
+        }
+
+        waitForExpectations(timeout: 1.0)
+    }
+
+    func testReadSleepDisabledParsesVariantSeparatorFormat() {
+        let runner = MockRunner()
+        runner.nextOutput = """
+        System-wide power settings:
+        SleepDisabled: 0
+        """
         let service = PrivilegedService(runner: runner, cleanupManager: LegacyCleanupManager())
         let expectation = expectation(description: "reply")
 
@@ -60,8 +78,14 @@ final class PrivilegedServiceTests: XCTestCase {
         SleepDisabled\t0
         """
 
-        XCTAssertTrue(PrivilegedService.parseSleepDisabled(enabled))
-        XCTAssertFalse(PrivilegedService.parseSleepDisabled(disabled))
+        XCTAssertEqual(try? PrivilegedService.parseSleepDisabled(enabled), true)
+        XCTAssertEqual(try? PrivilegedService.parseSleepDisabled(disabled), false)
+    }
+
+    func testParseSleepDisabledThrowsForUnknownValue() {
+        XCTAssertThrowsError(
+            try PrivilegedService.parseSleepDisabled("SleepDisabled maybe")
+        )
     }
 }
 

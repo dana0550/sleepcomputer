@@ -53,4 +53,11 @@ final class PrivilegedDaemonClientTests: XCTestCase {
             "AwakeBarPrivilegedHelper"
         )
     }
+
+    func testInvalidSleepDisabledResponseErrorDescriptionIsUserFacing() {
+        XCTAssertEqual(
+            PrivilegedDaemonClientError.invalidSleepDisabledResponse.errorDescription,
+            "Privileged helper returned an invalid sleep policy value."
+        )
+    }
 }
