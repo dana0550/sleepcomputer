@@ -119,9 +119,7 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
     }
 
     static func isInApplications(_ bundleURL: URL) -> Bool {
-        let path = bundleURL.path
-        return path.hasPrefix("/Applications/")
-            || path == "/Applications"
+        bundleURL.path.hasPrefix("/Applications/")
     }
 
     private func isHelperReachable() async -> Bool {

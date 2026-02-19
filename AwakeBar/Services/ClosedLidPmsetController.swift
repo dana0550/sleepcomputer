@@ -16,6 +16,11 @@ final class ClosedLidPmsetController: ClosedLidSleepControlling {
     private let daemonClient: PrivilegedDaemonControlling
     private let setupController: ClosedLidSetupControlling
 
+    // Exposed for composition so higher-level wiring can share setup + daemon defaults.
+    var setupStateController: ClosedLidSetupControlling {
+        setupController
+    }
+
     init(
         daemonClient: PrivilegedDaemonControlling = PrivilegedDaemonClient(),
         setupController: ClosedLidSetupControlling? = nil

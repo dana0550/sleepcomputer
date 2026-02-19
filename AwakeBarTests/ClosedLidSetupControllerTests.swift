@@ -155,6 +155,11 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         controller.openSystemSettingsForApproval()
         XCTAssertTrue(didOpen)
     }
+
+    func testIsInApplicationsRejectsApplicationsDirectoryRoot() {
+        XCTAssertFalse(ClosedLidSetupController.isInApplications(URL(fileURLWithPath: "/Applications")))
+        XCTAssertTrue(ClosedLidSetupController.isInApplications(URL(fileURLWithPath: "/Applications/AwakeBar.app")))
+    }
 }
 
 @MainActor

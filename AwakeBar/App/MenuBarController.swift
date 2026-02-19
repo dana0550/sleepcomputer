@@ -24,8 +24,20 @@ final class MenuBarController: ObservableObject {
         loginItemController: LoginItemControlling = LoginItemController(),
         autoBootstrap: Bool = true
     ) {
-        let resolvedSetupController = closedLidSetupController ?? ClosedLidSetupController()
-        let resolvedClosedLidController = closedLidController ?? ClosedLidPmsetController(setupController: resolvedSetupController)
+        let resolvedClosedLidController: ClosedLidSleepControlling
+        let resolvedSetupController: ClosedLidSetupControlling
+
+        if let explicitClosedLidController = closedLidController {
+            resolvedClosedLidController = explicitClosedLidController
+            resolvedSetupController = closedLidSetupController ?? ClosedLidSetupController()
+        } else if let explicitSetupController = closedLidSetupController {
+            resolvedSetupController = explicitSetupController
+            resolvedClosedLidController = ClosedLidPmsetController(setupController: explicitSetupController)
+        } else {
+            let defaultClosedLidController = ClosedLidPmsetController()
+            resolvedClosedLidController = defaultClosedLidController
+            resolvedSetupController = defaultClosedLidController.setupStateController
+        }
 
         self.stateStore = stateStore
         self.openLidController = openLidController
