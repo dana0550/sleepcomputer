@@ -238,17 +238,49 @@ final class MenuBarController: ObservableObject {
             }
         }
 
+        var closedLidDisableErrorMessage: String?
+        var shouldRetryClosedLidDisable = false
+
         do {
             try await closedLidController.setEnabled(false)
             state.closedLidEnabledByApp = false
         } catch let ClosedLidControlError.setupRequired(setupState) {
             state.closedLidSetupState = setupState
+            shouldRetryClosedLidDisable = true
         } catch {
             state.closedLidEnabledByApp = previousByApp
-            setTransientError("Could not disable closed-lid awake: \(error.localizedDescription)")
+            closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(error.localizedDescription)"
         }
 
         await refreshClosedLidRuntimeState(allowDuringTransition: true)
+
+        if shouldRetryClosedLidDisable && state.closedLidSetupState.isReady {
+            do {
+                try await closedLidController.setEnabled(false)
+                state.closedLidEnabledByApp = false
+            } catch let ClosedLidControlError.setupRequired(retryState) {
+                state.closedLidSetupState = retryState
+                state.closedLidEnabledByApp = previousByApp
+                closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(fullAwakeSetupMessage(for: retryState))"
+            } catch {
+                state.closedLidEnabledByApp = previousByApp
+                closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(error.localizedDescription)"
+            }
+
+            await refreshClosedLidRuntimeState(allowDuringTransition: true)
+        } else if shouldRetryClosedLidDisable && previousByApp {
+            state.closedLidEnabledByApp = previousByApp
+            closedLidDisableErrorMessage = "Could not disable closed-lid awake: \(fullAwakeSetupMessage(for: state.closedLidSetupState))"
+        }
+
+        if state.closedLidEnabledByApp {
+            closedLidDisableErrorMessage = closedLidDisableErrorMessage ?? "Could not confirm closed-lid awake was disabled. Please try again."
+        }
+
+        if let closedLidDisableErrorMessage {
+            setTransientError(closedLidDisableErrorMessage)
+        }
+
         persistSafeState()
     }
 

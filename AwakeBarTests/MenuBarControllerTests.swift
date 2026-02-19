@@ -349,6 +349,60 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertFalse(controller.isFullAwakeEnabled)
     }
 
+    func testDisableRetriesClosedLidDisableAfterSetupRequiredThenRecovery() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        closedMock.failNextDisableWithSetupRequired = .approvalRequired
+        setupMock.refreshResult = .ready
+
+        await controller.setFullAwakeEnabled(false)
+
+        XCTAssertEqual(closedMock.setCalls, [true, false])
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertNil(controller.state.transientErrorMessage)
+    }
+
+    func testDisableSurfacesErrorWhenClosedLidDisableRemainsUnavailable() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        closedMock.failNextDisableWithSetupRequired = .approvalRequired
+        setupMock.refreshResult = .approvalRequired
+
+        await controller.setFullAwakeEnabled(false)
+
+        XCTAssertEqual(closedMock.setCalls, [true])
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertTrue(controller.state.transientErrorMessage?.contains("Could not disable closed-lid awake") == true)
+    }
+
     func testRefreshSetupStateDisablesOpenLidWhenHelperBecomesNotReady() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -439,8 +493,10 @@ private final class OpenLidMock: OpenLidSleepControlling {
 private final class ClosedLidMock: ClosedLidSleepControlling {
     var shouldThrow = false
     var setupRequiredState: ClosedLidSetupState?
+    var failNextDisableWithSetupRequired: ClosedLidSetupState?
     var suspendNextEnable = false
     private(set) var setCalls: [Bool] = []
+    private(set) var sleepDisabled = false
     private var pendingEnableContinuation: CheckedContinuation<Void, Never>?
 
     var isWaitingToCompleteEnable: Bool {
@@ -454,6 +510,10 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
                 pendingEnableContinuation = continuation
             }
         }
+        if !enabled, let failNextDisableWithSetupRequired {
+            self.failNextDisableWithSetupRequired = nil
+            throw ClosedLidControlError.setupRequired(failNextDisableWithSetupRequired)
+        }
         if let setupRequiredState {
             throw ClosedLidControlError.setupRequired(setupRequiredState)
         }
@@ -462,10 +522,11 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
             throw MockError()
         }
         setCalls.append(enabled)
+        sleepDisabled = enabled
     }
 
     func readSleepDisabled() async throws -> Bool {
-        false
+        sleepDisabled
     }
 
     func cleanupLegacyArtifacts() async throws -> LegacyCleanupReport {
