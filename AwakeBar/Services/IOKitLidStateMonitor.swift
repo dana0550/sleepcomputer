@@ -21,6 +21,9 @@ enum LidStateMonitorError: LocalizedError {
 
 @MainActor
 final class IOKitLidStateMonitor: LidStateMonitoring {
+    // Matches iokit_family_msg(sub_iokit_powermanagement, 0x100) from IOPM.h.
+    nonisolated static let clamshellStateChangeMessage: natural_t = 0xE0034100
+
     private nonisolated(unsafe) var notificationPort: IONotificationPortRef?
     private nonisolated(unsafe) var runLoopSource: CFRunLoopSource?
     private nonisolated(unsafe) var notifier: io_object_t = IO_OBJECT_NULL
@@ -120,18 +123,22 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
         lastKnownState = nil
     }
 
-    private func handleNotification(bitmask: UInt?) {
-        let isClosed: Bool
+    nonisolated static func decodeLidClosedState(messageType: natural_t, bitmask: UInt?, fallbackState: Bool?) -> Bool? {
+        guard messageType == clamshellStateChangeMessage else {
+            return nil
+        }
         if let bitmask {
-            let decodedState = (bitmask & UInt(kClamshellStateBit)) != 0
-            if let currentState = currentLidClosedState(), currentState != decodedState {
-                // Ignore unrelated root-domain notifications that share this callback.
-                return
-            }
-            isClosed = decodedState
-        } else if let currentState = currentLidClosedState() {
-            isClosed = currentState
-        } else {
+            return (bitmask & UInt(kClamshellStateBit)) != 0
+        }
+        return fallbackState
+    }
+
+    private func handleNotification(messageType: natural_t, bitmask: UInt?) {
+        guard let isClosed = Self.decodeLidClosedState(
+            messageType: messageType,
+            bitmask: bitmask,
+            fallbackState: currentLidClosedState()
+        ) else {
             return
         }
 
@@ -167,7 +174,7 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
     private nonisolated static let notificationCallback: IOServiceInterestCallback = {
         refcon,
         _,
-        _,
+        messageType,
         messageArgument
         in
         guard let refcon else {
@@ -178,7 +185,7 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
         let bitmask = messageArgument.map { UInt(bitPattern: $0) }
 
         Task { @MainActor in
-            monitor.handleNotification(bitmask: bitmask)
+            monitor.handleNotification(messageType: messageType, bitmask: bitmask)
         }
     }
 }

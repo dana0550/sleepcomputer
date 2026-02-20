@@ -26,6 +26,7 @@ final class MenuBarController: ObservableObject {
     private var pendingRestoreRetryTask: Task<Void, Never>?
     private var isLidMonitorActive = false
     private var lastObservedLidClosedState: Bool?
+    private var isLockAttemptInFlight = false
 
     init(
         stateStore: AppStateStore = AppStateStore(),
@@ -401,6 +402,7 @@ final class MenuBarController: ObservableObject {
         }
         isApplyingFullAwakeChange = true
         pendingFullAwakeTarget = enabled
+        updateLidMonitoringSubscription()
         return true
     }
 
@@ -618,7 +620,7 @@ final class MenuBarController: ObservableObject {
     }
 
     private var shouldMonitorLidForLocking: Bool {
-        state.lockOnLidCloseEnabled && isFullAwakeEnabled && lidStateMonitor.isSupported
+        state.lockOnLidCloseEnabled && isFullAwakeEnabled && lidStateMonitor.isSupported && !isApplyingFullAwakeChange
     }
 
     private func updateLidMonitoringSubscription() {
@@ -649,6 +651,7 @@ final class MenuBarController: ObservableObject {
     private func stopLidMonitoring() {
         lidStateMonitor.stopMonitoring()
         isLidMonitorActive = false
+        isLockAttemptInFlight = false
         lastObservedLidClosedState = nil
     }
 
@@ -663,9 +666,19 @@ final class MenuBarController: ObservableObject {
         guard isClosed else {
             return
         }
+        guard !isLockAttemptInFlight else {
+            return
+        }
+        isLockAttemptInFlight = true
 
         Task { @MainActor [weak self] in
             guard let self else {
+                return
+            }
+            defer {
+                self.isLockAttemptInFlight = false
+            }
+            guard self.shouldMonitorLidForLocking else {
                 return
             }
             do {

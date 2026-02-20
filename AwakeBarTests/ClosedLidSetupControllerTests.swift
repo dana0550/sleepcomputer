@@ -66,6 +66,45 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.registerCalls, 0)
     }
 
+    func testStartSetupEnabledServiceUsesSoftRetriesBeforeRepair() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingSequence = [false, false, false, false, true]
+        let service = MockDaemonService(status: .enabled)
+
+        let controller = makeController(
+            daemon: daemon,
+            service: service,
+            softRetryAttemptsBeforeRepair: 2
+        )
+
+        let state = await controller.startSetup()
+        XCTAssertEqual(state, .ready)
+        XCTAssertEqual(daemon.pingCalls, 5)
+        XCTAssertEqual(service.unregisterCalls, 0)
+        XCTAssertEqual(service.registerCalls, 0)
+    }
+
+    func testStartSetupEnabledServiceRepairsOnlyAfterSoftRetriesExhausted() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingValue = false
+        let service = MockDaemonService(status: .enabled)
+
+        let controller = makeController(
+            daemon: daemon,
+            service: service,
+            softRetryAttemptsBeforeRepair: 2
+        )
+
+        let state = await controller.startSetup()
+        guard case .unavailable(let message) = state else {
+            return XCTFail("Expected unavailable")
+        }
+        XCTAssertTrue(message.contains("did not launch"))
+        XCTAssertEqual(daemon.pingCalls, 9)
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+    }
+
     func testStartSetupEnabledServiceFailureRepairsRegistrationOnce() async {
         let daemon = MockDaemonClientForSetup()
         daemon.pingValue = false
@@ -80,6 +119,38 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertTrue(message.contains("did not launch"))
         XCTAssertEqual(service.unregisterCalls, 1)
         XCTAssertEqual(service.registerCalls, 1)
+    }
+
+    func testStartSetupEnabledServiceRepairCooldownSuppressesImmediateRetry() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingValue = false
+        let service = MockDaemonService(status: .enabled)
+        var currentDate = Date(timeIntervalSince1970: 1_000)
+
+        let controller = makeController(
+            daemon: daemon,
+            service: service,
+            softRetryAttemptsBeforeRepair: 0,
+            enabledRepairCooldownNanoseconds: 60_000_000_000,
+            now: { currentDate }
+        )
+
+        _ = await controller.startSetup()
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+
+        let secondState = await controller.startSetup()
+        guard case .unavailable(let message) = secondState else {
+            return XCTFail("Expected unavailable")
+        }
+        XCTAssertTrue(message.contains("cooling down"))
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+
+        currentDate = currentDate.addingTimeInterval(61)
+        _ = await controller.startSetup()
+        XCTAssertEqual(service.unregisterCalls, 2)
+        XCTAssertEqual(service.registerCalls, 2)
     }
 
     func testStartSetupEnabledServiceRepairReturnsApprovalRequiredWhenApprovalIsNeeded() async {
@@ -282,6 +353,9 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         daemon: MockDaemonClientForSetup,
         service: MockDaemonService,
         appPath: String = "/Applications/AwakeBar.app",
+        softRetryAttemptsBeforeRepair: Int = 4,
+        enabledRepairCooldownNanoseconds: UInt64 = 60_000_000_000,
+        now: @escaping () -> Date = Date.init,
         openSettings: @escaping () -> Void = {}
     ) -> ClosedLidSetupController {
         ClosedLidSetupController(
@@ -289,6 +363,9 @@ final class ClosedLidSetupControllerTests: XCTestCase {
             daemonService: service,
             appBundleURLProvider: { URL(fileURLWithPath: appPath) },
             retryDelayNanoseconds: 0,
+            softRetryAttemptsBeforeRepair: softRetryAttemptsBeforeRepair,
+            enabledRepairCooldownNanoseconds: enabledRepairCooldownNanoseconds,
+            now: now,
             openSettings: openSettings
         )
     }
@@ -299,9 +376,11 @@ private final class MockDaemonClientForSetup: PrivilegedDaemonControlling {
     var pingValue = true
     var shouldThrowPing = false
     var pingSequence: [Bool] = []
+    private(set) var pingCalls = 0
 
     func ping() async throws {
         struct PingError: Error {}
+        pingCalls += 1
 
         if shouldThrowPing {
             throw PingError()
