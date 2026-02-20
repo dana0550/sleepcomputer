@@ -666,6 +666,128 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(loginMock.setCalls, [true])
     }
 
+    func testLockOnLidCloseTriggersOncePerCloseCycleWhenAllGatesAreEnabled() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lidMonitorMock = LidStateMonitorMock()
+        let lockMock = ComputerLockMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            lidStateMonitor: lidMonitorMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        controller.setLockOnLidCloseEnabled(true)
+        await controller.setFullAwakeEnabled(true)
+
+        XCTAssertEqual(lidMonitorMock.startCalls, 1)
+
+        lidMonitorMock.emit(true)
+        lidMonitorMock.emit(true)
+        lidMonitorMock.emit(false)
+        lidMonitorMock.emit(true)
+
+        await waitForCondition { lockMock.lockCalls == 2 }
+        XCTAssertEqual(lockMock.lockCalls, 2)
+    }
+
+    func testLockOnLidCloseDoesNotTriggerWhenFullAwakeIsOff() {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lidMonitorMock = LidStateMonitorMock()
+        let lockMock = ComputerLockMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            lidStateMonitor: lidMonitorMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        controller.setLockOnLidCloseEnabled(true)
+        lidMonitorMock.emit(true)
+
+        XCTAssertEqual(lidMonitorMock.startCalls, 0)
+        XCTAssertEqual(lockMock.lockCalls, 0)
+    }
+
+    func testLockOnLidCloseDoesNotTriggerWhenPreferenceIsOff() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lidMonitorMock = LidStateMonitorMock()
+        let lockMock = ComputerLockMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            lidStateMonitor: lidMonitorMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        lidMonitorMock.emit(true)
+
+        XCTAssertEqual(lidMonitorMock.startCalls, 0)
+        XCTAssertEqual(lockMock.lockCalls, 0)
+    }
+
+    func testLockMonitoringSubscriptionTracksGateChanges() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lidMonitorMock = LidStateMonitorMock()
+        let lockMock = ComputerLockMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            lidStateMonitor: lidMonitorMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        controller.setLockOnLidCloseEnabled(true)
+        await controller.setFullAwakeEnabled(true)
+        XCTAssertEqual(lidMonitorMock.startCalls, 1)
+
+        controller.setLockOnLidCloseEnabled(false)
+        XCTAssertEqual(lidMonitorMock.stopCalls, 1)
+
+        controller.setLockOnLidCloseEnabled(true)
+        XCTAssertEqual(lidMonitorMock.startCalls, 2)
+
+        await controller.setFullAwakeEnabled(false)
+        XCTAssertEqual(lidMonitorMock.stopCalls, 2)
+    }
+
     func testDisableDoesNotProceedToClosedLidWhenOpenLidDisableFailsAndRemainsEnabled() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -1050,6 +1172,43 @@ private final class LoginItemMock: LoginItemControlling {
 
     func readEnabled() -> Bool {
         value
+    }
+}
+
+private final class LidStateMonitorMock: LidStateMonitoring {
+    var isSupported = true
+    private(set) var startCalls = 0
+    private(set) var stopCalls = 0
+    private var onLidStateChange: ((Bool) -> Void)?
+
+    func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws {
+        startCalls += 1
+        self.onLidStateChange = onLidStateChange
+    }
+
+    func stopMonitoring() {
+        if onLidStateChange != nil {
+            stopCalls += 1
+        }
+        onLidStateChange = nil
+    }
+
+    func emit(_ isClosed: Bool) {
+        onLidStateChange?(isClosed)
+    }
+}
+
+private final class ComputerLockMock: ComputerLockControlling {
+    private struct MockError: Error {}
+
+    var shouldThrow = false
+    private(set) var lockCalls = 0
+
+    func lockNow() async throws {
+        lockCalls += 1
+        if shouldThrow {
+            throw MockError()
+        }
     }
 }
 

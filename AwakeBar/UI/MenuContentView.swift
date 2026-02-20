@@ -3,7 +3,6 @@ import SwiftUI
 
 struct MenuContentView: View {
     @ObservedObject var controller: MenuBarController
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -55,12 +54,23 @@ struct MenuContentView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Button("Settings…") {
-                openSettings()
+            Divider()
+
+            Text("Settings")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+
+            if controller.showsLockOnLidCloseSetting {
+                Toggle("Lock Computer on Lid Close", isOn: lockOnLidCloseBinding)
+                    .toggleStyle(.switch)
+                    .font(.system(size: 12))
+                    .help("Lock your Mac after a lid-close event while Full Awake is ON.")
             }
-            .buttonStyle(.plain)
-            .font(.system(size: 12))
-            .foregroundStyle(.secondary)
+
+            Toggle("Launch at Login", isOn: launchAtLoginBinding)
+                .toggleStyle(.switch)
+                .font(.system(size: 12))
+                .help("Automatically start AwakeBar after you sign in.")
 
             Divider()
 
@@ -107,26 +117,13 @@ struct MenuContentView: View {
         )
     }
 
-    private var statusText: String {
-        if controller.isApplyingFullAwakeChange {
-            return controller.fullAwakeSwitchIsOn ? "Turning ON…" : "Turning OFF…"
-        }
-        return controller.isFullAwakeEnabled ? "Awake is ON" : "Awake is OFF"
-    }
-}
-
-struct SettingsContentView: View {
-    @ObservedObject var controller: MenuBarController
-
-    var body: some View {
-        Form {
-            Toggle("Launch at Login", isOn: launchAtLoginBinding)
-            Text("Automatically start AwakeBar after you sign in.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-        }
-        .padding(16)
-        .frame(width: 320)
+    private var lockOnLidCloseBinding: Binding<Bool> {
+        Binding(
+            get: { controller.lockOnLidCloseEnabled },
+            set: { isOn in
+                controller.setLockOnLidCloseEnabled(isOn)
+            }
+        )
     }
 
     private var launchAtLoginBinding: Binding<Bool> {
@@ -136,5 +133,12 @@ struct SettingsContentView: View {
                 controller.setLaunchAtLoginEnabled(isOn)
             }
         )
+    }
+
+    private var statusText: String {
+        if controller.isApplyingFullAwakeChange {
+            return controller.fullAwakeSwitchIsOn ? "Turning ON…" : "Turning OFF…"
+        }
+        return controller.isFullAwakeEnabled ? "Awake is ON" : "Awake is OFF"
     }
 }

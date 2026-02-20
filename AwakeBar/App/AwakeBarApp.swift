@@ -46,9 +46,5 @@ struct AwakeBarApp: App {
                 .accessibilityLabel(controller.fullAwakeSwitchIsOn ? "Awake On" : "Awake Off")
         }
         .menuBarExtraStyle(.window)
-
-        Settings {
-            SettingsContentView(controller: controller)
-        }
     }
 }

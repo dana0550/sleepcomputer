@@ -1,7 +1,7 @@
 ---
 doc_type: product_map
 from_index: ./FEATURES.md
-last_rendered: 2026-02-19
+last_rendered: 2026-02-20
 ---
 
 # Product Map
@@ -23,6 +23,7 @@ last_rendered: 2026-02-19
   - [F-004.01] Safe State Persistence Boundary
   - [F-004.02] Launch-at-Login Control
   - [F-004.03] Closed-Lid Override Session Recovery
+  - [F-004.04] Lock on Lid Close
 - [F-005] Iconography and Asset Pipeline
   - [F-005.01] SVG-to-Asset Regeneration
   - [F-005.02] Icon Visual Spec and Handoff
