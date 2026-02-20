@@ -33,8 +33,8 @@ final class MenuBarController: ObservableObject {
         closedLidController: ClosedLidSleepControlling? = nil,
         closedLidSetupController: ClosedLidSetupControlling? = nil,
         loginItemController: LoginItemControlling = LoginItemController(),
-        lidStateMonitor: LidStateMonitoring = IOKitLidStateMonitor(),
-        computerLockController: ComputerLockControlling = ComputerLockController(),
+        lidStateMonitor: LidStateMonitoring? = nil,
+        computerLockController: ComputerLockControlling? = nil,
         approvalPollingAttempts: Int = 30,
         approvalPollingIntervalNanoseconds: UInt64 = 1_000_000_000,
         autoBootstrap: Bool = true
@@ -59,8 +59,8 @@ final class MenuBarController: ObservableObject {
         self.closedLidController = resolvedClosedLidController
         self.closedLidSetupController = resolvedSetupController
         self.loginItemController = loginItemController
-        self.lidStateMonitor = lidStateMonitor
-        self.computerLockController = computerLockController
+        self.lidStateMonitor = lidStateMonitor ?? IOKitLidStateMonitor()
+        self.computerLockController = computerLockController ?? ComputerLockController()
         self.approvalPollingAttempts = max(1, approvalPollingAttempts)
         self.approvalPollingIntervalNanoseconds = approvalPollingIntervalNanoseconds
         self.state = stateStore.load()

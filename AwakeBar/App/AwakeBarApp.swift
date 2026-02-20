@@ -30,7 +30,11 @@ final class AwakeBarAppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct AwakeBarApp: App {
     @NSApplicationDelegateAdaptor(AwakeBarAppDelegate.self) private var appDelegate
-    @StateObject private var controller = MenuBarController()
+    @StateObject private var controller: MenuBarController
+
+    init() {
+        _controller = StateObject(wrappedValue: MenuBarController())
+    }
 
     var body: some Scene {
         let _ = appDelegate.attach(controller: controller)
