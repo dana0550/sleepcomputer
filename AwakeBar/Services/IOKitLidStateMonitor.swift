@@ -59,9 +59,6 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
 
     func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws {
         stopMonitoring()
-        guard isSupported else {
-            return
-        }
 
         self.onLidStateChange = onLidStateChange
         lastKnownState = currentLidClosedState()
