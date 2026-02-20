@@ -33,6 +33,8 @@ final class ClosedLidSetupControllerTests: XCTestCase {
 
         let state = await controller.refreshStatus()
         XCTAssertEqual(state, .ready)
+        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertEqual(service.unregisterCalls, 0)
     }
 
     func testStartSetupRegistersWhenNotRegistered() async {
@@ -64,7 +66,7 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.registerCalls, 0)
     }
 
-    func testStartSetupEnabledServiceFailureDoesNotUnregisterOrRegister() async {
+    func testStartSetupEnabledServiceFailureRepairsRegistrationOnce() async {
         let daemon = MockDaemonClientForSetup()
         daemon.pingValue = false
         let service = MockDaemonService(status: .enabled)
@@ -76,8 +78,22 @@ final class ClosedLidSetupControllerTests: XCTestCase {
             return XCTFail("Expected unavailable")
         }
         XCTAssertTrue(message.contains("did not launch"))
-        XCTAssertEqual(service.unregisterCalls, 0)
-        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+    }
+
+    func testStartSetupEnabledServiceRepairReturnsApprovalRequiredWhenApprovalIsNeeded() async {
+        let daemon = MockDaemonClientForSetup()
+        daemon.pingValue = false
+        let service = MockDaemonService(status: .enabled)
+        service.statusAfterRegister = .requiresApproval
+
+        let controller = makeController(daemon: daemon, service: service)
+
+        let state = await controller.startSetup()
+        XCTAssertEqual(state, .approvalRequired)
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
     }
 
     func testStartSetupNotRegisteredFailureRegistersOnceWithoutRepairLoop() async {
@@ -217,6 +233,8 @@ final class ClosedLidSetupControllerTests: XCTestCase {
             return XCTFail("Expected unavailable")
         }
         XCTAssertTrue(message.contains("did not launch"))
+        XCTAssertEqual(service.registerCalls, 0)
+        XCTAssertEqual(service.unregisterCalls, 0)
     }
 
     func testStartSetupReturnsUnavailableWhenRegisterFails() async {

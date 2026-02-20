@@ -88,7 +88,7 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             if await waitForHelperReachable(maxAttempts: 3) {
                 return .ready
             }
-            return .unavailable(helperUnavailableMessage(error: nil))
+            return await repairEnabledButUnreachable()
         case .notRegistered, .notFound:
             break
         @unknown default:
@@ -99,6 +99,35 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
             try daemonService.register()
         } catch {
             return .unavailable("Could not register privileged helper: \(error.localizedDescription)")
+        }
+
+        switch daemonService.status {
+        case .requiresApproval:
+            return .approvalRequired
+        case .notRegistered, .notFound:
+            return .unavailable("Privileged helper registration did not persist.")
+        default:
+            break
+        }
+
+        if await waitForHelperReachable(maxAttempts: 4) {
+            return .ready
+        }
+
+        return .unavailable(helperUnavailableMessage(error: nil))
+    }
+
+    private func repairEnabledButUnreachable() async -> ClosedLidSetupState {
+        do {
+            try daemonService.unregister()
+        } catch {
+            return .unavailable("Could not reset privileged helper registration: \(error.localizedDescription)")
+        }
+
+        do {
+            try daemonService.register()
+        } catch {
+            return .unavailable("Could not re-register privileged helper: \(error.localizedDescription)")
         }
 
         switch daemonService.status {

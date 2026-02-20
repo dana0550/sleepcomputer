@@ -429,12 +429,12 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/HelperTools/AwakeBarPrivilegedHelper",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchServices/AwakeBarPrivilegedHelper",
 				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/AwakeBarPrivilegedHelper\"\nHELPER_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/HelperTools\"\nHELPER_DST=\"${HELPER_DST_DIR}/AwakeBarPrivilegedHelper\"\nDAEMON_SRC=\"${SRCROOT}/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\nDAEMON_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons\"\nDAEMON_DST=\"${DAEMON_DST_DIR}/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\n\nmkdir -p \"${HELPER_DST_DIR}\" \"${DAEMON_DST_DIR}\"\n/usr/bin/install -m 755 \"${HELPER_SRC}\" \"${HELPER_DST}\"\n/usr/bin/install -m 644 \"${DAEMON_SRC}\" \"${DAEMON_DST}\"\n";
+			shellScript = "set -euo pipefail\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/AwakeBarPrivilegedHelper\"\nHELPER_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchServices\"\nHELPER_DST=\"${HELPER_DST_DIR}/AwakeBarPrivilegedHelper\"\nDAEMON_SRC=\"${SRCROOT}/AwakeBar/LaunchDaemons/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\nDAEMON_DST_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons\"\nDAEMON_DST=\"${DAEMON_DST_DIR}/com.dshakiba.AwakeBar.PrivilegedHelper.plist\"\n\nmkdir -p \"${HELPER_DST_DIR}\" \"${DAEMON_DST_DIR}\"\n/usr/bin/install -m 755 \"${HELPER_SRC}\" \"${HELPER_DST}\"\n/usr/bin/install -m 644 \"${DAEMON_SRC}\" \"${DAEMON_DST}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

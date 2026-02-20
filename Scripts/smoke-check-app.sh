@@ -51,7 +51,7 @@ expected_helper_identifier="$(awk -F'"' '/helperCodeSigningIdentifier/ {print $2
 [[ -n "$expected_helper_exec" ]] || fail "could not resolve expected helper executable name"
 [[ -n "$expected_helper_identifier" ]] || fail "could not resolve expected helper code-signing identifier"
 
-helper_rel="Contents/Library/HelperTools/${expected_helper_exec}"
+helper_rel="Contents/Library/LaunchServices/${expected_helper_exec}"
 daemon_rel="Contents/Library/LaunchDaemons/${expected_daemon_plist}"
 helper_path="${APP_PATH}/${helper_rel}"
 daemon_plist_path="${APP_PATH}/${daemon_rel}"
