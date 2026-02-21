@@ -13,6 +13,8 @@ final class MenuBarController: ObservableObject {
     private let closedLidController: ClosedLidSleepControlling
     private let closedLidSetupController: ClosedLidSetupControlling
     private let loginItemController: LoginItemControlling
+    private let lidStateMonitor: LidStateMonitoring
+    private let computerLockController: ComputerLockControlling
     private let approvalPollingAttempts: Int
     private let approvalPollingIntervalNanoseconds: UInt64
 
@@ -22,6 +24,9 @@ final class MenuBarController: ObservableObject {
     private var setupStatusPollTask: Task<Void, Never>?
     private var setupStatusPollToken = UUID()
     private var pendingRestoreRetryTask: Task<Void, Never>?
+    private var isLidMonitorActive = false
+    private var lastObservedLidClosedState: Bool?
+    private var isLockAttemptInFlight = false
 
     init(
         stateStore: AppStateStore = AppStateStore(),
@@ -29,6 +34,8 @@ final class MenuBarController: ObservableObject {
         closedLidController: ClosedLidSleepControlling? = nil,
         closedLidSetupController: ClosedLidSetupControlling? = nil,
         loginItemController: LoginItemControlling = LoginItemController(),
+        lidStateMonitor: LidStateMonitoring? = nil,
+        computerLockController: ComputerLockControlling? = nil,
         approvalPollingAttempts: Int = 30,
         approvalPollingIntervalNanoseconds: UInt64 = 1_000_000_000,
         autoBootstrap: Bool = true
@@ -53,6 +60,8 @@ final class MenuBarController: ObservableObject {
         self.closedLidController = resolvedClosedLidController
         self.closedLidSetupController = resolvedSetupController
         self.loginItemController = loginItemController
+        self.lidStateMonitor = lidStateMonitor ?? IOKitLidStateMonitor()
+        self.computerLockController = computerLockController ?? ComputerLockController()
         self.approvalPollingAttempts = max(1, approvalPollingAttempts)
         self.approvalPollingIntervalNanoseconds = approvalPollingIntervalNanoseconds
         self.state = stateStore.load()
@@ -86,6 +95,14 @@ final class MenuBarController: ObservableObject {
 
     var fullAwakeSwitchIsOn: Bool {
         pendingFullAwakeTarget ?? isFullAwakeEnabled
+    }
+
+    var lockOnLidCloseEnabled: Bool {
+        state.lockOnLidCloseEnabled
+    }
+
+    var showsLockOnLidCloseSetting: Bool {
+        lidStateMonitor.isSupported
     }
 
     var launchAtLoginEnabled: Bool {
@@ -155,6 +172,7 @@ final class MenuBarController: ObservableObject {
 
         await refreshClosedLidRuntimeState()
         await runLegacyCleanupIfNeeded()
+        updateLidMonitoringSubscription()
     }
 
     func requestFullAwakeChange(_ enabled: Bool) {
@@ -384,12 +402,14 @@ final class MenuBarController: ObservableObject {
         }
         isApplyingFullAwakeChange = true
         pendingFullAwakeTarget = enabled
+        updateLidMonitoringSubscription()
         return true
     }
 
     private func endFullAwakeTransition() {
         isApplyingFullAwakeChange = false
         pendingFullAwakeTarget = nil
+        updateLidMonitoringSubscription()
     }
 
     func setLaunchAtLoginEnabled(_ enabled: Bool) {
@@ -402,11 +422,19 @@ final class MenuBarController: ObservableObject {
         }
     }
 
+    func setLockOnLidCloseEnabled(_ enabled: Bool) {
+        state.lockOnLidCloseEnabled = enabled
+        persistSafeState()
+        updateLidMonitoringSubscription()
+    }
+
     func requestQuit() {
         NSApplication.shared.terminate(nil)
     }
 
     func prepareForTermination() async {
+        stopLidMonitoring()
+
         do {
             try openLidController.setEnabled(false)
             state.openLidEnabled = false
@@ -461,6 +489,7 @@ final class MenuBarController: ObservableObject {
                     state.openLidEnabled = openLidController.isEnabled
                     setTransientError("Could not restore default sleep while helper is unavailable: \(error.localizedDescription)")
                     if state.openLidEnabled {
+                        updateLidMonitoringSubscription()
                         return
                     }
                 }
@@ -469,6 +498,7 @@ final class MenuBarController: ObservableObject {
             if wasOpenEnabled && !state.openLidEnabled {
                 persistSafeState()
             }
+            updateLidMonitoringSubscription()
             return
         }
 
@@ -481,6 +511,8 @@ final class MenuBarController: ObservableObject {
             state.closedLidEnabledByApp = false
             setTransientError("Could not read current sleep policy: \(error.localizedDescription)")
         }
+
+        updateLidMonitoringSubscription()
     }
 
     private func runLegacyCleanupIfNeeded() async {
@@ -585,6 +617,76 @@ final class MenuBarController: ObservableObject {
 
     private func persistOverrideSession() {
         stateStore.saveOverrideSession(overrideSession)
+    }
+
+    private var shouldMonitorLidForLocking: Bool {
+        state.lockOnLidCloseEnabled && isFullAwakeEnabled && lidStateMonitor.isSupported && !isApplyingFullAwakeChange
+    }
+
+    private func updateLidMonitoringSubscription() {
+        if shouldMonitorLidForLocking {
+            startLidMonitoringIfNeeded()
+        } else {
+            stopLidMonitoring()
+        }
+    }
+
+    private func startLidMonitoringIfNeeded() {
+        guard !isLidMonitorActive else {
+            return
+        }
+
+        do {
+            try lidStateMonitor.startMonitoring { [weak self] isClosed in
+                self?.handleLidStateChange(isClosed)
+            }
+            isLidMonitorActive = true
+            lastObservedLidClosedState = nil
+        } catch {
+            stopLidMonitoring()
+            setTransientError("Could not monitor lid state: \(error.localizedDescription)")
+        }
+    }
+
+    private func stopLidMonitoring() {
+        lidStateMonitor.stopMonitoring()
+        isLidMonitorActive = false
+        isLockAttemptInFlight = false
+        lastObservedLidClosedState = nil
+    }
+
+    private func handleLidStateChange(_ isClosed: Bool) {
+        guard shouldMonitorLidForLocking else {
+            return
+        }
+        guard lastObservedLidClosedState != isClosed else {
+            return
+        }
+        lastObservedLidClosedState = isClosed
+        guard isClosed else {
+            return
+        }
+        guard !isLockAttemptInFlight else {
+            return
+        }
+        isLockAttemptInFlight = true
+
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+            defer {
+                self.isLockAttemptInFlight = false
+            }
+            guard self.shouldMonitorLidForLocking else {
+                return
+            }
+            do {
+                try await self.computerLockController.lockNow()
+            } catch {
+                self.setTransientError("Could not lock computer on lid close: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func rollbackOpenLidState(to previousOpen: Bool) -> String? {

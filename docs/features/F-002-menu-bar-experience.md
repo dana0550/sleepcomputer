@@ -8,8 +8,8 @@ parent: null
 children:
   - F-002.01
 aliases: []
-version: 1.1.0
-last_reviewed: 2026-02-18
+version: 1.2.0
+last_reviewed: 2026-02-20
 tags:
   - ui
   - macos
@@ -25,13 +25,14 @@ dependencies:
 
 ## Summary
 
-Deliver a minimal, menu bar-first control surface with one Full Awake toggle, clear ON/OFF status, and guided setup messaging.
+Deliver a minimal, menu bar-first control surface with one Full Awake toggle, clear ON/OFF status, guided setup messaging, and inline settings controls.
 
 ## Goals
 
 - Keep the primary sleep control in one menu toggle.
 - Keep ON/OFF visibility explicit at a glance.
 - Surface setup and helper errors inline without extra windows.
+- Keep settings controls in the same menu surface for fast access.
 
 ## Non-Goals
 
@@ -40,27 +41,31 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 
 ## Requirements
 
-- R1: Menu must expose a status header, a single `Full Awake` toggle, optional setup action, inline state/error messaging, and a quit action.
+- R1: Menu must expose a status header, a single `Full Awake` toggle, optional setup action, inline state/error messaging, an inline `Settings` section, and a quit action.
 - R2: `Full Awake` toggle must be disabled while an ON/OFF change is in-flight.
 - R3: When setup is not ready, toggle attempts must keep state OFF and render actionable setup guidance.
 - R4: ON/OFF states must be visually explicit with blue ON indicators in both menu bar glyph and menu status dot.
+- R5: Menu must not rely on a dedicated settings popup window; settings controls must remain inside the menu content.
 
 <!-- AUTOGEN:REQUIREMENTS_CHECKLIST -->
 - [x] R1
 - [x] R2
 - [x] R3
 - [x] R4
+- [x] R5
 
 ## Acceptance Criteria
 
 - AC1: Turning `Full Awake` OFF disables both open-lid and closed-lid awake paths.
 - AC2: Setup-required ON attempts surface non-ready/approval-required guidance and do not remain ON.
-- AC3: Menu stays compact with single-column controls and no secondary preferences window.
+- AC3: Menu renders an inline `Settings` section with `Launch at Login` and (when clamshell hardware is present) `Lock Computer on Lid Close`.
+- AC4: No dedicated settings popup path is exposed from menu content.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
 - [x] AC1
 - [x] AC2
-- [ ] AC3
+- [x] AC3
+- [x] AC4
 
 ## Traceability
 
@@ -72,9 +77,12 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 | R3 | code | AwakeBar/UI/MenuContentView.swift |
 | R4 | code | AwakeBar/UI/MenuContentView.swift |
 | R4 | code | AwakeBar/App/AwakeBarApp.swift |
+| R5 | code | AwakeBar/UI/MenuContentView.swift |
+| R5 | code | AwakeBar/App/AwakeBarApp.swift |
 | AC1 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC2 | test | AwakeBarTests/MenuBarControllerTests.swift |
 | AC3 | code | AwakeBar/UI/MenuContentView.swift |
+| AC4 | code | AwakeBar/UI/MenuContentView.swift |
 
 ## Children
 
@@ -88,6 +96,7 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 - [F-002.01](./F-002.01-mode-and-status-modeling.md)
 - [F-003](./F-003-closed-lid-admin-control.md)
 - [F-004](./F-004-state-persistence-login.md)
+- [F-004.04](./F-004.04-lock-on-lid-close.md)
 - [F-005](./F-005-iconography-asset-pipeline.md)
 
 ## API Contract
@@ -131,3 +140,4 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added setup/error UX requirements and child mode-modeling spec.
 - 2026-02-18: Simplified requirements to single-toggle Full Awake UX and explicit ON/OFF visuals.
+- 2026-02-20: Replaced settings popup flow with inline settings section and added lock-on-lid-close surface requirement.

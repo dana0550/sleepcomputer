@@ -48,7 +48,7 @@ final class PrivilegedServiceContractTests: XCTestCase {
 
         XCTAssertEqual(
             plist["BundleProgram"] as? String,
-            "Contents/Library/HelperTools/\(PrivilegedServiceConstants.helperExecutableName)"
+            "Contents/Library/LaunchServices/\(PrivilegedServiceConstants.helperExecutableName)"
         )
 
         let machServices = try XCTUnwrap(plist["MachServices"] as? [String: Any])

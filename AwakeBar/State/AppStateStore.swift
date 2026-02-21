@@ -3,6 +3,7 @@ import Foundation
 final class AppStateStore {
     private enum Keys {
         static let legacyOpenLidEnabled = "awakebar.openLidEnabled"
+        static let lockOnLidCloseEnabled = "awakebar.lockOnLidCloseEnabled"
         static let launchAtLoginEnabled = "awakebar.launchAtLoginEnabled"
         static let legacyCleanupCompleted = "awakebar.legacyCleanupCompleted"
         static let overrideSession = "awakebar.overrideSession.v1"
@@ -20,6 +21,7 @@ final class AppStateStore {
         AppState(
             openLidEnabled: false,
             closedLidEnabledByApp: false,
+            lockOnLidCloseEnabled: userDefaults.bool(forKey: Keys.lockOnLidCloseEnabled),
             launchAtLoginEnabled: userDefaults.bool(forKey: Keys.launchAtLoginEnabled),
             closedLidSetupState: .notRegistered,
             legacyCleanupCompleted: userDefaults.bool(forKey: Keys.legacyCleanupCompleted),
@@ -29,6 +31,7 @@ final class AppStateStore {
 
     func save(_ state: AppState) {
         userDefaults.removeObject(forKey: Keys.legacyOpenLidEnabled)
+        userDefaults.set(state.lockOnLidCloseEnabled, forKey: Keys.lockOnLidCloseEnabled)
         userDefaults.set(state.launchAtLoginEnabled, forKey: Keys.launchAtLoginEnabled)
         userDefaults.set(state.legacyCleanupCompleted, forKey: Keys.legacyCleanupCompleted)
     }

@@ -49,6 +49,9 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 
 - `Status`: shows `Awake is OFF`, `Awake is ON`, or transitional `Turning ON/OFF...`.
 - `Full Awake`: one toggle for all awake behavior.
+- `Settings`: inline section inside the menu window.
+- `Lock Computer on Lid Close`: optional lock behavior during lid-close events while `Full Awake` is ON (shown on clamshell Macs). Lock uses a best-effort chain (`CGSession -suspend` with bounded timeout, then `ScreenSaverEngine` launch fallback).
+- `Launch at Login`: controls app startup at sign-in.
 - `Finish Setup...`: appears when helper approval/setup is required.
 - `Inline message`: explains setup blockers or helper errors in menu context.
 - `Pending restore notice`: appears when previous sleep baseline restore is queued for retry.
@@ -76,6 +79,7 @@ Hover the `Full Awake` toggle to view quick inline help text.
 
 If setup still fails and the toggle returns to OFF, quit AwakeBar, reinstall it to `/Applications`, restart your Mac, then retry. If it still fails, reset Background Items with `sfltool resetbtm` and reboot.
 On first run, macOS may report the helper as "not found" until Background Items registration exists; AwakeBar now treats that state as setup-required and retries registration automatically.
+If helper status is enabled but temporarily unreachable, AwakeBar applies conservative auto recovery in setup flow (soft retries first, then at most one destructive re-registration attempt per cooldown window).
 
 Architecture details:
 

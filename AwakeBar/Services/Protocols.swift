@@ -27,3 +27,15 @@ protocol LoginItemControlling {
     func setEnabled(_ enabled: Bool) throws
     func readEnabled() -> Bool
 }
+
+@MainActor
+protocol LidStateMonitoring {
+    var isSupported: Bool { get }
+    func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws
+    func stopMonitoring()
+}
+
+@MainActor
+protocol ComputerLockControlling {
+    func lockNow() async throws
+}
