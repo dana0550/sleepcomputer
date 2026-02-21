@@ -5,7 +5,7 @@ version: 1.3.0
 status: active
 owners:
   - dshakiba
-last_reviewed: 2026-02-20
+last_reviewed: 2026-02-21
 sources_of_truth:
   features_index: ./FEATURES.md
   product_map: ./PRODUCT_MAP.md
@@ -22,7 +22,7 @@ AwakeBar provides a minimal, menu bar-first experience for safely controlling ma
 - [F-001] Open-lid keep-awake mode via IOKit assertions.
 - [F-002] Menu bar interaction model with status feedback, setup/error cards, and inline settings controls.
 - [F-003] Closed-lid control via `SMAppService` LaunchDaemon + XPC helper and guarded migration cleanup.
-- [F-004] Safe persistence boundaries, closed-lid restore recovery metadata, launch-at-login, and lock-on-lid preference control.
+- [F-004] Safe persistence boundaries, closed-lid restore recovery metadata, and launch-at-login controls.
 - [F-005] SVG-driven icon pipeline plus visual handoff documentation.
 - [F-006] Signed/notarized distribution pipeline across local script and GitHub Actions.
 

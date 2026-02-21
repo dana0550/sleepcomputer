@@ -13,8 +13,6 @@
 		07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */; };
 		119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */; };
 		126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */; };
-		145C2B14259ED807DE217656 /* IOKitLidStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65EDFDE5AC583DF87F7A8331 /* IOKitLidStateMonitor.swift */; };
-		152EA4127BDDADDD1CBAC722 /* ComputerLockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56941CB08D58582AFDD24F21 /* ComputerLockController.swift */; };
 		1A2294FD25E136B210414FF1 /* PrivilegedServiceContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8228607685FC3FA45A50EB2 /* PrivilegedServiceContractTests.swift */; };
 		2432E05DBFC7434A7412314D /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
 		319BDD8FD78E4105A0C15942 /* AwakeBarPrivilegedServiceXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */; };
@@ -24,7 +22,6 @@
 		4A5C27B7CCF4B0162C783024 /* AppStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD4873ABFBE117E2E2F93754 /* AppStateStore.swift */; };
 		50570258AD3B21C05A0F3E03 /* PrivilegedServiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E00BE409B57AAE34AEE6A5 /* PrivilegedServiceConstants.swift */; };
 		5595F0AF797848B678245641 /* LegacyCleanupPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A65CD3E8953A0E7E493844A9 /* LegacyCleanupPolicyTests.swift */; };
-		5CBEF40B618ECECEC611DD3B /* IOKitLidStateMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E189BFF8F368429C2811C46 /* IOKitLidStateMonitorTests.swift */; };
 		5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */; };
 		67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E534796D72E7DC597B4ADE4B /* LoginItemController.swift */; };
 		67AD90016FFF9A47328B8E18 /* ClosedLidSetupControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */; };
@@ -40,7 +37,6 @@
 		A20E2F5FA27E30D2E5EDD19A /* PrivilegedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */; };
 		A5927A3C8E2E9803B2F593C9 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E74433634A0685516D19AF8 /* Protocols.swift */; };
 		A72EF3F820821236D837A3A2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F1BA1ACED0A24645674D17 /* main.swift */; };
-		AE52A774E0E75D30A2122EA7 /* ComputerLockControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5854B0C5849E9CEA4F244004 /* ComputerLockControllerTests.swift */; };
 		B7137AD826FB5C9B066CDB69 /* MenuIconCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09996340B6B4EC228208612 /* MenuIconCatalog.swift */; };
 		B7B456F69C157266359B7478 /* HelperCommandRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349387AAB601B5E5959B3C1A /* HelperCommandRunner.swift */; };
 		BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD73A9EF1BE68D50BCDE3B1A /* MenuBarController.swift */; };
@@ -89,15 +85,11 @@
 		368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarControllerTests.swift; sourceTree = "<group>"; };
 		3949F8715294AA32D59737C9 /* com.dshakiba.AwakeBar.PrivilegedHelper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = com.dshakiba.AwakeBar.PrivilegedHelper.plist; sourceTree = "<group>"; };
 		443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLidAssertionController.swift; sourceTree = "<group>"; };
-		56941CB08D58582AFDD24F21 /* ComputerLockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComputerLockController.swift; sourceTree = "<group>"; };
-		5854B0C5849E9CEA4F244004 /* ComputerLockControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComputerLockControllerTests.swift; sourceTree = "<group>"; };
 		58F1BA1ACED0A24645674D17 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		65EDFDE5AC583DF87F7A8331 /* IOKitLidStateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitLidStateMonitor.swift; sourceTree = "<group>"; };
 		697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedLidSetupControllerTests.swift; sourceTree = "<group>"; };
 		6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuIconCatalogTests.swift; sourceTree = "<group>"; };
 		7BE7136CC16EA1FC30BE6850 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7C1AAF36CC83CCC4B322E38C /* LegacyCleanupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCleanupManager.swift; sourceTree = "<group>"; };
-		7E189BFF8F368429C2811C46 /* IOKitLidStateMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitLidStateMonitorTests.swift; sourceTree = "<group>"; };
 		8254635BB912D0E52A3AA5D3 /* AwakeBarPrivilegedServiceXPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeBarPrivilegedServiceXPC.swift; sourceTree = "<group>"; };
 		8E4E5315E8BD21EB13897A18 /* PrivilegedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedService.swift; sourceTree = "<group>"; };
 		98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateStoreTests.swift; sourceTree = "<group>"; };
@@ -161,8 +153,6 @@
 				98F8539221B26C8F3D83D109 /* AppStateStoreTests.swift */,
 				2763E3246B85290C31F15692 /* ClosedLidPmsetControllerTests.swift */,
 				697A46C5BE5F3FE96DDE03CB /* ClosedLidSetupControllerTests.swift */,
-				5854B0C5849E9CEA4F244004 /* ComputerLockControllerTests.swift */,
-				7E189BFF8F368429C2811C46 /* IOKitLidStateMonitorTests.swift */,
 				9CF4E36C5144B416650019DA /* KeepAwakeModeTests.swift */,
 				368A819A0365BBEBED9D4A2C /* MenuBarControllerTests.swift */,
 				6FCDC5D61A2E569F173E722B /* MenuIconCatalogTests.swift */,
@@ -197,8 +187,6 @@
 			children = (
 				F4BBF0487536FD652D845C2A /* ClosedLidPmsetController.swift */,
 				161235132EC045ACE6641F1C /* ClosedLidSetupController.swift */,
-				56941CB08D58582AFDD24F21 /* ComputerLockController.swift */,
-				65EDFDE5AC583DF87F7A8331 /* IOKitLidStateMonitor.swift */,
 				E534796D72E7DC597B4ADE4B /* LoginItemController.swift */,
 				443FACAF0FF6104274A3D2FB /* OpenLidAssertionController.swift */,
 				AE32D2B6F5B8638BE4C540B2 /* PrivilegedDaemonClient.swift */,
@@ -452,8 +440,6 @@
 				5EBE21D941E245C93A87F16E /* AppStateStoreTests.swift in Sources */,
 				126BB371E4C603E748B870A1 /* ClosedLidPmsetControllerTests.swift in Sources */,
 				67AD90016FFF9A47328B8E18 /* ClosedLidSetupControllerTests.swift in Sources */,
-				AE52A774E0E75D30A2122EA7 /* ComputerLockControllerTests.swift in Sources */,
-				5CBEF40B618ECECEC611DD3B /* IOKitLidStateMonitorTests.swift in Sources */,
 				07C3AAC63E5427910942DEF3 /* KeepAwakeModeTests.swift in Sources */,
 				35822F11D3C1871DE56E0865 /* MenuBarControllerTests.swift in Sources */,
 				119622FA44C14B5AB2D8ED53 /* MenuIconCatalogTests.swift in Sources */,
@@ -501,8 +487,6 @@
 				9DE5DD6991F84A09CF4963DE /* ClosedLidPmsetController.swift in Sources */,
 				9B3B1AD9500A397C879A9C72 /* ClosedLidSetupController.swift in Sources */,
 				C2C7B574709887D14AECE9C5 /* ClosedLidSetupState.swift in Sources */,
-				152EA4127BDDADDD1CBAC722 /* ComputerLockController.swift in Sources */,
-				145C2B14259ED807DE217656 /* IOKitLidStateMonitor.swift in Sources */,
 				758F845CF8EF31F7E9AA73C7 /* KeepAwakeMode.swift in Sources */,
 				67272D44E98E91EF8BB074D0 /* LoginItemController.swift in Sources */,
 				BA03C54AFEC5ED60BCA9E51A /* MenuBarController.swift in Sources */,

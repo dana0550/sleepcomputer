@@ -15,7 +15,6 @@ final class AppStateStoreTests: XCTestCase {
         let input = AppState(
             openLidEnabled: true,
             closedLidEnabledByApp: true,
-            lockOnLidCloseEnabled: true,
             launchAtLoginEnabled: true,
             closedLidSetupState: .ready,
             legacyCleanupCompleted: true,
@@ -26,7 +25,6 @@ final class AppStateStoreTests: XCTestCase {
         let loaded = store.load()
 
         XCTAssertFalse(loaded.openLidEnabled)
-        XCTAssertTrue(loaded.lockOnLidCloseEnabled)
         XCTAssertTrue(loaded.launchAtLoginEnabled)
         XCTAssertTrue(loaded.legacyCleanupCompleted)
         XCTAssertFalse(loaded.closedLidEnabledByApp)
@@ -52,7 +50,7 @@ final class AppStateStoreTests: XCTestCase {
         XCTAssertFalse(store.load().openLidEnabled)
     }
 
-    func testLoadDefaultsLockOnLidCloseToFalse() {
+    func testSaveClearsLegacyLockOnLidCloseKey() {
         let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             return XCTFail("Could not create UserDefaults suite")
@@ -61,10 +59,12 @@ final class AppStateStoreTests: XCTestCase {
             defaults.removePersistentDomain(forName: suiteName)
         }
 
-        let store = AppStateStore(userDefaults: defaults)
-        let loaded = store.load()
+        defaults.set(true, forKey: "awakebar.lockOnLidCloseEnabled")
 
-        XCTAssertFalse(loaded.lockOnLidCloseEnabled)
+        let store = AppStateStore(userDefaults: defaults)
+        store.save(AppState())
+
+        XCTAssertNil(defaults.object(forKey: "awakebar.lockOnLidCloseEnabled"))
     }
 
     func testOverrideSessionRoundTrips() {

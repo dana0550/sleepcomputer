@@ -9,10 +9,9 @@ children:
   - F-004.01
   - F-004.02
   - F-004.03
-  - F-004.04
 aliases: []
-version: 1.5.0
-last_reviewed: 2026-02-20
+version: 1.6.0
+last_reviewed: 2026-02-21
 tags:
   - persistence
   - login-item
@@ -25,13 +24,13 @@ dependencies:
 
 ## Summary
 
-Persist only safe state, retain deterministic login and lid-close lock preferences, and preserve bounded restore metadata for closed-lid override recovery.
+Persist only safe state, retain deterministic login preferences, and preserve bounded restore metadata for closed-lid override recovery.
 
 ## Goals
 
 - Keep relaunch behavior safe by default (no persisted Full Awake ON intent).
 - Restore previously captured system sleep policy after app-managed closed-lid sessions.
-- Persist login and lock-on-lid preferences plus migration completion state with explicit recovery metadata.
+- Persist login preference plus migration completion state with explicit recovery metadata.
 
 ## Non-Goals
 
@@ -40,7 +39,7 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 
 ## Requirements
 
-- R1: Persist launch-at-login preference, lock-on-lid-close preference, legacy cleanup completion marker, and closed-lid override session metadata only.
+- R1: Persist launch-at-login preference, legacy cleanup completion marker, and closed-lid override session metadata only.
 - R2: Never persist runtime closed-lid/open-lid state flags (for example `openLidEnabled`, `closedLidEnabledByApp`) or transient UI/error fields.
 - R3: Bootstrap must reset runtime awake flags, attempt pending override-session restore, and then refresh live setup/runtime status.
 - R4: Login toggle must drive `SMAppService.mainApp` registration state.
@@ -57,7 +56,7 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 
 - AC1: Relaunch does not auto-enable Full Awake; runtime awake flags reset to OFF by default.
 - AC2: Pending override sessions retry on launch/refresh and clear persisted session state after a successful restore.
-- AC3: Login and lock-on-lid preference changes are persisted and reloaded.
+- AC3: Launch-at-login preference changes are persisted and reloaded.
 - AC4: Invalid override-session payloads are discarded without crashing and legacy restore-intent key is removed.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
@@ -89,7 +88,6 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 - [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
 - [F-004.02](./F-004.02-launch-at-login-control.md)
 - [F-004.03](./F-004.03-closed-lid-override-session-recovery.md)
-- [F-004.04](./F-004.04-lock-on-lid-close.md)
 
 ## References
 
@@ -98,7 +96,6 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 - [F-004.01](./F-004.01-safe-state-persistence-boundary.md)
 - [F-004.02](./F-004.02-launch-at-login-control.md)
 - [F-004.03](./F-004.03-closed-lid-override-session-recovery.md)
-- [F-004.04](./F-004.04-lock-on-lid-close.md)
 - [F-003](./F-003-closed-lid-admin-control.md)
 
 ## API Contract
@@ -109,7 +106,6 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 - `AppStateStore.loadOverrideSession()`
 - `AppStateStore.saveOverrideSession(_:)`
 - `LoginItemControlling`
-- `AppState.lockOnLidCloseEnabled`
 
 ## Impact
 
@@ -150,4 +146,3 @@ Persist only safe state, retain deterministic login and lid-close lock preferenc
 - 2026-02-18: Updated Full Awake terminology for persisted awake intent.
 - 2026-02-19: Removed unused transient state fields from persistence boundary and clarified R2 wording.
 - 2026-02-19: Added closed-lid override session recovery semantics and child spec linkage.
-- 2026-02-20: Added lock-on-lid-close preference persistence and child spec linkage.

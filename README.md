@@ -50,7 +50,6 @@ Menu bar icons are template-rendered (monochrome) so macOS applies native menu b
 - `Status`: shows `Awake is OFF`, `Awake is ON`, or transitional `Turning ON/OFF...`.
 - `Full Awake`: one toggle for all awake behavior.
 - `Settings`: inline section inside the menu window.
-- `Lock Computer on Lid Close`: optional lock behavior during lid-close events while `Full Awake` is ON (shown on clamshell Macs). Lock uses a best-effort chain (`CGSession -suspend` with bounded timeout, then `ScreenSaverEngine` launch fallback).
 - `Launch at Login`: controls app startup at sign-in.
 - `Finish Setup...`: appears when helper approval/setup is required.
 - `Inline message`: explains setup blockers or helper errors in menu context.

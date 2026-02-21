@@ -60,13 +60,6 @@ struct MenuContentView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
 
-            if controller.showsLockOnLidCloseSetting {
-                Toggle("Lock Computer on Lid Close", isOn: lockOnLidCloseBinding)
-                    .toggleStyle(.switch)
-                    .font(.system(size: 12))
-                    .help("Lock your Mac after a lid-close event while Full Awake is ON.")
-            }
-
             Toggle("Launch at Login", isOn: launchAtLoginBinding)
                 .toggleStyle(.switch)
                 .font(.system(size: 12))
@@ -113,15 +106,6 @@ struct MenuContentView: View {
             get: { controller.fullAwakeSwitchIsOn },
             set: { isOn in
                 controller.requestFullAwakeChange(isOn)
-            }
-        )
-    }
-
-    private var lockOnLidCloseBinding: Binding<Bool> {
-        Binding(
-            get: { controller.lockOnLidCloseEnabled },
-            set: { isOn in
-                controller.setLockOnLidCloseEnabled(isOn)
             }
         )
     }
