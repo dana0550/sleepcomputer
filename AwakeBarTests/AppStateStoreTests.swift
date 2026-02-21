@@ -50,6 +50,23 @@ final class AppStateStoreTests: XCTestCase {
         XCTAssertFalse(store.load().openLidEnabled)
     }
 
+    func testSaveClearsLegacyLockOnLidCloseKey() {
+        let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create UserDefaults suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        defaults.set(true, forKey: "awakebar.lockOnLidCloseEnabled")
+
+        let store = AppStateStore(userDefaults: defaults)
+        store.save(AppState())
+
+        XCTAssertNil(defaults.object(forKey: "awakebar.lockOnLidCloseEnabled"))
+    }
+
     func testOverrideSessionRoundTrips() {
         let suiteName = "AppStateStoreTests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
