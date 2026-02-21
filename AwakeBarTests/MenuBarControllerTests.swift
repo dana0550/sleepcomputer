@@ -756,6 +756,69 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(lockMock.lockCalls, 0)
     }
 
+    func testSetLockOnLidCloseEnabledBlocksUnsupportedCapability() {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lidMonitorMock = LidStateMonitorMock()
+        let lockMock = ComputerLockMock()
+        lockMock.lockCapability = .unsupported(reason: "No verifiable lock command is available on this macOS version.")
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            lidStateMonitor: lidMonitorMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        controller.setLockOnLidCloseEnabled(true)
+
+        XCTAssertFalse(controller.lockOnLidCloseEnabled)
+        XCTAssertTrue(controller.state.transientErrorMessage?.contains("No verifiable lock command is available") == true)
+        XCTAssertEqual(lidMonitorMock.startCalls, 0)
+    }
+
+    func testBootstrapNormalizesPersistedLockPreferenceWhenCapabilityUnsupported() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        defaults.set(true, forKey: "awakebar.lockOnLidCloseEnabled")
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+        let lockMock = ComputerLockMock()
+        lockMock.lockCapability = .unsupported(reason: "No verifiable lock command is available on this macOS version.")
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            computerLockController: lockMock,
+            autoBootstrap: false
+        )
+
+        await controller.bootstrapIfNeeded()
+
+        XCTAssertFalse(controller.lockOnLidCloseEnabled)
+        XCTAssertFalse(store.load().lockOnLidCloseEnabled)
+        XCTAssertTrue(controller.state.transientErrorMessage?.contains("Lock on lid close is unavailable") == true)
+    }
+
     func testLockMonitoringSubscriptionTracksGateChanges() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -1322,6 +1385,7 @@ private final class LidStateMonitorMock: LidStateMonitoring {
 private final class ComputerLockMock: ComputerLockControlling {
     private struct MockError: Error {}
 
+    var lockCapability: ComputerLockCapability = .supported
     var shouldThrow = false
     var suspendNextLock = false
     private(set) var lockCalls = 0

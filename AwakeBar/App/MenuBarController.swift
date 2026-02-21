@@ -101,6 +101,18 @@ final class MenuBarController: ObservableObject {
         state.lockOnLidCloseEnabled
     }
 
+    var lockOnLidCloseCapability: ComputerLockCapability {
+        computerLockController.lockCapability
+    }
+
+    var lockOnLidCloseUnavailableReason: String? {
+        lockOnLidCloseCapability.unsupportedReason
+    }
+
+    var canEnableLockOnLidClose: Bool {
+        lockOnLidCloseCapability.isSupported
+    }
+
     var showsLockOnLidCloseSetting: Bool {
         lidStateMonitor.isSupported
     }
@@ -141,8 +153,16 @@ final class MenuBarController: ObservableObject {
         loaded.closedLidEnabledByApp = false
         loaded.closedLidSetupState = .notRegistered
         loaded.transientErrorMessage = nil
+        let lockCapability = computerLockController.lockCapability
+        let shouldNormalizePersistedLockPreference = loaded.lockOnLidCloseEnabled && !lockCapability.isSupported
+        if shouldNormalizePersistedLockPreference {
+            loaded.lockOnLidCloseEnabled = false
+        }
         state = loaded
         persistSafeState()
+        if shouldNormalizePersistedLockPreference {
+            setTransientError(lockOnLidCloseUnsupportedMessage(reason: lockCapability.unsupportedReason))
+        }
 
         do {
             try openLidController.setEnabled(false)
@@ -423,6 +443,16 @@ final class MenuBarController: ObservableObject {
     }
 
     func setLockOnLidCloseEnabled(_ enabled: Bool) {
+        if enabled, !canEnableLockOnLidClose {
+            state.lockOnLidCloseEnabled = false
+            persistSafeState()
+            setTransientError(
+                lockOnLidCloseUnsupportedMessage(reason: lockOnLidCloseUnavailableReason)
+            )
+            updateLidMonitoringSubscription()
+            return
+        }
+
         state.lockOnLidCloseEnabled = enabled
         persistSafeState()
         updateLidMonitoringSubscription()
@@ -620,7 +650,11 @@ final class MenuBarController: ObservableObject {
     }
 
     private var shouldMonitorLidForLocking: Bool {
-        state.lockOnLidCloseEnabled && isFullAwakeEnabled && lidStateMonitor.isSupported && !isApplyingFullAwakeChange
+        state.lockOnLidCloseEnabled &&
+        isFullAwakeEnabled &&
+        lidStateMonitor.isSupported &&
+        canEnableLockOnLidClose &&
+        !isApplyingFullAwakeChange
     }
 
     private func updateLidMonitoringSubscription() {
@@ -735,5 +769,12 @@ final class MenuBarController: ObservableObject {
         case .unavailable(let detail):
             return "Helper unavailable: \(detail)"
         }
+    }
+
+    private func lockOnLidCloseUnsupportedMessage(reason: String?) -> String {
+        if let reason, !reason.isEmpty {
+            return "Lock on lid close is unavailable: \(reason)"
+        }
+        return "Lock on lid close is unavailable on this macOS version."
     }
 }

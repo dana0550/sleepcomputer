@@ -1,13 +1,14 @@
 import Foundation
+import CoreGraphics
 
 enum ComputerLockError: LocalizedError {
-    case noAvailableCommand
+    case unsupportedCapability(String)
     case commandFailed([String])
 
     var errorDescription: String? {
         switch self {
-        case .noAvailableCommand:
-            return "No compatible lock command is available on this macOS version."
+        case .unsupportedCapability(let reason):
+            return reason
         case .commandFailed(let commands):
             let joined = commands.joined(separator: "; ")
             return "Lock command failed (\(joined))."
@@ -19,7 +20,6 @@ enum ComputerLockError: LocalizedError {
 final class ComputerLockController: ComputerLockControlling {
     enum CommandBehavior: Equatable {
         case waitForExit(timeoutNanoseconds: UInt64)
-        case launchOnly
     }
 
     struct CommandAttempt: Equatable {
@@ -35,12 +35,8 @@ final class ComputerLockController: ComputerLockControlling {
         }
     }
 
-    enum CommandExecutionResult: Equatable {
-        case exited(Int32)
-        case launched
-    }
-
-    typealias CommandExecutor = (CommandAttempt) async throws -> CommandExecutionResult
+    typealias CommandExecutor = (CommandAttempt) async throws -> Int32
+    typealias LockStateReader = () -> Bool?
 
     private struct ProcessTimeoutError: LocalizedError {
         let command: String
@@ -59,22 +55,50 @@ final class ComputerLockController: ComputerLockControlling {
     }
 
     private static let defaultWaitTimeoutNanoseconds: UInt64 = 3_000_000_000
+    private static let defaultVerificationTimeoutNanoseconds: UInt64 = 1_500_000_000
+    private static let defaultVerificationPollNanoseconds: UInt64 = 100_000_000
+    private static let defaultUnsupportedReason = "No verifiable lock command is available on this macOS version."
 
     private let fileManager: FileManager
     private let commandAttempts: [CommandAttempt]
     private let commandExecutor: CommandExecutor
+    private let lockStateReader: LockStateReader
+    private let lockVerificationTimeoutNanoseconds: UInt64
+    private let lockVerificationPollNanoseconds: UInt64
 
     init(
         fileManager: FileManager = .default,
         commandAttempts: [CommandAttempt] = ComputerLockController.defaultCommandAttempts,
-        commandExecutor: @escaping CommandExecutor = ComputerLockController.executeCommand
+        commandExecutor: @escaping CommandExecutor = ComputerLockController.executeCommand,
+        lockStateReader: @escaping LockStateReader = ComputerLockController.readSessionLockedState,
+        lockVerificationTimeoutNanoseconds: UInt64 = ComputerLockController.defaultVerificationTimeoutNanoseconds,
+        lockVerificationPollNanoseconds: UInt64 = ComputerLockController.defaultVerificationPollNanoseconds
     ) {
         self.fileManager = fileManager
         self.commandAttempts = commandAttempts
         self.commandExecutor = commandExecutor
+        self.lockStateReader = lockStateReader
+        self.lockVerificationTimeoutNanoseconds = lockVerificationTimeoutNanoseconds
+        self.lockVerificationPollNanoseconds = lockVerificationPollNanoseconds
+    }
+
+    var lockCapability: ComputerLockCapability {
+        let hasVerifiableCommand = commandAttempts.contains { attempt in
+            fileManager.isExecutableFile(atPath: attempt.executable)
+        }
+        if hasVerifiableCommand {
+            return .supported
+        }
+        return .unsupported(reason: Self.defaultUnsupportedReason)
     }
 
     func lockNow() async throws {
+        guard case .supported = lockCapability else {
+            throw ComputerLockError.unsupportedCapability(
+                lockCapability.unsupportedReason ?? Self.defaultUnsupportedReason
+            )
+        }
+
         var attempted: [String] = []
         var failed: [String] = []
 
@@ -85,17 +109,16 @@ final class ComputerLockController: ComputerLockControlling {
 
             attempted.append(command.display)
             do {
-                let result = try await commandExecutor(command)
-                switch result {
-                case .launched:
-                    return
-                case .exited(let status):
-                    guard status == 0 else {
-                        failed.append("\(command.display): exited with status \(status)")
-                        continue
-                    }
-                    return
+                let status = try await commandExecutor(command)
+                guard status == 0 else {
+                    failed.append("\(command.display): exited with status \(status)")
+                    continue
                 }
+                guard await waitForSessionLocked() else {
+                    failed.append("\(command.display): did not verify locked session state")
+                    continue
+                }
+                return
             } catch {
                 failed.append("\(command.display): \(error.localizedDescription)")
                 continue
@@ -103,9 +126,37 @@ final class ComputerLockController: ComputerLockControlling {
         }
 
         guard !attempted.isEmpty else {
-            throw ComputerLockError.noAvailableCommand
+            throw ComputerLockError.unsupportedCapability(
+                lockCapability.unsupportedReason ?? Self.defaultUnsupportedReason
+            )
         }
         throw ComputerLockError.commandFailed(failed.isEmpty ? attempted : failed)
+    }
+
+    private func waitForSessionLocked() async -> Bool {
+        if lockStateReader() == true {
+            return true
+        }
+        guard lockVerificationTimeoutNanoseconds > 0 else {
+            return false
+        }
+
+        let deadline = DispatchTime.now().uptimeNanoseconds &+ lockVerificationTimeoutNanoseconds
+        let pollInterval = max(lockVerificationPollNanoseconds, 1_000_000)
+
+        while DispatchTime.now().uptimeNanoseconds < deadline {
+            let now = DispatchTime.now().uptimeNanoseconds
+            let remaining = deadline > now ? deadline - now : 0
+            let sleepNanoseconds = min(pollInterval, remaining)
+            if sleepNanoseconds > 0 {
+                try? await Task.sleep(nanoseconds: sleepNanoseconds)
+            }
+            if lockStateReader() == true {
+                return true
+            }
+        }
+
+        return false
     }
 
     private static let defaultCommandAttempts: [CommandAttempt] = [
@@ -123,34 +174,29 @@ final class ComputerLockController: ComputerLockControlling {
             executable: "/usr/bin/CGSession",
             arguments: ["-suspend"],
             behavior: .waitForExit(timeoutNanoseconds: defaultWaitTimeoutNanoseconds)
-        ),
-        CommandAttempt(
-            executable: "/System/Library/CoreServices/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine",
-            arguments: [],
-            behavior: .launchOnly
         )
     ]
 
-    private nonisolated static func executeCommand(_ command: CommandAttempt) async throws -> CommandExecutionResult {
+    private nonisolated static func executeCommand(_ command: CommandAttempt) async throws -> Int32 {
         switch command.behavior {
-        case .launchOnly:
-            try launchProcess(command.executable, command.arguments)
-            return .launched
         case .waitForExit(let timeoutNanoseconds):
-            let status = try await runProcessAndWait(
+            return try await runProcessAndWait(
                 command.executable,
                 command.arguments,
                 timeoutNanoseconds: timeoutNanoseconds
             )
-            return .exited(status)
         }
     }
 
-    private nonisolated static func launchProcess(_ executable: String, _ arguments: [String]) throws {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
-        process.arguments = arguments
-        try process.run()
+    private nonisolated static func readSessionLockedState() -> Bool? {
+        guard let session = CGSessionCopyCurrentDictionary() else {
+            return nil
+        }
+        let dictionary = session as NSDictionary
+        guard let locked = dictionary["CGSSessionScreenIsLocked"] as? NSNumber else {
+            return nil
+        }
+        return locked.boolValue
     }
 
     private nonisolated static func runProcessAndWait(
