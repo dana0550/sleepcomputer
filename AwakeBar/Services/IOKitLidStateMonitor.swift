@@ -24,6 +24,35 @@ enum LidStateMonitorError: LocalizedError {
 
 @MainActor
 final class IOKitLidStateMonitor: LidStateMonitoring {
+    private final class CallbackContext: @unchecked Sendable {
+        private let lock = NSLock()
+        private weak var monitor: IOKitLidStateMonitor?
+
+        init(monitor: IOKitLidStateMonitor?) {
+            self.monitor = monitor
+        }
+
+        func updateMonitor(_ monitor: IOKitLidStateMonitor?) {
+            lock.lock()
+            self.monitor = monitor
+            lock.unlock()
+        }
+
+        func dispatch(messageType: natural_t, messageArgument: UnsafeMutableRawPointer?) {
+            let bitmask = messageArgument.map { UInt(bitPattern: $0) }
+            lock.lock()
+            let monitor = self.monitor
+            lock.unlock()
+            guard let monitor else {
+                return
+            }
+
+            Task { @MainActor [weak monitor] in
+                monitor?.handleNotification(messageType: messageType, bitmask: bitmask)
+            }
+        }
+    }
+
     private enum LidSupportCapability {
         case unknown
         case supported
@@ -40,6 +69,7 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
     private var onLidStateChange: ((Bool) -> Void)?
     private var lastKnownState: Bool?
     private var lidSupportCapability: LidSupportCapability = .unknown
+    private nonisolated(unsafe) var callbackRefcon: UnsafeMutableRawPointer?
 
     var isSupported: Bool {
         switch lidSupportCapability {
@@ -76,6 +106,12 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
             IOObjectRelease(rootDomain)
             rootDomain = IO_OBJECT_NULL
         }
+
+        if let callbackRefcon {
+            let context = Unmanaged<CallbackContext>.fromOpaque(callbackRefcon).takeRetainedValue()
+            context.updateMonitor(nil)
+            self.callbackRefcon = nil
+        }
     }
 
     func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws {
@@ -104,12 +140,24 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
 
         var notifier: io_object_t = IO_OBJECT_NULL
+        let callbackRefcon: UnsafeMutableRawPointer
+        if let existingRefcon = self.callbackRefcon {
+            let context = Unmanaged<CallbackContext>.fromOpaque(existingRefcon).takeUnretainedValue()
+            context.updateMonitor(self)
+            callbackRefcon = existingRefcon
+        } else {
+            let context = CallbackContext(monitor: self)
+            let retainedContext = Unmanaged.passRetained(context)
+            callbackRefcon = retainedContext.toOpaque()
+            self.callbackRefcon = callbackRefcon
+        }
+
         let result = IOServiceAddInterestNotification(
             notificationPort,
             service,
             kIOGeneralInterest,
             Self.notificationCallback,
-            UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()),
+            callbackRefcon,
             &notifier
         )
         guard result == KERN_SUCCESS else {
@@ -138,6 +186,11 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
         if rootDomain != IO_OBJECT_NULL {
             IOObjectRelease(rootDomain)
             rootDomain = IO_OBJECT_NULL
+        }
+
+        if let callbackRefcon {
+            let context = Unmanaged<CallbackContext>.fromOpaque(callbackRefcon).takeUnretainedValue()
+            context.updateMonitor(nil)
         }
 
         onLidStateChange = nil
@@ -230,11 +283,7 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
             return
         }
 
-        let monitor = Unmanaged<IOKitLidStateMonitor>.fromOpaque(refcon).takeUnretainedValue()
-        let bitmask = messageArgument.map { UInt(bitPattern: $0) }
-
-        Task { @MainActor in
-            monitor.handleNotification(messageType: messageType, bitmask: bitmask)
-        }
+        let context = Unmanaged<CallbackContext>.fromOpaque(refcon).takeUnretainedValue()
+        context.dispatch(messageType: messageType, messageArgument: messageArgument)
     }
 }

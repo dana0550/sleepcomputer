@@ -202,9 +202,10 @@ final class ComputerLockController: ComputerLockControlling {
 
             let timeoutSeconds = Double(timeoutNanoseconds) / 1_000_000_000
             DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + timeoutSeconds) {
-                if process.isRunning {
-                    process.terminate()
+                guard process.isRunning else {
+                    return
                 }
+                process.terminate()
                 finishBox.callback(.failure(ProcessTimeoutError(command: commandDisplay)))
             }
         }
