@@ -1,6 +1,6 @@
 ---
 doc_type: feature_index
-version: 1.6.1
+version: 1.7.0
 last_synced: 2026-02-21
 ---
 
@@ -23,7 +23,6 @@ last_synced: 2026-02-21
 | F-004.01 | Safe State Persistence Boundary | active | F-004 | ./features/F-004.01-safe-state-persistence-boundary.md | dshakiba | Safe Persistence |
 | F-004.02 | Launch-at-Login Control | active | F-004 | ./features/F-004.02-launch-at-login-control.md | dshakiba | Login Item Toggle |
 | F-004.03 | Closed-Lid Override Session Recovery | active | F-004 | ./features/F-004.03-closed-lid-override-session-recovery.md | dshakiba | Pending Restore Recovery |
-| F-004.04 | Lock on Lid Close | active | F-004 | ./features/F-004.04-lock-on-lid-close.md | dshakiba | Lid Close Lock |
 | F-005 | Iconography and Asset Pipeline | active | - | ./features/F-005-iconography-asset-pipeline.md | dshakiba | - |
 | F-005.01 | SVG-to-Asset Regeneration | active | F-005 | ./features/F-005.01-svg-to-asset-regeneration.md | dshakiba | Icon Build Script |
 | F-005.02 | Icon Visual Spec and Handoff | active | F-005 | ./features/F-005.02-icon-visual-spec-handoff.md | dshakiba | Hermes Green Pack |

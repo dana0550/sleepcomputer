@@ -1,24 +1,5 @@
 import Foundation
 
-enum ComputerLockCapability: Equatable {
-    case supported
-    case unsupported(reason: String)
-
-    var isSupported: Bool {
-        if case .supported = self {
-            return true
-        }
-        return false
-    }
-
-    var unsupportedReason: String? {
-        if case .unsupported(let reason) = self {
-            return reason
-        }
-        return nil
-    }
-}
-
 @MainActor
 protocol OpenLidSleepControlling {
     func setEnabled(_ enabled: Bool) throws
@@ -45,17 +26,4 @@ protocol ClosedLidSetupControlling {
 protocol LoginItemControlling {
     func setEnabled(_ enabled: Bool) throws
     func readEnabled() -> Bool
-}
-
-@MainActor
-protocol LidStateMonitoring {
-    var isSupported: Bool { get }
-    func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws
-    func stopMonitoring()
-}
-
-@MainActor
-protocol ComputerLockControlling {
-    var lockCapability: ComputerLockCapability { get }
-    func lockNow() async throws
 }

@@ -8,6 +8,5 @@ action_finish_setup,Finish Setup...,Open Login Items and approve the privileged 
 message_move_to_applications,Move app to /Applications,Install AwakeBar in /Applications to enable privileged helper setup.,27,76
 message_approval_required,Approve helper in Login Items.,Full Awake cannot turn ON until helper approval is complete.,30,66
 settings_section_header,Settings,Inline settings for AwakeBar behavior.,8,38
-toggle_lock_on_lid_close,Lock Computer on Lid Close,Lock your Mac after a lid-close event while Full Awake is ON.,26,60
 toggle_launch_at_login,Launch at Login,Automatically start AwakeBar after you sign in.,15,45
 action_quit,Quit AwakeBar,Closes AwakeBar.,12,20

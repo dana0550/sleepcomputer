@@ -8,8 +8,8 @@ parent: null
 children:
   - F-002.01
 aliases: []
-version: 1.2.0
-last_reviewed: 2026-02-20
+version: 1.3.0
+last_reviewed: 2026-02-21
 tags:
   - ui
   - macos
@@ -58,7 +58,7 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 
 - AC1: Turning `Full Awake` OFF disables both open-lid and closed-lid awake paths.
 - AC2: Setup-required ON attempts surface non-ready/approval-required guidance and do not remain ON.
-- AC3: Menu renders an inline `Settings` section with `Launch at Login` and (when clamshell hardware is present) `Lock Computer on Lid Close`.
+- AC3: Menu renders an inline `Settings` section with `Launch at Login`.
 - AC4: No dedicated settings popup path is exposed from menu content.
 
 <!-- AUTOGEN:ACCEPTANCE_CHECKLIST -->
@@ -96,7 +96,6 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 - [F-002.01](./F-002.01-mode-and-status-modeling.md)
 - [F-003](./F-003-closed-lid-admin-control.md)
 - [F-004](./F-004-state-persistence-login.md)
-- [F-004.04](./F-004.04-lock-on-lid-close.md)
 - [F-005](./F-005-iconography-asset-pipeline.md)
 
 ## API Contract
@@ -140,4 +139,3 @@ Deliver a minimal, menu bar-first control surface with one Full Awake toggle, cl
 - 2026-02-17: Initial spec created.
 - 2026-02-18: Added setup/error UX requirements and child mode-modeling spec.
 - 2026-02-18: Simplified requirements to single-toggle Full Awake UX and explicit ON/OFF visuals.
-- 2026-02-20: Replaced settings popup flow with inline settings section and added lock-on-lid-close surface requirement.
