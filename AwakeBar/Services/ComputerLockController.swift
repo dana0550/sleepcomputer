@@ -57,7 +57,8 @@ final class ComputerLockController: ComputerLockControlling {
     private static let defaultWaitTimeoutNanoseconds: UInt64 = 3_000_000_000
     private static let defaultVerificationTimeoutNanoseconds: UInt64 = 1_500_000_000
     private static let defaultVerificationPollNanoseconds: UInt64 = 100_000_000
-    private static let defaultUnsupportedReason = "No verifiable lock command is available on this macOS version."
+    private static let unsupportedNoCommandReason = "No verifiable lock command is available on this macOS version."
+    private static let unsupportedNoVerificationReason = "Lock-state verification is unavailable on this macOS version."
 
     private let fileManager: FileManager
     private let commandAttempts: [CommandAttempt]
@@ -86,16 +87,20 @@ final class ComputerLockController: ComputerLockControlling {
         let hasVerifiableCommand = commandAttempts.contains { attempt in
             fileManager.isExecutableFile(atPath: attempt.executable)
         }
-        if hasVerifiableCommand {
-            return .supported
+        guard hasVerifiableCommand else {
+            return .unsupported(reason: Self.unsupportedNoCommandReason)
         }
-        return .unsupported(reason: Self.defaultUnsupportedReason)
+        guard lockStateReader() != nil else {
+            return .unsupported(reason: Self.unsupportedNoVerificationReason)
+        }
+        return .supported
     }
 
     func lockNow() async throws {
-        guard case .supported = lockCapability else {
+        let capability = lockCapability
+        guard case .supported = capability else {
             throw ComputerLockError.unsupportedCapability(
-                lockCapability.unsupportedReason ?? Self.defaultUnsupportedReason
+                capability.unsupportedReason ?? Self.unsupportedNoCommandReason
             )
         }
 
@@ -126,8 +131,9 @@ final class ComputerLockController: ComputerLockControlling {
         }
 
         guard !attempted.isEmpty else {
+            let latestCapability = lockCapability
             throw ComputerLockError.unsupportedCapability(
-                lockCapability.unsupportedReason ?? Self.defaultUnsupportedReason
+                latestCapability.unsupportedReason ?? Self.unsupportedNoCommandReason
             )
         }
         throw ComputerLockError.commandFailed(failed.isEmpty ? attempted : failed)
@@ -149,7 +155,14 @@ final class ComputerLockController: ComputerLockControlling {
             let remaining = deadline > now ? deadline - now : 0
             let sleepNanoseconds = min(pollInterval, remaining)
             if sleepNanoseconds > 0 {
-                try? await Task.sleep(nanoseconds: sleepNanoseconds)
+                do {
+                    try await Task.sleep(nanoseconds: sleepNanoseconds)
+                } catch {
+                    return false
+                }
+            }
+            guard !Task.isCancelled else {
+                return false
             }
             if lockStateReader() == true {
                 return true

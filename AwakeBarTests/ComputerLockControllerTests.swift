@@ -17,6 +17,52 @@ final class ComputerLockControllerTests: XCTestCase {
         }
     }
 
+    func testLockCapabilityReportsUnsupportedWhenLockStateReaderIsUnavailable() {
+        let controller = ComputerLockController(
+            commandAttempts: [makeAttempt(executable: "/usr/bin/true")],
+            lockStateReader: { nil }
+        )
+
+        switch controller.lockCapability {
+        case .supported:
+            XCTFail("Expected unsupported capability")
+        case .unsupported(let reason):
+            XCTAssertTrue(reason.contains("verification"))
+        }
+    }
+
+    func testLockNowThrowsUnsupportedWhenLockStateReaderIsUnavailable() async {
+        let attempts = [
+            makeAttempt(executable: "/usr/bin/true")
+        ]
+        var didExecuteCommand = false
+
+        let controller = ComputerLockController(
+            commandAttempts: attempts,
+            commandExecutor: { _ in
+                didExecuteCommand = true
+                return 0
+            },
+            lockStateReader: { nil }
+        )
+
+        do {
+            try await controller.lockNow()
+            XCTFail("Expected unsupportedCapability")
+        } catch let error as ComputerLockError {
+            switch error {
+            case .unsupportedCapability(let reason):
+                XCTAssertTrue(reason.contains("verification"))
+            default:
+                XCTFail("Unexpected error: \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertFalse(didExecuteCommand)
+    }
+
     func testLockNowSucceedsWhenCommandExitsZeroAndLockStateVerifies() async throws {
         let attempts = [
             makeAttempt(executable: "/usr/bin/true")
