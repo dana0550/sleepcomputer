@@ -6,6 +6,7 @@ enum LidStateMonitorError: LocalizedError {
     case rootDomainUnavailable
     case notificationPortUnavailable
     case interestRegistrationFailed(kern_return_t)
+    case unsupportedHardware
 
     var errorDescription: String? {
         switch self {
@@ -15,12 +16,20 @@ enum LidStateMonitorError: LocalizedError {
             return "Could not create lid state notification channel."
         case .interestRegistrationFailed(let status):
             return "Could not subscribe to lid state changes (\(status))."
+        case .unsupportedHardware:
+            return "Lid state monitoring is not supported on this Mac."
         }
     }
 }
 
 @MainActor
 final class IOKitLidStateMonitor: LidStateMonitoring {
+    private enum LidSupportCapability {
+        case unknown
+        case supported
+        case unsupported
+    }
+
     // Matches iokit_family_msg(sub_iokit_powermanagement, 0x100) from IOPM.h.
     nonisolated static let clamshellStateChangeMessage: natural_t = 0xE0034100
 
@@ -30,9 +39,21 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
     private nonisolated(unsafe) var rootDomain: io_registry_entry_t = IO_OBJECT_NULL
     private var onLidStateChange: ((Bool) -> Void)?
     private var lastKnownState: Bool?
+    private var lidSupportCapability: LidSupportCapability = .unknown
 
     var isSupported: Bool {
-        currentLidClosedState() != nil
+        switch lidSupportCapability {
+        case .supported:
+            return true
+        case .unsupported:
+            return false
+        case .unknown:
+            guard let resolved = resolveLidSupportCapability() else {
+                return false
+            }
+            lidSupportCapability = resolved
+            return resolved == .supported
+        }
     }
 
     deinit {
@@ -59,6 +80,9 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
 
     func startMonitoring(onLidStateChange: @escaping (Bool) -> Void) throws {
         stopMonitoring()
+        guard isSupported else {
+            throw LidStateMonitorError.unsupportedHardware
+        }
 
         self.onLidStateChange = onLidStateChange
         lastKnownState = currentLidClosedState()
@@ -161,11 +185,39 @@ final class IOKitLidStateMonitor: LidStateMonitoring {
             kCFAllocatorDefault,
             0
         ) else {
+            lidSupportCapability = .unsupported
             return nil
         }
 
         let value = valueRef.takeRetainedValue()
-        return (value as? NSNumber)?.boolValue
+        guard let isClosed = (value as? NSNumber)?.boolValue else {
+            lidSupportCapability = .unsupported
+            return nil
+        }
+        lidSupportCapability = .supported
+        return isClosed
+    }
+
+    private func resolveLidSupportCapability() -> LidSupportCapability? {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+        guard service != IO_OBJECT_NULL else {
+            return nil
+        }
+        defer {
+            IOObjectRelease(service)
+        }
+
+        guard let valueRef = IORegistryEntryCreateCFProperty(
+            service,
+            kAppleClamshellStateKey as CFString,
+            kCFAllocatorDefault,
+            0
+        ) else {
+            return .unsupported
+        }
+
+        let value = valueRef.takeRetainedValue()
+        return value is NSNumber ? .supported : .unsupported
     }
 
     private nonisolated static let notificationCallback: IOServiceInterestCallback = {
