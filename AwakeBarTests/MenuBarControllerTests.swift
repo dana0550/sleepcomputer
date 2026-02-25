@@ -516,6 +516,43 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertEqual(closedMock.setCalls, [])
     }
 
+    func testFullAwakeFailureRollbackRestoresCapturedBaselineValue() async {
+        let suiteName = "MenuBarControllerTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Failed to create suite")
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = AppStateStore(userDefaults: defaults)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        closedMock.baselineSleepDisabled = true
+        closedMock.shouldThrow = true
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertEqual(openMock.setCalls, [true, false])
+        XCTAssertEqual(closedMock.restoreCalls.count, 1)
+        XCTAssertEqual(closedMock.restoreCalls.first?[.sleepDisabled], true)
+        XCTAssertTrue(closedMock.sleepDisabled)
+        XCTAssertNil(store.loadOverrideSession())
+    }
+
     func testFullAwakeFailureRollbackTracksActualOpenLidStateWhenRollbackFails() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -876,6 +913,35 @@ final class MenuBarControllerTests: XCTestCase {
         XCTAssertTrue(controller.state.transientErrorMessage?.contains("Could not restore default sleep settings") == true)
     }
 
+    func testDisableDefaultRestoreRecoversAfterTransientReadFailure() async {
+        let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
+        let openMock = OpenLidMock()
+        let closedMock = ClosedLidMock()
+        let setupMock = ClosedLidSetupMock()
+        let loginMock = LoginItemMock()
+
+        let controller = MenuBarController(
+            stateStore: store,
+            openLidController: openMock,
+            closedLidController: closedMock,
+            closedLidSetupController: setupMock,
+            loginItemController: loginMock,
+            autoBootstrap: false
+        )
+
+        await controller.setFullAwakeEnabled(true)
+        closedMock.failNextReadSleepDisabledError = TerminationMockError()
+
+        await controller.setFullAwakeEnabled(false)
+
+        XCTAssertFalse(controller.isFullAwakeEnabled)
+        XCTAssertEqual(openMock.setCalls, [true, false])
+        XCTAssertEqual(closedMock.setCalls, [true])
+        XCTAssertEqual(closedMock.restoreCalls.count, 1)
+        XCTAssertEqual(closedMock.restoreCalls.first?[.sleepDisabled], false)
+        XCTAssertNil(controller.state.transientErrorMessage)
+    }
+
     func testRefreshSetupStateDisablesOpenLidWhenHelperBecomesNotReady() async {
         let store = AppStateStore(userDefaults: UserDefaults(suiteName: "MenuBarControllerTests.\(UUID().uuidString)")!)
         let openMock = OpenLidMock()
@@ -975,6 +1041,7 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
     var suspendNextEnable = false
     var suspendNextRestore = false
     var forcedReadSleepDisabled: Bool?
+    var failNextReadSleepDisabledError: Error?
     private(set) var setCalls: [Bool] = []
     private(set) var sleepDisabled = false
     private var pendingEnableContinuation: CheckedContinuation<Void, Never>?
@@ -1011,6 +1078,10 @@ private final class ClosedLidMock: ClosedLidSleepControlling {
     }
 
     func readSleepDisabled() async throws -> Bool {
+        if let failNextReadSleepDisabledError {
+            self.failNextReadSleepDisabledError = nil
+            throw failNextReadSleepDisabledError
+        }
         if let forcedReadSleepDisabled {
             return forcedReadSleepDisabled
         }

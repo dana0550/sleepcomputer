@@ -34,6 +34,11 @@ final class MenuBarController: ObservableObject {
         }
     }
 
+    private enum OverrideSessionRestoreMode {
+        case managedDefaults
+        case capturedBaseline
+    }
+
     init(
         stateStore: AppStateStore = AppStateStore(),
         openLidController: OpenLidSleepControlling = OpenLidAssertionController(),
@@ -156,7 +161,7 @@ final class MenuBarController: ObservableObject {
         }
 
         if overrideSession != nil {
-            switch await restoreOverrideSession(markPendingOnFailure: true) {
+            switch await restoreOverrideSession(markPendingOnFailure: true, mode: .managedDefaults) {
             case .success:
                 break
             case .failure(let error):
@@ -305,7 +310,7 @@ final class MenuBarController: ObservableObject {
 
         do {
             if overrideSession != nil {
-                switch await restoreOverrideSession(markPendingOnFailure: false) {
+                switch await restoreOverrideSession(markPendingOnFailure: false, mode: .managedDefaults) {
                 case .success:
                     break
                 case .failure(let error):
@@ -352,11 +357,11 @@ final class MenuBarController: ObservableObject {
         }
 
         if capturedSessionThisAttempt {
-            switch await restoreOverrideSession(markPendingOnFailure: false) {
+            switch await restoreOverrideSession(markPendingOnFailure: false, mode: .capturedBaseline) {
             case .success:
                 break
             case .failure(let error):
-                issues.append("Could not restore default sleep settings: \(error.localizedDescription)")
+                issues.append("Could not restore previous sleep settings: \(error.localizedDescription)")
             }
         } else if state.closedLidEnabledByApp != previousByApp {
             do {
@@ -426,7 +431,7 @@ final class MenuBarController: ObservableObject {
         }
 
         if overrideSession != nil {
-            switch await restoreOverrideSession(markPendingOnFailure: true) {
+            switch await restoreOverrideSession(markPendingOnFailure: true, mode: .managedDefaults) {
             case .success:
                 state.closedLidEnabledByApp = false
             case .failure:
@@ -523,7 +528,10 @@ final class MenuBarController: ObservableObject {
     }
 
     @discardableResult
-    private func restoreOverrideSession(markPendingOnFailure: Bool) async -> Result<Void, Error> {
+    private func restoreOverrideSession(
+        markPendingOnFailure: Bool,
+        mode: OverrideSessionRestoreMode
+    ) async -> Result<Void, Error> {
         guard var session = overrideSession else {
             return .success(())
         }
@@ -536,8 +544,13 @@ final class MenuBarController: ObservableObject {
         let inFlightSession = session
 
         do {
-            let normalizedSnapshot = normalizedManagedDefaultSnapshot(from: session.snapshot)
-            try await restoreManagedDefaultSleep(using: normalizedSnapshot)
+            switch mode {
+            case .managedDefaults:
+                let normalizedSnapshot = normalizedManagedDefaultSnapshot(from: session.snapshot)
+                try await restoreManagedDefaultSleep(using: normalizedSnapshot)
+            case .capturedBaseline:
+                try await applyManagedSleep(using: session.snapshot)
+            }
             if overrideSession == inFlightSession {
                 overrideSession = nil
                 persistOverrideSession()
@@ -573,7 +586,7 @@ final class MenuBarController: ObservableObject {
                 self.pendingRestoreRetryTask = nil
             }
 
-            switch await self.restoreOverrideSession(markPendingOnFailure: true) {
+            switch await self.restoreOverrideSession(markPendingOnFailure: true, mode: .managedDefaults) {
             case .success:
                 break
             case .failure(let error):
@@ -598,11 +611,11 @@ final class MenuBarController: ObservableObject {
     }
 
     private func restoreManagedDefaultSleep(using snapshot: ClosedLidOverrideSnapshot?) async throws {
-        try await applyManagedDefaultSleep(using: snapshot)
+        try await applyManagedSleep(using: snapshot)
         try await verifyManagedDefaultSleep(using: snapshot)
     }
 
-    private func applyManagedDefaultSleep(using snapshot: ClosedLidOverrideSnapshot?) async throws {
+    private func applyManagedSleep(using snapshot: ClosedLidOverrideSnapshot?) async throws {
         if let snapshot {
             try await closedLidController.restoreManagedOverrides(from: snapshot)
         } else {
@@ -611,15 +624,23 @@ final class MenuBarController: ObservableObject {
     }
 
     private func verifyManagedDefaultSleep(using snapshot: ClosedLidOverrideSnapshot?) async throws {
-        let sleepDisabled = try await closedLidController.readSleepDisabled()
+        let sleepDisabled = try await readSleepDisabledWithRetryOnceOnError()
         guard sleepDisabled else {
             return
         }
 
-        try await applyManagedDefaultSleep(using: snapshot)
-        let retriedSleepDisabled = try await closedLidController.readSleepDisabled()
+        try await applyManagedSleep(using: snapshot)
+        let retriedSleepDisabled = try await readSleepDisabledWithRetryOnceOnError()
         guard !retriedSleepDisabled else {
             throw ManagedDefaultSleepRestoreError.sleepDisabledStillEnabled
+        }
+    }
+
+    private func readSleepDisabledWithRetryOnceOnError() async throws -> Bool {
+        do {
+            return try await closedLidController.readSleepDisabled()
+        } catch {
+            return try await closedLidController.readSleepDisabled()
         }
     }
 
