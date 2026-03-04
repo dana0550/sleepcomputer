@@ -1,7 +1,7 @@
 ---
 doc_type: feature_index
-version: 1.7.0
-last_synced: 2026-02-21
+version: 1.8.0
+last_synced: 2026-03-03
 ---
 
 # Features Index
@@ -29,3 +29,4 @@ last_synced: 2026-02-21
 | F-006 | Signed Release and Notarization | active | - | ./features/F-006-signed-release-notarization.md | dshakiba | Distribution Pipeline |
 | F-006.01 | Local Notarization Script | active | F-006 | ./features/F-006.01-local-notarization-script.md | dshakiba | release-notarize.sh |
 | F-006.02 | GitHub Actions Release Workflow | active | F-006 | ./features/F-006.02-ci-release-workflow.md | dshakiba | release-macos.yml |
+| F-006.03 | Default PR Auto-Merge Gatekeeper | active | F-006 | ./features/F-006.03-default-pr-automerge-gatekeeper.md | dshakiba | pr-automerge.yml |

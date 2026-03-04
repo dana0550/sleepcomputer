@@ -1,0 +1,342 @@
+name: pr-automerge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+      - converted_to_draft
+      - labeled
+      - unlabeled
+  pull_request_review_thread:
+    types:
+      - resolved
+      - unresolved
+  issue_comment:
+    types:
+      - created
+      - edited
+      - deleted
+  workflow_run:
+    workflows:
+      - ci-macos
+    types:
+      - completed
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+  issues: read
+
+jobs:
+  evaluate-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate PRs and merge when gates are clear
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const baseBranch = "main";
+            const disableLabel = "auto-merge:off";
+            const disableCheckboxRegex = /(^|\n)\s*-\s*\[[xX]\]\s*Disable default auto-merge for this PR\b/m;
+            const selfCheckRegex = /^pr-automerge( \/|$)/i;
+            const bugbotRegex = /(cursor[\s_-]*bugbot|bugbot)/i;
+            const allowedConclusions = new Set(["success", "neutral", "skipped"]);
+
+            function unique(items) {
+              return [...new Set(items)];
+            }
+
+            function isSelfCheckRun(run) {
+              return selfCheckRegex.test(run?.name || "");
+            }
+
+            function isSelfStatusContext(contextName) {
+              return selfCheckRegex.test(contextName || "");
+            }
+
+            function matchesBugbot(signal) {
+              const name = signal?.name || "";
+              const appSlug = signal?.app?.slug || "";
+              const appName = signal?.app?.name || "";
+              const contextName = signal?.context || "";
+              return (
+                bugbotRegex.test(name) ||
+                bugbotRegex.test(appSlug) ||
+                bugbotRegex.test(appName) ||
+                bugbotRegex.test(contextName)
+              );
+            }
+
+            async function listOpenMainPulls() {
+              const pulls = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: "open",
+                base: baseBranch,
+                per_page: 100
+              });
+              return pulls.map((pr) => pr.number);
+            }
+
+            async function candidatePullNumbers() {
+              switch (context.eventName) {
+                case "pull_request_target":
+                  return [context.payload.pull_request.number];
+                case "pull_request_review_thread":
+                  return [context.payload.pull_request.number];
+                case "issue_comment":
+                  return context.payload.issue.pull_request
+                    ? [context.payload.issue.number]
+                    : [];
+                case "workflow_run":
+                  return unique(
+                    (context.payload.workflow_run.pull_requests || []).map((pr) => pr.number)
+                  );
+                case "workflow_dispatch":
+                case "schedule":
+                  return listOpenMainPulls();
+                default:
+                  return [];
+              }
+            }
+
+            async function unresolvedBugbotThreadCount(pullNumber) {
+              let unresolved = 0;
+              let hasNextPage = true;
+              let cursor = null;
+
+              while (hasNextPage) {
+                const result = await github.graphql(
+                  `
+                    query($owner: String!, $repo: String!, $pullNumber: Int!, $cursor: String) {
+                      repository(owner: $owner, name: $repo) {
+                        pullRequest(number: $pullNumber) {
+                          reviewThreads(first: 100, after: $cursor) {
+                            pageInfo {
+                              hasNextPage
+                              endCursor
+                            }
+                            nodes {
+                              isResolved
+                              comments(first: 100) {
+                                nodes {
+                                  author {
+                                    login
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  `,
+                  {
+                    owner,
+                    repo,
+                    pullNumber,
+                    cursor
+                  }
+                );
+
+                const threads = result.repository.pullRequest.reviewThreads.nodes;
+                for (const thread of threads) {
+                  if (thread.isResolved) {
+                    continue;
+                  }
+                  const hasBugbotAuthor = thread.comments.nodes.some((comment) =>
+                    bugbotRegex.test(comment.author?.login || "")
+                  );
+                  if (hasBugbotAuthor) {
+                    unresolved += 1;
+                  }
+                }
+
+                hasNextPage = result.repository.pullRequest.reviewThreads.pageInfo.hasNextPage;
+                cursor = result.repository.pullRequest.reviewThreads.pageInfo.endCursor;
+              }
+
+              return unresolved;
+            }
+
+            async function getMergeMethod() {
+              const { data } = await github.rest.repos.get({ owner, repo });
+              if (data.allow_merge_commit) {
+                return "merge";
+              }
+              if (data.allow_squash_merge) {
+                return "squash";
+              }
+              if (data.allow_rebase_merge) {
+                return "rebase";
+              }
+              return "merge";
+            }
+
+            const mergeMethod = await getMergeMethod();
+            const numbers = unique(await candidatePullNumbers());
+
+            if (numbers.length === 0) {
+              core.info("No candidate PRs for this event.");
+              return;
+            }
+
+            core.info(`Evaluating PRs: ${numbers.join(", ")}`);
+
+            for (const pullNumber of numbers) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pullNumber
+              });
+
+              if (pr.state !== "open") {
+                core.info(`#${pullNumber}: closed, skipping.`);
+                continue;
+              }
+              if (pr.base.ref !== baseBranch) {
+                core.info(`#${pullNumber}: base branch is ${pr.base.ref}, skipping.`);
+                continue;
+              }
+              if (pr.draft) {
+                core.info(`#${pullNumber}: draft PR, skipping.`);
+                continue;
+              }
+
+              const labels = (pr.labels || []).map((label) => label.name);
+              const hasDisableLabel = labels.includes(disableLabel);
+              const hasDisableCheckbox = disableCheckboxRegex.test(pr.body || "");
+              if (hasDisableLabel || hasDisableCheckbox) {
+                core.info(
+                  `#${pullNumber}: auto-merge disabled via ${hasDisableLabel ? "label" : "PR template checkbox"}.`
+                );
+                continue;
+              }
+
+              const unresolvedBugbotThreads = await unresolvedBugbotThreadCount(pullNumber);
+              if (unresolvedBugbotThreads > 0) {
+                core.info(
+                  `#${pullNumber}: ${unresolvedBugbotThreads} unresolved bugbot review thread(s), waiting.`
+                );
+                continue;
+              }
+
+              const { data: checkRunsResp } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                per_page: 100
+              });
+              const checkRuns = (checkRunsResp.check_runs || []).filter((run) => !isSelfCheckRun(run));
+
+              if (checkRuns.length === 0) {
+                core.info(`#${pullNumber}: no completed checks yet, waiting.`);
+                continue;
+              }
+
+              const incompleteRuns = checkRuns.filter((run) => run.status !== "completed");
+              if (incompleteRuns.length > 0) {
+                core.info(`#${pullNumber}: checks still running (${incompleteRuns.length}), waiting.`);
+                continue;
+              }
+
+              const failingRuns = checkRuns.filter(
+                (run) => !allowedConclusions.has((run.conclusion || "").toLowerCase())
+              );
+              if (failingRuns.length > 0) {
+                core.info(
+                  `#${pullNumber}: failing check runs: ${failingRuns.map((run) => run.name).join(", ")}`
+                );
+                continue;
+              }
+
+              const bugbotRuns = checkRuns.filter((run) => matchesBugbot(run));
+              if (bugbotRuns.length === 0) {
+                core.info(`#${pullNumber}: cursor bugbot check has not run yet, waiting.`);
+                continue;
+              }
+
+              const failedBugbotRuns = bugbotRuns.filter(
+                (run) => run.status !== "completed" || run.conclusion !== "success"
+              );
+              if (failedBugbotRuns.length > 0) {
+                core.info(
+                  `#${pullNumber}: cursor bugbot checks not successful yet (${failedBugbotRuns
+                    .map((run) => `${run.name}:${run.conclusion}`)
+                    .join(", ")}).`
+                );
+                continue;
+              }
+
+              const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+                owner,
+                repo,
+                ref: pr.head.sha
+              });
+              const failingStatuses = (combinedStatus.statuses || []).filter(
+                (status) =>
+                  !isSelfStatusContext(status.context) && status.state && status.state !== "success"
+              );
+              if (failingStatuses.length > 0) {
+                core.info(
+                  `#${pullNumber}: failing status contexts: ${failingStatuses
+                    .map((status) => status.context)
+                    .join(", ")}`
+                );
+                continue;
+              }
+
+              const bugbotStatuses = (combinedStatus.statuses || []).filter((status) =>
+                matchesBugbot(status)
+              );
+              if (bugbotStatuses.length > 0) {
+                const badBugbotStatuses = bugbotStatuses.filter((status) => status.state !== "success");
+                if (badBugbotStatuses.length > 0) {
+                  core.info(
+                    `#${pullNumber}: cursor bugbot status contexts not successful (${badBugbotStatuses
+                      .map((status) => `${status.context}:${status.state}`)
+                      .join(", ")}).`
+                  );
+                  continue;
+                }
+              }
+
+              if (pr.mergeable === false || pr.mergeable_state === "dirty" || pr.mergeable_state === "behind") {
+                core.info(
+                  `#${pullNumber}: mergeability is ${pr.mergeable_state} (mergeable=${pr.mergeable}), waiting.`
+                );
+                continue;
+              }
+
+              try {
+                const mergeResp = await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pullNumber,
+                  sha: pr.head.sha,
+                  merge_method: mergeMethod
+                });
+                if (mergeResp.data.merged) {
+                  core.notice(`#${pullNumber}: merged automatically (${mergeMethod}).`);
+                } else {
+                  core.info(`#${pullNumber}: merge API returned not merged.`);
+                }
+              } catch (error) {
+                if (error.status === 405 || error.status === 409 || error.status === 422) {
+                  core.info(`#${pullNumber}: merge blocked by GitHub state (${error.status}), will retry on next event.`);
+                  continue;
+                }
+                throw error;
+              }
+            }

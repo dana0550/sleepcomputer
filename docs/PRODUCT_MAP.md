@@ -1,7 +1,7 @@
 ---
 doc_type: product_map
 from_index: ./FEATURES.md
-last_rendered: 2026-02-21
+last_rendered: 2026-03-03
 ---
 
 # Product Map
@@ -29,6 +29,7 @@ last_rendered: 2026-02-21
 - [F-006] Signed Release and Notarization
   - [F-006.01] Local Notarization Script
   - [F-006.02] GitHub Actions Release Workflow
+  - [F-006.03] Default PR Auto-Merge Gatekeeper
 
 ## Deprecated Features
 
