@@ -15,6 +15,11 @@ on:
     types:
       - resolved
       - unresolved
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
   issue_comment:
     types:
       - created
@@ -94,6 +99,8 @@ jobs:
                 case "pull_request_target":
                   return [context.payload.pull_request.number];
                 case "pull_request_review_thread":
+                  return [context.payload.pull_request.number];
+                case "pull_request_review":
                   return [context.payload.pull_request.number];
                 case "issue_comment":
                   return context.payload.issue.pull_request
