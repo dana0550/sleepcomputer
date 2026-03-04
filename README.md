@@ -135,11 +135,13 @@ APP_PATH="$(xcodebuild -project AwakeBar.xcodeproj -scheme AwakeBar -configurati
 ## Signed/Notarized Release
 
 - CI validation workflow: `.github/workflows/ci-macos.yml` (PRs + branch pushes + manual runs).
+- Default PR auto-merge gatekeeper: `.github/workflows/pr-automerge.yml` (requires green CI + successful cursor bugbot + resolved bugbot review threads).
 - Compatibility matrix in CI validates high-value restore/parser suites on `macos-14` and `macos-latest`.
 - CI workflow: `.github/workflows/release-macos.yml` (tag push `v*`).
 - Local parity script: `Scripts/release-notarize.sh`.
 - Artifact smoke checks script: `Scripts/smoke-check-app.sh` (runs in PR CI and release flows).
 - CI workflow also supports `workflow_dispatch` once this workflow exists on `main`; publication remains tag-scoped.
+- PR-level auto-merge opt-out controls: add label `auto-merge:off` or check `Disable default auto-merge for this PR` in the PR template.
 - Release archives now enforce Hardened Runtime for both `AwakeBar` and `AwakeBarPrivilegedHelper` (required for notarization acceptance).
 
 Required environment variables/secrets:

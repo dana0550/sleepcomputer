@@ -8,10 +8,11 @@ parent: null
 children:
   - F-006.01
   - F-006.02
+  - F-006.03
 aliases:
   - Distribution Pipeline
-version: 1.2.0
-last_reviewed: 2026-02-19
+version: 1.3.0
+last_reviewed: 2026-03-03
 tags:
   - release
   - signing
@@ -102,6 +103,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 <!-- AUTOGEN:CHILDREN -->
 - [F-006.01](./F-006.01-local-notarization-script.md)
 - [F-006.02](./F-006.02-ci-release-workflow.md)
+- [F-006.03](./F-006.03-default-pr-automerge-gatekeeper.md)
 
 ## References
 
@@ -109,6 +111,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - [F-003](./F-003-closed-lid-admin-control.md)
 - [F-006.01](./F-006.01-local-notarization-script.md)
 - [F-006.02](./F-006.02-ci-release-workflow.md)
+- [F-006.03](./F-006.03-default-pr-automerge-gatekeeper.md)
 - [ADR-0001](../DECISIONS/ADR-0001-privileged-daemon-cutover.md)
 
 ## API Contract
@@ -116,6 +119,7 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 <!-- AUTOGEN:API_CONTRACT_SUMMARY -->
 - `Scripts/release-notarize.sh`
 - `.github/workflows/release-macos.yml`
+- `.github/workflows/pr-automerge.yml`
 
 ## Impact
 
@@ -155,3 +159,4 @@ Produce distributable macOS builds through a signed, notarized, and checksumed r
 - 2026-02-19: Added release credential-preflight and secret-material handling requirements.
 - 2026-02-19: Added tag-only publication guard requirement for manual workflow runs.
 - 2026-02-19: Added hardened-runtime notarization acceptance requirement with local execution evidence.
+- 2026-03-03: Added child feature coverage for default PR auto-merge gatekeeper workflow.
