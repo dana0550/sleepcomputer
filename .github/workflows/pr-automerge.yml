@@ -94,6 +94,28 @@ jobs:
               return pulls.map((pr) => pr.number);
             }
 
+            async function listCheckRunsForRef(ref) {
+              const checkRuns = [];
+              let page = 1;
+
+              while (true) {
+                const { data } = await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref,
+                  per_page: 100,
+                  page
+                });
+                checkRuns.push(...(data.check_runs || []));
+                if (checkRuns.length >= data.total_count) {
+                  break;
+                }
+                page += 1;
+              }
+
+              return checkRuns;
+            }
+
             async function candidatePullNumbers() {
               switch (context.eventName) {
                 case "pull_request_target":
@@ -239,13 +261,9 @@ jobs:
                 continue;
               }
 
-              const { data: checkRunsResp } = await github.rest.checks.listForRef({
-                owner,
-                repo,
-                ref: pr.head.sha,
-                per_page: 100
-              });
-              const checkRuns = (checkRunsResp.check_runs || []).filter((run) => !isSelfCheckRun(run));
+              const checkRuns = (await listCheckRunsForRef(pr.head.sha)).filter(
+                (run) => !isSelfCheckRun(run)
+              );
 
               if (checkRuns.length === 0) {
                 core.info(`#${pullNumber}: no completed checks yet, waiting.`);
@@ -319,7 +337,13 @@ jobs:
                 }
               }
 
-              if (pr.mergeable === false || pr.mergeable_state === "dirty" || pr.mergeable_state === "behind") {
+              if (
+                pr.mergeable === null ||
+                pr.mergeable === false ||
+                pr.mergeable_state === "unknown" ||
+                pr.mergeable_state === "dirty" ||
+                pr.mergeable_state === "behind"
+              ) {
                 core.info(
                   `#${pullNumber}: mergeability is ${pr.mergeable_state} (mergeable=${pr.mergeable}), waiting.`
                 );
