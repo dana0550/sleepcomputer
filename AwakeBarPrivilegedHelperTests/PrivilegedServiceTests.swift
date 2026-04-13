@@ -70,6 +70,25 @@ final class PrivilegedServiceTests: XCTestCase {
         waitForExpectations(timeout: 1.0)
     }
 
+    func testReadSleepDisabledFallsBackToSleepTimerWhenSleepDisabledMissing() {
+        let runner = MockRunner()
+        runner.nextOutput = """
+        System-wide power settings:
+        Currently in use:
+         sleep                0
+        """
+        let service = PrivilegedService(runner: runner, cleanupManager: LegacyCleanupManager())
+        let expectation = expectation(description: "reply")
+
+        service.readSleepDisabled { value, error in
+            XCTAssertNil(error)
+            XCTAssertEqual(value?.boolValue, true)
+            expectation.fulfill()
+        }
+
+        waitForExpectations(timeout: 1.0)
+    }
+
     func testParseSleepDisabledReadsTrailingValue() {
         let enabled = """
         SleepDisabled 1
@@ -96,7 +115,10 @@ final class PrivilegedServiceTests: XCTestCase {
             ("SleepDisabled\t0\n", false),
             // Delimiter variants seen in tool wrappers.
             ("SleepDisabled: 1\n", true),
-            ("SleepDisabled = 0\n", false)
+            ("SleepDisabled = 0\n", false),
+            // Fallback for systems where `SleepDisabled` is omitted.
+            ("sleep 0\n", true),
+            ("sleep                1 (sleep prevented by powerd)\n", false)
         ]
 
         for (output, expected) in fixtures {

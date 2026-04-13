@@ -69,12 +69,36 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
     }
 
     static func parseSleepDisabled(_ output: String) throws -> Bool {
-        let key = "SleepDisabled"
+        if let valueToken = try firstValueToken(forKey: "SleepDisabled", in: output) {
+            switch valueToken {
+            case "1":
+                return true
+            case "0":
+                return false
+            default:
+                throw SleepDisabledParseError.invalidValue(valueToken)
+            }
+        }
+
+        // Newer macOS output can omit `SleepDisabled`, but still exposes the
+        // aggregate sleep timer (`sleep`). A `sleep` value of `0` means disabled.
+        if let valueToken = try firstValueToken(forKey: "sleep", in: output) {
+            guard let sleepMinutes = Int(valueToken) else {
+                throw SleepDisabledParseError.invalidValue(valueToken)
+            }
+            return sleepMinutes == 0
+        }
+
+        throw SleepDisabledParseError.keyNotFound
+    }
+
+    private static func firstValueToken(forKey key: String, in output: String) throws -> String? {
         for line in output.split(whereSeparator: \.isNewline) {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             guard trimmed.hasPrefix(key) else {
                 continue
             }
+
             let suffixStart = trimmed.index(trimmed.startIndex, offsetBy: key.count)
             let suffix = trimmed[suffixStart...]
             if let firstSuffixChar = suffix.first,
@@ -95,16 +119,10 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
                 throw SleepDisabledParseError.valueMissing
             }
 
-            switch valueToken {
-            case "1":
-                return true
-            case "0":
-                return false
-            default:
-                throw SleepDisabledParseError.invalidValue(String(valueToken))
-            }
+            return String(valueToken)
         }
-        throw SleepDisabledParseError.keyNotFound
+
+        return nil
     }
 }
 
