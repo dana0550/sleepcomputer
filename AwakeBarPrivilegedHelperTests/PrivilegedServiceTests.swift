@@ -118,12 +118,23 @@ final class PrivilegedServiceTests: XCTestCase {
             ("SleepDisabled = 0\n", false),
             // Fallback for systems where `SleepDisabled` is omitted.
             ("sleep 0\n", true),
+            ("Sleep 0\n", true),
             ("sleep                1 (sleep prevented by powerd)\n", false)
         ]
 
         for (output, expected) in fixtures {
             XCTAssertEqual(try PrivilegedService.parseSleepDisabled(output), expected)
         }
+    }
+
+    func testParseSleepDisabledIgnoresSleepOnPowerButtonLineWhenUsingSleepFallback() throws {
+        let output = """
+        System-wide power settings:
+         Sleep On Power Button 1
+         sleep                1
+        """
+
+        XCTAssertEqual(try PrivilegedService.parseSleepDisabled(output), false)
     }
 
     func testParseSleepDisabledDoesNotMatchLookalikeKeys() {

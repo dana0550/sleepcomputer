@@ -82,7 +82,11 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
 
         // Newer macOS output can omit `SleepDisabled`, but still exposes the
         // aggregate sleep timer (`sleep`). A `sleep` value of `0` means disabled.
-        if let valueToken = try firstValueToken(forKey: "sleep", in: output) {
+        if let valueToken = try firstValueToken(
+            forKey: "sleep",
+            in: output,
+            numericTokenOnly: true
+        ) {
             guard let sleepMinutes = Int(valueToken) else {
                 throw SleepDisabledParseError.invalidValue(valueToken)
             }
@@ -92,10 +96,17 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
         throw SleepDisabledParseError.keyNotFound
     }
 
-    private static func firstValueToken(forKey key: String, in output: String) throws -> String? {
+    private static func firstValueToken(
+        forKey key: String,
+        in output: String,
+        numericTokenOnly: Bool = false
+    ) throws -> String? {
+        let normalizedKey = key.lowercased()
+
         for line in output.split(whereSeparator: \.isNewline) {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.hasPrefix(key) else {
+            let normalizedLine = trimmed.lowercased()
+            guard normalizedLine.hasPrefix(normalizedKey) else {
                 continue
             }
 
@@ -117,6 +128,10 @@ final class PrivilegedService: NSObject, AwakeBarPrivilegedServiceXPC {
 
             guard let valueToken = remainder.split(whereSeparator: \.isWhitespace).first else {
                 throw SleepDisabledParseError.valueMissing
+            }
+
+            if numericTokenOnly, Int(valueToken) == nil {
+                continue
             }
 
             return String(valueToken)
