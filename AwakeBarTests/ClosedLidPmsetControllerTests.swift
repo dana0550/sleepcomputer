@@ -44,6 +44,42 @@ final class ClosedLidPmsetControllerTests: XCTestCase {
         XCTAssertEqual(daemon.readCalls, 1)
     }
 
+    func testReadSleepDisabledRepairsAndRetriesAfterReadFailure() async throws {
+        struct ReadbackError: Error {}
+
+        let daemon = MockDaemonClient()
+        daemon.readResults = [.failure(ReadbackError()), .success(true)]
+        let setup = MockSetupController(state: .ready)
+        setup.repairAfterReadFailureResult = true
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        let value = try await controller.readSleepDisabled()
+
+        XCTAssertTrue(value)
+        XCTAssertEqual(daemon.readCalls, 2)
+        XCTAssertEqual(setup.repairAfterReadFailureCalls, 1)
+    }
+
+    func testReadSleepDisabledThrowsOriginalErrorWhenRepairDoesNotRecover() async {
+        struct ReadbackError: Error {}
+
+        let daemon = MockDaemonClient()
+        daemon.readResults = [.failure(ReadbackError())]
+        let setup = MockSetupController(state: .ready)
+        setup.repairAfterReadFailureResult = false
+        let controller = ClosedLidPmsetController(daemonClient: daemon, setupController: setup)
+
+        do {
+            _ = try await controller.readSleepDisabled()
+            XCTFail("Expected read error")
+        } catch {
+            XCTAssertTrue(error is ReadbackError)
+        }
+
+        XCTAssertEqual(daemon.readCalls, 1)
+        XCTAssertEqual(setup.repairAfterReadFailureCalls, 1)
+    }
+
     func testRestoreManagedOverridesAppliesSleepDisabledValue() async throws {
         let daemon = MockDaemonClient()
         let setup = MockSetupController(state: .ready)
@@ -93,6 +129,7 @@ final class ClosedLidPmsetControllerTests: XCTestCase {
 private final class MockDaemonClient: PrivilegedDaemonControlling {
     var sleepDisabledValue = false
     var cleanupResult = LegacyCleanupReport(cleanedPaths: [], skippedPaths: [], backupDirectory: "")
+    var readResults: [Result<Bool, Error>] = []
     private(set) var setCalls: [Bool] = []
     private(set) var readCalls = 0
 
@@ -105,6 +142,9 @@ private final class MockDaemonClient: PrivilegedDaemonControlling {
 
     func readSleepDisabled() async throws -> Bool {
         readCalls += 1
+        if !readResults.isEmpty {
+            return try readResults.removeFirst().get()
+        }
         return sleepDisabledValue
     }
 
@@ -116,6 +156,8 @@ private final class MockDaemonClient: PrivilegedDaemonControlling {
 @MainActor
 private final class MockSetupController: ClosedLidSetupControlling {
     var state: ClosedLidSetupState
+    var repairAfterReadFailureResult = false
+    private(set) var repairAfterReadFailureCalls = 0
 
     init(state: ClosedLidSetupState) {
         self.state = state
@@ -127,6 +169,11 @@ private final class MockSetupController: ClosedLidSetupControlling {
 
     func startSetup() async -> ClosedLidSetupState {
         state
+    }
+
+    func repairAfterSleepPolicyReadFailure(_ error: Error) async -> Bool {
+        repairAfterReadFailureCalls += 1
+        return repairAfterReadFailureResult
     }
 
     func openSystemSettingsForApproval() {}

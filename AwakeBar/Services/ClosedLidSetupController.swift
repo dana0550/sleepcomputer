@@ -151,6 +151,25 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         return .unavailable(helperUnavailableMessage(error: nil))
     }
 
+    func repairAfterSleepPolicyReadFailure(_ error: Error) async -> Bool {
+        guard Self.isInApplications(appBundleURLProvider()) else {
+            return false
+        }
+        guard daemonService.status == .enabled else {
+            return false
+        }
+        guard shouldRepairAfterSleepPolicyReadFailure(error) else {
+            return false
+        }
+        if remainingEnabledRepairCooldownSeconds() != nil {
+            return false
+        }
+
+        lastEnabledRepairAttemptAt = now()
+        let repairedState = await repairEnabledButUnreachable()
+        return repairedState.isReady
+    }
+
     private func repairEnabledButUnreachable() async -> ClosedLidSetupState {
         do {
             try daemonService.unregister()
@@ -243,5 +262,14 @@ final class ClosedLidSetupController: ClosedLidSetupControlling {
         segments.append("Quit AwakeBar, reinstall it in /Applications, then restart your Mac.")
         segments.append("If it still fails, reset Background Items with 'sfltool resetbtm' and reboot.")
         return segments.joined(separator: " ")
+    }
+
+    private func shouldRepairAfterSleepPolicyReadFailure(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        if nsError.domain.contains("SleepDisabledParseError") {
+            return true
+        }
+        let normalizedDescription = nsError.localizedDescription.lowercased()
+        return normalizedDescription.contains("sleepdisabled") || normalizedDescription.contains("sleep policy")
     }
 }

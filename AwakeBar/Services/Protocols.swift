@@ -19,7 +19,14 @@ protocol ClosedLidSleepControlling {
 protocol ClosedLidSetupControlling {
     func refreshStatus() async -> ClosedLidSetupState
     func startSetup() async -> ClosedLidSetupState
+    func repairAfterSleepPolicyReadFailure(_ error: Error) async -> Bool
     func openSystemSettingsForApproval()
+}
+
+extension ClosedLidSetupControlling {
+    func repairAfterSleepPolicyReadFailure(_ error: Error) async -> Bool {
+        false
+    }
 }
 
 @MainActor

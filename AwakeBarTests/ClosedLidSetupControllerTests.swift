@@ -287,6 +287,56 @@ final class ClosedLidSetupControllerTests: XCTestCase {
         XCTAssertEqual(service.unregisterCalls, 0)
     }
 
+    func testRepairAfterSleepPolicyReadFailureReRegistersHelperWhenParseErrorIsDetected() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .enabled)
+        let controller = makeController(daemon: daemon, service: service)
+        let parseError = NSError(domain: "AwakeBarPrivilegedHelper.SleepDisabledParseError", code: 1)
+
+        let didRepair = await controller.repairAfterSleepPolicyReadFailure(parseError)
+
+        XCTAssertTrue(didRepair)
+        XCTAssertEqual(service.unregisterCalls, 1)
+        XCTAssertEqual(service.registerCalls, 1)
+    }
+
+    func testRepairAfterSleepPolicyReadFailureSkipsWhenErrorIsUnrelated() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .enabled)
+        let controller = makeController(daemon: daemon, service: service)
+        let unrelatedError = NSError(domain: "AwakeBarDaemon", code: 1, userInfo: [NSLocalizedDescriptionKey: "Random failure"])
+
+        let didRepair = await controller.repairAfterSleepPolicyReadFailure(unrelatedError)
+
+        XCTAssertFalse(didRepair)
+        XCTAssertEqual(service.unregisterCalls, 0)
+        XCTAssertEqual(service.registerCalls, 0)
+    }
+
+    func testRepairAfterSleepPolicyReadFailureHonorsRepairCooldown() async {
+        let daemon = MockDaemonClientForSetup()
+        let service = MockDaemonService(status: .enabled)
+        var currentDate = Date(timeIntervalSince1970: 5_000)
+        let controller = makeController(
+            daemon: daemon,
+            service: service,
+            enabledRepairCooldownNanoseconds: 60_000_000_000,
+            now: { currentDate }
+        )
+        let parseError = NSError(domain: "AwakeBarPrivilegedHelper.SleepDisabledParseError", code: 1)
+
+        let firstRepair = await controller.repairAfterSleepPolicyReadFailure(parseError)
+        let secondRepair = await controller.repairAfterSleepPolicyReadFailure(parseError)
+        currentDate = currentDate.addingTimeInterval(61)
+        let thirdRepair = await controller.repairAfterSleepPolicyReadFailure(parseError)
+
+        XCTAssertTrue(firstRepair)
+        XCTAssertFalse(secondRepair)
+        XCTAssertTrue(thirdRepair)
+        XCTAssertEqual(service.unregisterCalls, 2)
+        XCTAssertEqual(service.registerCalls, 2)
+    }
+
     func testRefreshStatusReturnsUnavailableWhenPingFails() async {
         let daemon = MockDaemonClientForSetup()
         daemon.shouldThrowPing = true
