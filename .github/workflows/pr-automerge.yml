@@ -14,10 +14,6 @@ on:
       - converted_to_draft
       - labeled
       - unlabeled
-  pull_request_review_thread:
-    types:
-      - resolved
-      - unresolved
   pull_request_review:
     types:
       - submitted
